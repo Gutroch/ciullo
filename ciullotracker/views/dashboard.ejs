@@ -731,6 +731,12 @@
   </script>
 
   <script>
+    var dashboardChartData = {
+      categorie: <%- JSON.stringify(chartCategorie) %>,
+      giornaliero: <%- JSON.stringify(chartGiornaliero) %>,
+      trend: <%- JSON.stringify(chartTrend) %>
+    };
+
     (function initDashboard() {
       if (typeof Chart === 'undefined') {
         setTimeout(initDashboard, 200);
@@ -752,12 +758,15 @@
       
       // ===== DATI DAL SERVER (con fallback) =====
       // Usiamo typeof per evitare ReferenceError se chartData non è definito
-      var chartData = typeof chartData !== 'undefined' ? chartData : { categorie: { labels: [], data: [] }, sottocategorie: {} };
+      var chartData = {
+        categorie: dashboardChartData.categorie || { labels: [], data: [] },
+        sottocategorie: {}
+      };
       var catData = chartData.categorie;
       var subData = chartData.sottocategorie || {};
       
-      var giornoData = typeof chartGiornaliero !== 'undefined' ? chartGiornaliero : { labels: [], dataIngressi: [], dataUscite: [] };
-      var trendData = typeof chartTrend !== 'undefined' ? chartTrend : { labels: [], dataIngressi: [], dataUscite: [] };
+      var giornoData = dashboardChartData.giornaliero || { labels: [], dataIngressi: [], dataUscite: [] };
+      var trendData = dashboardChartData.trend || { labels: [], dataIngressi: [], dataUscite: [] };
 
       // ===== 1. GRAFICO CATEGORIE (DINAMICO CON SELECTOR) =====
       var ctxCategorie = document.getElementById('chartCategorie');

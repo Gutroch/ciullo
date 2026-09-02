@@ -43,10 +43,45 @@ html, body {
   --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
 }
 
+/* Direzione visiva comune: bianco, nero e movimento discreto. */
+:root,
+[data-theme="dark"] {
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --accent: #111111;
+  --accent-text: #ffffff;
+  --danger: #333333;
+}
+
+[data-theme="dark"] {
+  --accent: #f5f5f5;
+  --accent-text: #0a0a0b;
+  --danger: #f5f5f5;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.04) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+[data-theme="dark"] body {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+}
+
+body > .app-shell { animation: page-enter 420ms ease both; }
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chart-card canvas,
+#chart-modal-canvas {
+  filter: grayscale(1) contrast(1.08);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -237,6 +272,40 @@ ul { list-style: none; }
   border: 1px solid var(--border);
   padding: 20px;
   box-shadow: var(--shadow);
+}
+
+/* Neutralizza gli accenti legacy nelle viste EJS. */
+.kpi-value.positive,
+.kpi-value.negative,
+.expense-amount,
+.increment-popup .popup-value.new.positive,
+.increment-popup .popup-value.new.negative,
+.qty-btn.inc,
+.qty-btn.dec,
+.badge-success,
+.badge-danger,
+.toast-notification.success,
+.toast-notification.error {
+  color: var(--text) !important;
+}
+
+.qty-btn.inc:hover,
+.qty-btn.dec:hover,
+.btn-danger:hover {
+  background: var(--text) !important;
+  color: var(--surface) !important;
+}
+
+.increment-popup .popup-confirm.positive,
+.increment-popup .popup-confirm.negative {
+  background: var(--accent) !important;
+  color: var(--accent-text) !important;
+}
+
+.badge-success,
+.badge-danger {
+  background: var(--surface-alt) !important;
+  border: 1px solid var(--border);
 }
 
 .grid { display: grid; gap: 16px; }
