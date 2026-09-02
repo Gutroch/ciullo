@@ -410,6 +410,149 @@
         align-self: flex-end;
       }
     }
+    /* Popup di incremento - STILI COMPLETI */
+.increment-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.increment-popup {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+  animation: modalIn 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.increment-popup h3 {
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.increment-popup .popup-body {
+  margin-bottom: 24px;
+}
+
+.increment-popup .popup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.increment-popup .popup-row:last-child {
+  border-bottom: none;
+}
+
+.increment-popup .popup-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.increment-popup .popup-value {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.increment-popup .popup-value.old {
+  color: var(--text-secondary);
+}
+
+.increment-popup .popup-value.new {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.increment-popup .popup-value.new.positive {
+  color: #4ECDC4;
+}
+
+.increment-popup .popup-value.new.negative {
+  color: #FF6B6B;
+}
+
+.increment-popup .popup-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.increment-popup .popup-cancel {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.increment-popup .popup-cancel:hover {
+  background: var(--bg-hover);
+}
+
+.increment-popup .popup-confirm {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.increment-popup .popup-confirm.positive {
+  background: #4ECDC4;
+}
+
+.increment-popup .popup-confirm.positive:hover {
+  background: #3dbdb5;
+  transform: scale(1.02);
+}
+
+.increment-popup .popup-confirm.negative {
+  background: #FF6B6B;
+}
+
+.increment-popup .popup-confirm.negative:hover {
+  background: #e85a5a;
+  transform: scale(1.02);
+}
+
+.increment-popup .popup-confirm:active {
+  transform: scale(0.98);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
   </style>
 </head>
 <body>
