@@ -1,4 +1,8 @@
+// history-buttons.js - Pulsanti per incrementare/decrementare importi con importo personalizzabile
+// Versione con popup interattivo e input per scegliere quanto aggiungere/togliere
+
 document.addEventListener('DOMContentLoaded', function() {
+
     // ========== GESTIONE PULSANTI NELLA TABELLA STORICO ==========
     document.querySelectorAll('.qty-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
@@ -10,15 +14,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!amountCell) return;
 
             const currentAmount = parseFloat(amountCell.textContent.replace('€', '').replace(',', '.').trim());
-            const increment = parseFloat(this.dataset.value);
+            // Determiniamo se è incremento o decremento dal pulsante (dec/inc)
+            const isIncrement = this.classList.contains('inc');
             const expenseId = this.dataset.id;
 
-            if (isNaN(currentAmount) || isNaN(increment) || !expenseId) {
+            if (isNaN(currentAmount) || !expenseId) {
                 showNotification('❌ Dati non validi', 'error');
                 return;
             }
 
-            showIncrementPopup(expenseId, currentAmount, increment, row, amountCell);
+            // Mostra il popup con input personalizzato
+            showCustomAmountPopup(expenseId, currentAmount, isIncrement, row, amountCell);
         });
     });
 
@@ -29,8 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const expenseMeta = item.querySelector('.expense-meta');
             const expenseAmount = item.querySelector('.expense-amount');
             if (!expenseMeta || !expenseAmount) return;
-
-            // Evita di aggiungere pulsanti duplicati
             if (item.querySelector('.dashboard-qty-btn')) return;
 
             const expenseId = item.dataset.id;
@@ -40,19 +44,15 @@ document.addEventListener('DOMContentLoaded', function() {
             btnGroup.className = 'qty-btn-group dashboard-qty-btn';
             btnGroup.style.cssText = 'margin-top: 8px; display: flex; gap: 4px;';
 
-            // Pulsante decremento
             const decBtn = document.createElement('button');
             decBtn.className = 'qty-btn dec';
             decBtn.dataset.id = expenseId;
-            decBtn.dataset.value = '-1.00';
             decBtn.textContent = '−';
             decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-secondary); color: #FF6B6B; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
-            // Pulsante incremento
             const incBtn = document.createElement('button');
             incBtn.className = 'qty-btn inc';
             incBtn.dataset.id = expenseId;
-            incBtn.dataset.value = '1.00';
             incBtn.textContent = '+';
             incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-secondary); color: #4ECDC4; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 const currentAmount = parseFloat(expenseAmount.textContent.replace(/[€+−\s]/g, '').replace(',', '.').trim());
                 if (isNaN(currentAmount)) return;
-                showIncrementPopup(expenseId, currentAmount, -1.00, null, expenseAmount);
+                showCustomAmountPopup(expenseId, currentAmount, false, null, expenseAmount);
             });
 
             incBtn.addEventListener('click', function(e) {
@@ -73,42 +73,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 const currentAmount = parseFloat(expenseAmount.textContent.replace(/[€+−\s]/g, '').replace(',', '.').trim());
                 if (isNaN(currentAmount)) return;
-                showIncrementPopup(expenseId, currentAmount, 1.00, null, expenseAmount);
+                showCustomAmountPopup(expenseId, currentAmount, true, null, expenseAmount);
             });
         });
     }
 
-    // Esegui dopo il caricamento della dashboard
     setTimeout(addDashboardButtons, 500);
 
-    // ========== POPUP DI CONFERMA ==========
-    function showIncrementPopup(expenseId, currentAmount, increment, row, amountElement) {
-        const newAmount = Math.max(0.01, currentAmount + increment);
-        const isPositive = increment > 0;
-
+    // ========== POPUP CON INPUT PERSONALIZZATO ==========
+    function showCustomAmountPopup(expenseId, currentAmount, isIncrement, row, amountElement) {
         // Rimuovi eventuali popup aperti
         const existing = document.querySelector('.increment-popup-overlay');
         if (existing) existing.remove();
 
-        // Creazione overlay
         const overlay = document.createElement('div');
         overlay.className = 'increment-popup-overlay';
         overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             z-index: 10000;
             animation: fadeIn 0.3s ease;
         `;
 
-        // Creazione popup
         const popup = document.createElement('div');
         popup.className = 'increment-popup';
         popup.style.cssText = `
@@ -122,58 +110,108 @@ document.addEventListener('DOMContentLoaded', function() {
             border: 1px solid var(--border-color);
         `;
 
+        // Valore predefinito 1.00 (o 0.00 se decremento? Lasciamo 1.00)
+        const defaultAmount = 1.00;
+
         popup.innerHTML = `
             <h3 style="margin: 0 0 20px 0; color: var(--text-primary); font-size: 1.3rem; text-align: center;">
-                ${isPositive ? '➕ Incrementa' : '➖ Decrementa'} Importo
+                ${isIncrement ? '➕ Incrementa' : '➖ Decrementa'} importo
             </h3>
-            <div style="margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
-                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Importo attuale</span>
-                    <span style="font-weight: 600; font-size: 1.1rem; color: var(--text-secondary);">€${currentAmount.toFixed(2)}</span>
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                    <span style="color: var(--text-secondary);">Importo attuale</span>
+                    <span style="font-weight: 600; color: var(--text-primary);">€${currentAmount.toFixed(2)}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
-                    <span style="color: var(--text-secondary); font-size: 0.9rem;">${isPositive ? '➕ Aggiungi' : '➖ Sottrai'}</span>
-                    <span style="font-weight: 600; font-size: 1.1rem; color: ${isPositive ? '#4ECDC4' : '#FF6B6B'};">€${Math.abs(increment).toFixed(2)}</span>
+                <div style="margin-top: 16px;">
+                    <label style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">
+                        ${isIncrement ? 'Aggiungi' : 'Sottrai'} (€)
+                    </label>
+                    <input type="text" id="popup-amount-input" class="input" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1.1rem; box-sizing: border-box;" value="${defaultAmount.toFixed(2)}" autofocus>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                        <button class="quick-amount" data-value="0.50" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+0.50</button>
+                        <button class="quick-amount" data-value="1.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+1.00</button>
+                        <button class="quick-amount" data-value="2.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+2.00</button>
+                        <button class="quick-amount" data-value="5.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+5.00</button>
+                        <button class="quick-amount" data-value="10.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+10.00</button>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
-                    <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;">Nuovo importo</span>
-                    <span style="font-weight: 700; font-size: 1.8rem; color: ${isPositive ? '#4ECDC4' : '#FF6B6B'};">€${newAmount.toFixed(2)}</span>
+                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                    <span style="color: var(--text-secondary);">Nuovo importo</span>
+                    <span id="popup-new-amount" style="display: block; font-weight: 700; font-size: 2rem; color: ${isIncrement ? '#4ECDC4' : '#FF6B6B'}; margin-top: 4px;">
+                        €${currentAmount.toFixed(2)}
+                    </span>
                 </div>
             </div>
-            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
-                <button class="popup-cancel" style="
-                    padding: 10px 24px;
-                    border-radius: 10px;
-                    border: 1px solid var(--border-color);
-                    background: transparent;
-                    color: var(--text-secondary);
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    font-weight: 500;
-                    font-size: 0.95rem;
-                ">Annulla</button>
-                <button class="popup-confirm" style="
-                    padding: 10px 24px;
-                    border-radius: 10px;
-                    border: none;
-                    background: ${isPositive ? '#4ECDC4' : '#FF6B6B'};
-                    color: white;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    font-weight: 600;
-                    font-size: 0.95rem;
-                ">Conferma</button>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="popup-cancel" style="padding: 10px 24px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-weight: 500; font-size: 0.95rem;">Annulla</button>
+                <button class="popup-confirm" style="padding: 10px 24px; border-radius: 10px; border: none; background: ${isIncrement ? '#4ECDC4' : '#FF6B6B'}; color: white; cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.95rem;">Conferma</button>
             </div>
         `;
 
         overlay.appendChild(popup);
         document.body.appendChild(overlay);
 
-        // Eventi chiusura
+        // Riferimenti agli elementi del popup
+        const inputField = popup.querySelector('#popup-amount-input');
+        const newAmountDisplay = popup.querySelector('#popup-new-amount');
+        const confirmBtn = popup.querySelector('.popup-confirm');
+        const cancelBtn = popup.querySelector('.popup-cancel');
+
+        // Funzione per aggiornare l'anteprima del nuovo importo
+        function updatePreview() {
+            let inputValue = inputField.value.replace(',', '.').trim();
+            let parsed = parseFloat(inputValue);
+            if (isNaN(parsed) || parsed < 0) parsed = 0;
+            const newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
+            newAmountDisplay.textContent = `€${newAmount.toFixed(2)}`;
+            // Colore dinamico
+            newAmountDisplay.style.color = isIncrement ? '#4ECDC4' : '#FF6B6B';
+        }
+
+        // Eventi per aggiornare l'anteprima in tempo reale
+        inputField.addEventListener('input', updatePreview);
+
+        // Pulsanti rapidi
+        popup.querySelectorAll('.quick-amount').forEach(qbtn => {
+            qbtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const val = parseFloat(this.dataset.value);
+                if (!isNaN(val) && val >= 0) {
+                    inputField.value = val.toFixed(2);
+                    updatePreview();
+                    inputField.focus();
+                    inputField.select();
+                }
+            });
+        });
+
+        // Se premo Invio nel campo, conferma automaticamente
+        inputField.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmBtn.click();
+            }
+        });
+
+        // All'apertura, focus sul campo e seleziona tutto
+        setTimeout(() => {
+            inputField.focus();
+            inputField.select();
+        }, 100);
+
+        // Azioni
         const closePopup = () => overlay.remove();
 
-        popup.querySelector('.popup-cancel').addEventListener('click', closePopup);
-        popup.querySelector('.popup-confirm').addEventListener('click', function() {
+        cancelBtn.addEventListener('click', closePopup);
+
+        confirmBtn.addEventListener('click', function() {
+            let inputValue = inputField.value.replace(',', '.').trim();
+            let parsed = parseFloat(inputValue);
+            if (isNaN(parsed) || parsed <= 0) {
+                showNotification('⚠️ Inserisci un importo valido maggiore di zero', 'error');
+                return;
+            }
+            const newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
             closePopup();
             updateExpenseAmount(expenseId, newAmount, row, amountElement);
         });
@@ -185,29 +223,28 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && document.body.contains(overlay)) closePopup();
         });
+
+        // Inizializza anteprima
+        updatePreview();
     }
 
-    // ========== AGGIORNAMENTO IMPORT VIA AJAX ==========
+    // ========== AGGIORNAMENTO IMPORT VIA AJAX (JSON) ==========
     function updateExpenseAmount(id, newAmount, row, amountElement) {
-        const formData = new FormData();
-        formData.append('importo', newAmount);
+        const payload = { importo: newAmount };
+        const headers = { 'Content-Type': 'application/json' };
 
-        // Aggiungi CSRF token se presente
+        // CSRF token se presente
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
         if (csrfToken) {
-            formData.append('_csrf', csrfToken.getAttribute('content'));
+            headers['X-CSRF-Token'] = csrfToken.getAttribute('content');
         }
 
-        // Disabilita pulsanti durante il caricamento
         let buttons = [];
         if (row) {
             buttons = row.querySelectorAll('.qty-btn');
         } else if (amountElement) {
-            // Cerca i pulsanti nel contenitore della dashboard
             const parent = amountElement.closest('.expense-item');
-            if (parent) {
-                buttons = parent.querySelectorAll('.qty-btn');
-            }
+            if (parent) buttons = parent.querySelectorAll('.qty-btn');
         }
 
         buttons.forEach(b => {
@@ -218,17 +255,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch(`/expenses/${id}/update-amount`, {
             method: 'POST',
-            body: formData
+            headers: headers,
+            body: JSON.stringify(payload)
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`Server responded with ${response.status}`);
+                return response.json().then(err => { throw new Error(err.error || 'Errore del server'); });
             }
             return response.json();
         })
         .then(data => {
             if (data.success) {
-                // Aggiorna l'elemento visivo
                 if (row) {
                     const amountCell = row.querySelector('.amount-cell');
                     if (amountCell) {
@@ -239,9 +276,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (amountElement) {
                     amountElement.textContent = `${data.isIngresso ? '+' : '−'} €${newAmount.toFixed(2)}`;
                     amountElement.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
-                    // Ricarica la dashboard per aggiornare i KPI
                     if (window.location.pathname === '/') {
-                        location.reload();
+                        // Ricarica per aggiornare KPI
+                        setTimeout(() => location.reload(), 500);
                     }
                 }
                 showNotification('✅ Importo aggiornato a €' + newAmount.toFixed(2), 'success');
@@ -251,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Errore:', error);
-            showNotification('❌ Errore di connessione al server', 'error');
+            showNotification('❌ ' + error.message, 'error');
         })
         .finally(() => {
             buttons.forEach(b => {
@@ -265,8 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== AGGIORNAMENTO TOTALI NEL FOOTER ==========
     function updateTotals() {
         const rows = document.querySelectorAll('.data-table tbody tr:not(.empty-state)');
-        let totalUscite = 0;
-        let totalEntrate = 0;
+        let totalUscite = 0, totalEntrate = 0;
 
         rows.forEach(row => {
             const amountCell = row.querySelector('.amount-cell');
@@ -276,11 +312,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const badge = row.querySelector('.badge');
                     if (badge) {
                         const type = badge.textContent.trim();
-                        if (type === 'Uscita') {
-                            totalUscite += amount;
-                        } else if (type === 'Entrata') {
-                            totalEntrate += amount;
-                        }
+                        if (type === 'Uscita') totalUscite += amount;
+                        else if (type === 'Entrata') totalEntrate += amount;
                     }
                 }
             }
@@ -296,11 +329,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Aggiorna contatore movimenti
         const countSpan = document.querySelector('.export-bar strong');
-        if (countSpan) {
-            countSpan.textContent = rows.length;
-        }
+        if (countSpan) countSpan.textContent = rows.length;
     }
 
     // ========== NOTIFICHE TOAST ==========
@@ -336,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
-    // ========== STILI DINAMICI PER ANIMAZIONI ==========
+    // ========== STILI PER ANIMAZIONI ==========
     const styleSheet = document.createElement('style');
     styleSheet.textContent = `
         @keyframes fadeIn {
