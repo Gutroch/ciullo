@@ -490,13 +490,27 @@
     }
 
     .chart-modal-body {
-      margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: min(60vh, 620px);
+            min-height: 280px;
+            margin-bottom: 20px;
+            overflow: hidden;
     }
 
     .chart-modal-body canvas {
+            display: block;
+            position: relative;
+            flex: 0 1 auto;
+            width: 100% !important;
+            max-width: 100%;
+            margin: 0 auto;
       width: 100% !important;
       height: auto !important;
-      max-height: 60vh;
+            max-height: 100%;
     }
 
     .chart-modal-footer {
@@ -583,6 +597,11 @@
         padding: 16px;
         width: 95vw;
       }
+
+            .chart-modal-body {
+                height: 52vh;
+                min-height: 240px;
+            }
       
       .expense-item {
         flex-direction: column;
@@ -2091,7 +2110,11 @@ var dashboardChartData = {
         chartModalTitle.textContent = button.closest('.chart-card').querySelector('.chart-title > span').textContent;
         chartModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        window.requestAnimationFrame(function() { modalChart.resize(); });
+        window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(function() {
+                modalChart.resize();
+            });
+        });
     }
 
     document.querySelectorAll('.chart-fullscreen').forEach(function(button) {
@@ -2112,6 +2135,15 @@ var dashboardChartData = {
 
     if (document.getElementById('chart-modal-close')) {
         document.getElementById('chart-modal-close').addEventListener('click', closeChartModal);
+    }
+    if (chartModalDownload) {
+        chartModalDownload.addEventListener('click', function() {
+            if (!modalChart) return;
+            var link = document.createElement('a');
+            link.download = 'ciullotracker-grafico-<%= selectedYear %>-<%= selectedMonth %>.png';
+            link.href = modalChart.toBase64Image('image/png', 1);
+            link.click();
+        });
     }
     if (chartModal) {
         chartModal.addEventListener('click', function(event) {

@@ -11,6 +11,11 @@ function isInMonth(dateStr, month, year) {
   return d.getMonth() + 1 === month && d.getFullYear() === year;
 }
 
+async function getRecentExpenses() {
+  const all = await Expenses.getAllExpenses();
+  return all.slice(0, 10);
+}
+
 // ---------------------------------------------------------------
 // GET / - Dashboard principale (mese corrente)
 // ---------------------------------------------------------------
@@ -258,6 +263,7 @@ const chartTrend = {
 router.get('/expenses/new', requireAuth, async (req, res) => {
   try {
     const utenti = await Users.getAllUsers();
+    const ultimeSpese = await getRecentExpenses();
     res.render('new-expense', {
       user: req.session.user,
       utenti,
@@ -269,6 +275,7 @@ router.get('/expenses/new', requireAuth, async (req, res) => {
       success: null,
       expense: null,
       editMode: false, // 👈 AGGIUNGI QUESTA RIGA
+      ultimeSpese,
     });
   } catch (error) {
     console.error('❌ Errore form nuova spesa:', error);
@@ -290,6 +297,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
     const per_conto_di = req.body.per_conto_di || req.session.user.username;
 
     const utenti = await Users.getAllUsers();
+    let ultimeSpese = await getRecentExpenses();
 
     if (!importo || isNaN(parseFloat(importo)) || parseFloat(importo) <= 0) {
       return res.status(400).render('new-expense', {
@@ -302,6 +310,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
         error: "Inserisci un importo valido maggiore di zero.",
         success: null,
         expense: null,
+        ultimeSpese,
       });
     }
 
@@ -316,6 +325,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
       note,
     });
 
+    ultimeSpese = await getRecentExpenses();
     res.render('new-expense', {
       user: req.session.user,
       utenti,
@@ -326,6 +336,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
       error: null,
       success: 'Spesa registrata correttamente!',
       expense: null,
+      ultimeSpese,
     });
   } catch (error) {
     console.error('❌ Errore salvataggio spesa:', error);
@@ -350,6 +361,7 @@ router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
       });
     }
     const utenti = await Users.getAllUsers();
+    const ultimeSpese = all.slice(0, 10);
     res.render('new-expense', {
       user: req.session.user,
       utenti,
@@ -361,6 +373,7 @@ router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
       success: null,
       expense: expense, // precompila il form
       editMode: true,
+      ultimeSpese,
     });
   } catch (error) {
     console.error('❌ Errore form modifica:', error);

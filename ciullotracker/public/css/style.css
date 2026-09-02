@@ -518,6 +518,23 @@ table.data-table tr:last-child td { border-bottom: none; }
 .login-subtitle { text-align: center; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 24px; }
 .login-card .alert { overflow-wrap: anywhere; }
 
+.new-expense-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 480px) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: start;
+  max-width: 1080px;
+}
+.new-expense-form-card,
+.recent-expenses-card { min-width: 0; }
+.recent-expenses-card .chart-title { margin-bottom: 16px; }
+.recent-expenses-link {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
 /* ============================================================
    RESPONSIVE: DESKTOP
    ============================================================ */
@@ -531,6 +548,7 @@ table.data-table tr:last-child td { border-bottom: none; }
 @media (max-width: 899px) {
   .app-shell { display: block; }
   .main-content { padding: 20px 14px 32px; }
+  .new-expense-layout { grid-template-columns: 1fr; }
   .grid-2,
   .grid-4 { grid-template-columns: 1fr !important; }
   .card { max-width: 100%; }

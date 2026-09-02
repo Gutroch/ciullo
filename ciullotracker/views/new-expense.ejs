@@ -15,7 +15,8 @@
       <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
       <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
 
-      <div class="card squircle" style="max-width: 480px;">
+      <div class="new-expense-layout">
+      <div class="card squircle new-expense-form-card">
         <form action="<%= editMode ? '/expenses/' + expense.id + '/update' : '/expenses' %>" method="POST" id="expenseForm">
 
           <div class="field">
@@ -106,6 +107,28 @@
             <a href="/history" class="btn btn-secondary btn-block" style="margin-top:8px; text-align:center;">Annulla</a>
           <% } %>
         </form>
+      </div>
+
+      <section class="card squircle recent-expenses-card" aria-labelledby="recent-expenses-title">
+        <div class="chart-title">
+          <span id="recent-expenses-title">Ultimi movimenti</span>
+          <a href="/history" class="recent-expenses-link">Vedi tutti</a>
+        </div>
+        <% if (!ultimeSpese || ultimeSpese.length === 0) { %>
+          <div class="empty-state">Nessun movimento registrato.</div>
+        <% } else { %>
+          <% ultimeSpese.forEach(function(e) { %>
+            <div class="expense-item">
+              <div class="expense-meta">
+                <span class="expense-cat"><%= e.tipo === 'ingresso' ? 'Ingresso' : 'Spesa' %> · <%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
+                <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
+                <span class="expense-sub"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · <%= e.inserito_da %> → <%= e.per_conto_di %></span>
+              </div>
+              <div class="expense-amount"><%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= Number(e.importo).toFixed(2) %></div>
+            </div>
+          <% }); %>
+        <% } %>
+      </section>
       </div>
     </main>
   </div>
