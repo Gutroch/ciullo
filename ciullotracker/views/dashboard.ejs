@@ -571,8 +571,8 @@
       --bg-hover: #f0f0f0;
       --text-primary: #0a0a0a;
       --text-secondary: #6c757d;
-      --border-color: #dee2e6;
-      --accent: #4ECDC4;
+      --border-color: #dee2e6
+      --accent: #0a0a0a;
       --danger: #FF6B6B;
     }
 
@@ -584,6 +584,43 @@
       --text-secondary: #b0b0b0;
       --border-color: #444444;
     }
+    .chart-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 0.9rem;
+}
+.breadcrumb-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.breadcrumb-btn:hover {
+    background: var(--bg-hover);
+    border-color: #4ECDC4;
+    color: #4ECDC4;
+}
+.breadcrumb-sep {
+    color: var(--text-secondary);
+}
+.breadcrumb-current {
+    font-weight: 600;
+    color: var(--text-primary);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#chartCategorie {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
   </style>
 </head>
 <body>
@@ -621,23 +658,31 @@
 
       <!-- Grafici -->
       <div class="grid-2">
-        <div class="card squircle chart-card" data-chart="categorie">
-          <div class="chart-title">
-            <span>Spese per Categoria</span>
-            <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
-          </div>
-          <div class="chart-controls">
-            <label for="chartViewMode">Mostra:</label>
-            <select id="chartViewMode" class="input">
-              <option value="categorie">Categorie</option>
-              <option value="sottocategorie">Sottocategorie</option>
-            </select>
-            <select id="chartCategorySelect" class="input" style="display:none;">
-              <!-- Popolato da JavaScript -->
-            </select>
-          </div>
-          <canvas id="chartCategorie"></canvas>
+        <!-- Grafico Categorie con drill-down -->
+<div class="card squircle chart-card" data-chart="categorie">
+    <div class="chart-title">
+        <span>Spese per Categoria</span>
+        <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+    </div>
+    <div class="chart-controls">
+        <label for="chartTipoSelect">Tipo:</label>
+        <select id="chartTipoSelect" class="input">
+            <option value="uscite">Uscite</option>
+            <option value="ingressi">Entrate</option>
+        </select>
+        <div id="chartBreadcrumb" class="chart-breadcrumb" style="display:none;">
+            <button id="breadcrumbBack" class="breadcrumb-btn" title="Torna alle macrocategorie">
+                ← Macro
+            </button>
+            <span class="breadcrumb-sep">/</span>
+            <span id="breadcrumbCategory" class="breadcrumb-current"></span>
         </div>
+    </div>
+    <canvas id="chartCategorie"></canvas>
+    <div id="chartNoData" class="empty-state" style="display:none; padding: 20px;">
+        Nessun dato disponibile per questa selezione.
+    </div>
+</div>
         <div class="card squircle chart-card" data-chart="giornaliero">
           <div class="chart-title">
             <span>Andamento Giornaliero</span>
@@ -731,569 +776,538 @@
   </script>
 
   <script>
-    var dashboardChartData = {
-      categorie: <%- JSON.stringify(chartCategorie) %>,
-      giornaliero: <%- JSON.stringify(chartGiornaliero) %>,
-      trend: <%- JSON.stringify(chartTrend) %>
-    };
 
-    (function initDashboard() {
-      if (typeof Chart === 'undefined') {
+var dashboardChartData = {
+    categorie: <%- JSON.stringify(chartCategorie) %>,
+    sottocategorie: <%- JSON.stringify(chartSottocategorie || {}) %>,
+    giornaliero: <%- JSON.stringify(chartGiornaliero) %>,
+    trend: <%- JSON.stringify(chartTrend) %>
+};
+
+(function initDashboard() {
+    if (typeof Chart === 'undefined') {
         setTimeout(initDashboard, 200);
         return;
-      }
+    }
 
-      function getThemeColors() {
+    function getThemeColors() {
         var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
-          text: dark ? '#f5f5f5' : '#0a0a0a',
-          grid: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-          palette: dark 
-            ? ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9']
-            : ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9']
+            text: dark ? '#f5f5f5' : '#0a0a0a',
+            grid: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+            bgPrimary: dark ? '#1e1e1e' : '#ffffff',
+            palette: [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+                '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9',
+                '#F8B500', '#6C5CE7', '#00B894', '#E17055', '#74B9FF'
+            ]
         };
-      }
+    }
+    var colors = getThemeColors();
 
-      var colors = getThemeColors();
-      
-      // ===== DATI DAL SERVER (con fallback) =====
-      // Usiamo typeof per evitare ReferenceError se chartData non è definito
-      var chartData = {
-        categorie: dashboardChartData.categorie || { labels: [], data: [] },
-        sottocategorie: {}
-      };
-      var catData = chartData.categorie;
-      var subData = chartData.sottocategorie || {};
-      
-      var giornoData = dashboardChartData.giornaliero || { labels: [], dataIngressi: [], dataUscite: [] };
-      var trendData = dashboardChartData.trend || { labels: [], dataIngressi: [], dataUscite: [] };
+    // ===== NORMALIZZAZIONE DATI =====
+    // Accetta sia il nuovo formato {uscite:{...}, ingressi:{...}}
+    // sia il vecchio formato {labels:[], data:[]} per retrocompatibilità
+    function normalizeCategorie(raw) {
+        if (!raw) return { uscite: { labels: [], data: [] }, ingressi: { labels: [], data: [] } };
+        // Nuovo formato
+        if (raw.uscite || raw.ingressi) {
+            return {
+                uscite: raw.uscite || { labels: [], data: [] },
+                ingressi: raw.ingressi || { labels: [], data: [] }
+            };
+        }
+        // Vecchio formato: assume che siano uscite
+        return {
+            uscite: { labels: raw.labels || [], data: raw.data || [] },
+            ingressi: { labels: [], data: [] }
+        };
+    }
 
-      // ===== 1. GRAFICO CATEGORIE (DINAMICO CON SELECTOR) =====
-      var ctxCategorie = document.getElementById('chartCategorie');
-      var chartInstance = null;
-      var currentMode = 'categorie';
-      var currentCategory = '';
+    function normalizeSottocategorie(raw) {
+        if (!raw) return { uscite: {}, ingressi: {} };
+        if (raw.uscite || raw.ingressi) {
+            return {
+                uscite: raw.uscite || {},
+                ingressi: raw.ingressi || {}
+            };
+        }
+        // Vecchio formato: { "Cat1": {labels, data}, ... } → assume uscite
+        return { uscite: raw, ingressi: {} };
+    }
 
-      function renderPieChart(mode, category) {
-        var labels, data, title;
-        
-        if (mode === 'categorie') {
-          labels = catData.labels || [];
-          data = catData.data || [];
-          title = 'Spese per Categoria';
+    var catData = normalizeCategorie(dashboardChartData.categorie);
+    var subData = normalizeSottocategorie(dashboardChartData.sottocategorie);
+    var giornoData = dashboardChartData.giornaliero || { labels: [], dataIngressi: [], dataUscite: [] };
+    var trendData = dashboardChartData.trend || { labels: [], dataIngressi: [], dataUscite: [] };
+
+    // ===== STATO GRAFICO CATEGORIE =====
+    var ctxCategorie = document.getElementById('chartCategorie');
+    var chartInstance = null;
+    var currentTipo = 'uscite';      // 'uscite' | 'ingressi'
+    var currentView = 'macro';       // 'macro' | 'sub'
+    var currentCategory = '';        // nome macrocategoria in drill-down
+
+    var tipoSelect = document.getElementById('chartTipoSelect');
+    var breadcrumb = document.getElementById('chartBreadcrumb');
+    var breadcrumbBack = document.getElementById('breadcrumbBack');
+    var breadcrumbCategory = document.getElementById('breadcrumbCategory');
+    var noDataMsg = document.getElementById('chartNoData');
+
+    function getPalette(n) {
+        var out = [];
+        for (var i = 0; i < n; i++) {
+            out.push(colors.palette[i % colors.palette.length]);
+        }
+        return out;
+    }
+
+    function renderCategorieChart() {
+        if (!ctxCategorie) return;
+
+        var labels = [], data = [], title = '';
+
+        if (currentView === 'macro') {
+            var src = catData[currentTipo] || { labels: [], data: [] };
+            labels = src.labels || [];
+            data = src.data || [];
+            title = (currentTipo === 'uscite' ? 'Uscite' : 'Entrate') + ' per Categoria';
+            breadcrumb.style.display = 'none';
         } else {
-          var sub = subData[category];
-          if (!sub || !sub.labels || sub.labels.length === 0) {
-            labels = ['Nessuna sottocategoria'];
-            data = [0];
-          } else {
-            labels = sub.labels;
-            data = sub.data;
-          }
-          title = 'Sottocategorie di "' + category + '"';
+            var subs = (subData[currentTipo] || {})[currentCategory];
+            if (subs && subs.labels && subs.labels.length > 0) {
+                labels = subs.labels;
+                data = subs.data;
+            } else {
+                labels = ['Nessuna sottocategoria'];
+                data = [0];
+            }
+            title = currentCategory;
+            breadcrumb.style.display = 'flex';
+            breadcrumbCategory.textContent = currentCategory;
         }
 
-        if (chartInstance) {
-          chartInstance.destroy();
-          chartInstance = null;
+        // Gestione "nessun dato"
+        if (labels.length === 0 || (labels.length === 1 && data[0] === 0)) {
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            ctxCategorie.style.display = 'none';
+            noDataMsg.style.display = 'block';
+            return;
+        } else {
+            ctxCategorie.style.display = 'block';
+            noDataMsg.style.display = 'none';
         }
 
-        if (!labels || labels.length === 0 || data.length === 0) {
-          labels = ['Nessun dato'];
-          data = [0];
-        }
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
-        var palette = colors.palette || ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9'];
-        var backgroundColors = labels.map(function(_, i) {
-          return palette[i % palette.length];
-        });
+        var bgColors = getPalette(labels.length);
 
         chartInstance = new Chart(ctxCategorie, {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors,
-              borderWidth: 2,
-              borderColor: 'var(--bg-primary, #ffffff)'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: {
-                  color: colors.text,
-                  boxWidth: 12,
-                  padding: 14,
-                  usePointStyle: true,
-                  pointStyle: 'circle'
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                    var percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                    return '€' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
-                  }
-                }
-              }
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: bgColors,
+                    borderWidth: 2,
+                    borderColor: colors.bgPrimary,
+                    hoverOffset: 8
+                }]
             },
-            cutout: '60%'
-          }
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: { duration: 500, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: colors.text,
+                            boxWidth: 12,
+                            padding: 14,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.85)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            title: function(items) {
+                                return items[0].label;
+                            },
+                            label: function(context) {
+                                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                var perc = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                var prefix = currentTipo === 'uscite' ? '−' : '+';
+                                return prefix + ' €' + context.parsed.toFixed(2) + ' (' + perc + '%)';
+                            },
+                            afterLabel: function(context) {
+                                // Suggerimento drill-down solo in vista macro
+                                if (currentView === 'macro') {
+                                    var subs = (subData[currentTipo] || {})[context.label];
+                                    if (subs && subs.labels && subs.labels.length > 0) {
+                                        return '🔍 Click per vedere le sottocategorie';
+                                    }
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%',
+                onClick: handleChartClick
+            }
         });
-      }
+    }
 
-      var categorySelect = document.getElementById('chartCategorySelect');
-      var viewModeSelect = document.getElementById('chartViewMode');
+    // ===== DRILL-DOWN: click su una fetta → sottocategorie =====
+    function handleChartClick(event, elements) {
+        if (currentView !== 'macro') return; // drill-down solo dalla vista macro
+        if (!elements || elements.length === 0) return;
 
-      categorySelect.innerHTML = '';
-      var categories = Object.keys(subData);
-      if (categories.length === 0) {
-        var opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Nessuna categoria';
-        categorySelect.appendChild(opt);
-      } else {
-        categories.forEach(function(cat) {
-          var opt = document.createElement('option');
-          opt.value = cat;
-          opt.textContent = cat;
-          categorySelect.appendChild(opt);
-        });
-        currentCategory = categories[0];
-        categorySelect.value = currentCategory;
-      }
+        var idx = elements[0].index;
+        var clickedLabel = chartInstance.data.labels[idx];
 
-      viewModeSelect.addEventListener('change', function() {
-        currentMode = this.value;
-        if (currentMode === 'sottocategorie') {
-          categorySelect.style.display = 'inline-block';
-          renderPieChart('sottocategorie', categorySelect.value);
-        } else {
-          categorySelect.style.display = 'none';
-          renderPieChart('categorie');
+        // Verifica che esistano sottocategorie per questa categoria
+        var subs = (subData[currentTipo] || {})[clickedLabel];
+        if (!subs || !subs.labels || subs.labels.length === 0) {
+            return; // niente sottocategorie, non fare nulla
         }
-      });
 
-      categorySelect.addEventListener('change', function() {
-        if (currentMode === 'sottocategorie') {
-          currentCategory = this.value;
-          renderPieChart('sottocategorie', currentCategory);
-        }
-      });
+        currentCategory = clickedLabel;
+        currentView = 'sub';
+        renderCategorieChart();
+    }
 
-      renderPieChart('categorie');
+    // ===== EVENTI UI =====
+    tipoSelect.addEventListener('change', function() {
+        currentTipo = this.value;
+        currentView = 'macro';
+        currentCategory = '';
+        renderCategorieChart();
+    });
 
-      // ===== 2. GRAFICO GIORNALIERO =====
-      var ctxGiornaliero = document.getElementById('chartGiornaliero');
-      if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
+    breadcrumbBack.addEventListener('click', function() {
+        currentView = 'macro';
+        currentCategory = '';
+        renderCategorieChart();
+    });
+
+    // Prima renderizzazione
+    renderCategorieChart();
+
+    // ===== GRAFICO GIORNALIERO =====
+    var ctxGiornaliero = document.getElementById('chartGiornaliero');
+    if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
         new Chart(ctxGiornaliero, {
-          type: 'bar',
-          data: {
-            labels: giornoData.labels,
-            datasets: [
-              {
-                label: 'Entrate (€)',
-                data: giornoData.dataIngressi || [],
-                backgroundColor: 'rgba(78, 205, 196, 0.7)',
-                borderColor: '#4ECDC4',
-                borderWidth: 2,
-                borderRadius: 4
-              },
-              {
-                label: 'Uscite (€)',
-                data: giornoData.dataUscite || [],
-                backgroundColor: 'rgba(255, 107, 107, 0.7)',
-                borderColor: '#FF6B6B',
-                borderWidth: 2,
-                borderRadius: 4
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: {
-                display: true,
-                labels: {
-                  color: colors.text,
-                  boxWidth: 12,
-                  usePointStyle: true,
-                  pointStyle: 'circle'
-                }
-              }
+            type: 'bar',
+            data: {
+                labels: giornoData.labels,
+                datasets: [
+                    {
+                        label: 'Entrate (€)',
+                        data: giornoData.dataIngressi || [],
+                        backgroundColor: 'rgba(78, 205, 196, 0.7)',
+                        borderColor: '#4ECDC4',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Uscite (€)',
+                        data: giornoData.dataUscite || [],
+                        backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                        borderColor: '#FF6B6B',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }
+                ]
             },
-            scales: {
-              x: {
-                ticks: { color: colors.text, maxTicksLimit: 10 },
-                grid: { display: false }
-              },
-              y: {
-                ticks: { 
-                  color: colors.text,
-                  callback: function(value) {
-                    return '€' + value.toFixed(0);
-                  }
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: colors.text,
+                            boxWidth: 12,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                var prefix = ctx.dataset.label.indexOf('Entrate') === 0 ? '+' : '−';
+                                return ctx.dataset.label + ': ' + prefix + ' €' + ctx.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
                 },
-                grid: { color: colors.grid },
-                beginAtZero: true
-              }
+                scales: {
+                    x: { ticks: { color: colors.text, maxTicksLimit: 10 }, grid: { display: false } },
+                    y: {
+                        ticks: {
+                            color: colors.text,
+                            callback: function(v) { return '€' + v.toFixed(0); }
+                        },
+                        grid: { color: colors.grid },
+                        beginAtZero: true
+                    }
+                }
             }
-          }
         });
-      }
+    }
 
-      // ===== 3. GRAFICO TREND MENSILE =====
-      var ctxTrend = document.getElementById('chartTrend');
-      if (ctxTrend && trendData && trendData.labels && trendData.labels.length > 0) {
+    // ===== GRAFICO TREND MENSILE =====
+    var ctxTrend = document.getElementById('chartTrend');
+    if (ctxTrend && trendData && trendData.labels && trendData.labels.length > 0) {
         new Chart(ctxTrend, {
-          type: 'line',
-          data: {
-            labels: trendData.labels,
-            datasets: [
-              {
-                label: 'Uscite mensili',
-                data: trendData.dataUscite || [],
-                borderColor: '#FF6B6B',
-                backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#FF6B6B',
-                pointRadius: 4,
-                pointHoverRadius: 6
-              },
-              {
-                label: 'Entrate mensili',
-                data: trendData.dataIngressi || [],
-                borderColor: '#4ECDC4',
-                backgroundColor: 'rgba(78, 205, 196, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#4ECDC4',
-                pointRadius: 4,
-                pointHoverRadius: 6
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: {
-                position: 'top',
-                labels: {
-                  color: colors.text,
-                  usePointStyle: true,
-                  pointStyle: 'circle'
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
-                  }
-                }
-              }
+            type: 'line',
+            data: {
+                labels: trendData.labels,
+                datasets: [
+                    {
+                        label: 'Uscite mensili',
+                        data: trendData.dataUscite || [],
+                        borderColor: '#FF6B6B',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#FF6B6B',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Entrate mensili',
+                        data: trendData.dataIngressi || [],
+                        borderColor: '#4ECDC4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#4ECDC4',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }
+                ]
             },
-            scales: {
-              x: {
-                ticks: { color: colors.text },
-                grid: { color: colors.grid }
-              },
-              y: {
-                ticks: { 
-                  color: colors.text,
-                  callback: function(value) {
-                    return '€' + value.toFixed(0);
-                  }
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                var prefix = ctx.dataset.label.indexOf('Entrate') === 0 ? '+' : '−';
+                                return ctx.dataset.label + ': ' + prefix + ' €' + ctx.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
                 },
-                grid: { color: colors.grid },
-                beginAtZero: true
-              }
+                scales: {
+                    x: { ticks: { color: colors.text }, grid: { color: colors.grid } },
+                    y: {
+                        ticks: {
+                            color: colors.text,
+                            callback: function(v) { return '€' + v.toFixed(0); }
+                        },
+                        grid: { color: colors.grid },
+                        beginAtZero: true
+                    }
+                }
             }
-          }
         });
-      }
+    }
 
-      // ===== 4. MODAL GRAFICI FULLSCREEN =====
-      var modal = document.getElementById('chart-modal');
-      var modalTitle = document.getElementById('chart-modal-title');
-      var modalCanvas = document.getElementById('chart-modal-canvas');
-      var modalDetails = document.getElementById('chart-modal-details');
-      var modalCloseBtn = document.getElementById('chart-modal-close');
-      var modalChartInstance = null;
+    // ===== MODAL FULLSCREEN (aggiornato per supportare drill-down) =====
+    var modal = document.getElementById('chart-modal');
+    var modalTitle = document.getElementById('chart-modal-title');
+    var modalCanvas = document.getElementById('chart-modal-canvas');
+    var modalDetails = document.getElementById('chart-modal-details');
+    var modalCloseBtn = document.getElementById('chart-modal-close');
+    var modalChartInstance = null;
 
-      function openChartModal(type) {
+    function openChartModal(type) {
         modal.style.display = 'flex';
-        if (modalChartInstance) {
-          modalChartInstance.destroy();
-          modalChartInstance = null;
-        }
+        if (modalChartInstance) { modalChartInstance.destroy(); modalChartInstance = null; }
+
         var chartConfig = null;
 
         if (type === 'categorie') {
-          var currentLabels = chartInstance ? chartInstance.data.labels : catData.labels || ['Nessun dato'];
-          var currentData = chartInstance ? chartInstance.data.datasets[0].data : catData.data || [0];
-          
-          modalTitle.textContent = 'Dettaglio: Spese per Categoria';
-          modalDetails.innerHTML = `
-            <strong>Analisi dettagliata delle tue spese per categoria</strong><br>
-            Totale categorie: ${currentLabels.length} | 
-            Spesa totale: €${currentData.reduce(function(a, b) { return a + b; }, 0).toFixed(2)}
-          `;
-          chartConfig = {
-            type: 'doughnut',
-            data: {
-              labels: currentLabels,
-              datasets: [{
-                data: currentData,
-                backgroundColor: colors.palette.slice(0, currentLabels.length),
-                borderWidth: 3,
-                borderColor: 'var(--bg-primary, #ffffff)'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: true,
-              plugins: {
-                legend: {
-                  position: 'right',
-                  labels: {
-                    color: colors.text,
-                    boxWidth: 16,
-                    padding: 20,
-                    font: { size: 14 },
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                  }
-                },
-                tooltip: {
-                  bodyFont: { size: 14 },
-                  titleFont: { size: 16 },
-                  padding: 12,
-                  callbacks: {
-                    label: function(context) {
-                      var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                      var percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                      return '€' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
-                    }
-                  }
-                }
-              },
-              cutout: '65%'
+            // Nel modal mostriamo la vista corrente (macro o sub)
+            var srcLabels, srcData, viewLabel;
+            if (currentView === 'macro') {
+                var src = catData[currentTipo] || { labels: [], data: [] };
+                srcLabels = src.labels;
+                srcData = src.data;
+                viewLabel = (currentTipo === 'uscite' ? 'Uscite' : 'Entrate') + ' per Categoria';
+            } else {
+                var subs = (subData[currentTipo] || {})[currentCategory] || { labels: [], data: [] };
+                srcLabels = subs.labels;
+                srcData = subs.data;
+                viewLabel = 'Sottocategorie di "' + currentCategory + '"';
             }
-          };
+
+            modalTitle.textContent = 'Dettaglio: ' + viewLabel;
+            var total = srcData.reduce(function(a, b) { return a + b; }, 0);
+            modalDetails.innerHTML =
+                '<strong>' + viewLabel + '</strong><br>' +
+                'Categorie: ' + srcLabels.length + ' | ' +
+                'Totale: €' + total.toFixed(2);
+
+            chartConfig = {
+                type: 'doughnut',
+                data: {
+                    labels: srcLabels,
+                    datasets: [{
+                        data: srcData,
+                        backgroundColor: getPalette(srcLabels.length),
+                        borderWidth: 3,
+                        borderColor: colors.bgPrimary
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: colors.text,
+                                boxWidth: 16,
+                                padding: 20,
+                                font: { size: 14 },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: { size: 14 },
+                            titleFont: { size: 16 },
+                            padding: 12,
+                            callbacks: {
+                                label: function(ctx) {
+                                    var t = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                    var p = t > 0 ? ((ctx.parsed / t) * 100).toFixed(1) : 0;
+                                    var prefix = currentTipo === 'uscite' ? '−' : '+';
+                                    return prefix + ' €' + ctx.parsed.toFixed(2) + ' (' + p + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            };
         } else if (type === 'giornaliero') {
-          modalTitle.textContent = 'Dettaglio: Andamento Giornaliero';
-          modalDetails.innerHTML = `
-            <strong>Distribuzione giornaliera di entrate e uscite</strong><br>
-            Giorni analizzati: ${giornoData.labels.length} | 
-            Totale entrate: €${(giornoData.dataIngressi || []).reduce(function(a, b) { return a + b; }, 0).toFixed(2)} | 
-            Totale uscite: €${(giornoData.dataUscite || []).reduce(function(a, b) { return a + b; }, 0).toFixed(2)}
-          `;
-          chartConfig = {
-            type: 'bar',
-            data: {
-              labels: giornoData.labels,
-              datasets: [
-                {
-                  label: 'Entrate (€)',
-                  data: giornoData.dataIngressi || [],
-                  backgroundColor: 'rgba(78, 205, 196, 0.7)',
-                  borderColor: '#4ECDC4',
-                  borderWidth: 2,
-                  borderRadius: 6
+            modalTitle.textContent = 'Dettaglio: Andamento Giornaliero';
+            var totIn = (giornoData.dataIngressi || []).reduce(function(a, b) { return a + b; }, 0);
+            var totOut = (giornoData.dataUscite || []).reduce(function(a, b) { return a + b; }, 0);
+            modalDetails.innerHTML =
+                '<strong>Distribuzione giornaliera</strong><br>' +
+                'Giorni: ' + giornoData.labels.length + ' | ' +
+                'Entrate: +€' + totIn.toFixed(2) + ' | Uscite: −€' + totOut.toFixed(2);
+            chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: giornoData.labels,
+                    datasets: [
+                        {
+                            label: 'Entrate (€)',
+                            data: giornoData.dataIngressi || [],
+                            backgroundColor: 'rgba(78, 205, 196, 0.7)',
+                            borderColor: '#4ECDC4', borderWidth: 2, borderRadius: 6
+                        },
+                        {
+                            label: 'Uscite (€)',
+                            data: giornoData.dataUscite || [],
+                            backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                            borderColor: '#FF6B6B', borderWidth: 2, borderRadius: 6
+                        }
+                    ]
                 },
-                {
-                  label: 'Uscite (€)',
-                  data: giornoData.dataUscite || [],
-                  backgroundColor: 'rgba(255, 107, 107, 0.7)',
-                  borderColor: '#FF6B6B',
-                  borderWidth: 2,
-                  borderRadius: 6
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: true,
-              plugins: {
-                legend: {
-                  display: true,
-                  labels: {
-                    color: colors.text,
-                    boxWidth: 16,
-                    font: { size: 14 },
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                  }
-                },
-                tooltip: {
-                  bodyFont: { size: 14 },
-                  titleFont: { size: 16 },
-                  padding: 12,
-                  callbacks: {
-                    label: function(context) {
-                      return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
+                options: {
+                    responsive: true, maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: true, labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { bodyFont: { size: 14 }, titleFont: { size: 16 }, padding: 12 }
+                    },
+                    scales: {
+                        x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { display: false } },
+                        y: { ticks: { color: colors.text, font: { size: 13 }, callback: function(v) { return '€' + v.toFixed(0); } }, grid: { color: colors.grid }, beginAtZero: true }
                     }
-                  }
                 }
-              },
-              scales: {
-                x: {
-                  ticks: { color: colors.text, font: { size: 13 } },
-                  grid: { display: false }
-                },
-                y: {
-                  ticks: { 
-                    color: colors.text, 
-                    font: { size: 13 },
-                    callback: function(value) {
-                      return '€' + value.toFixed(0);
-                    }
-                  },
-                  grid: { color: colors.grid },
-                  beginAtZero: true
-                }
-              }
-            }
-          };
+            };
         } else if (type === 'trend') {
-          modalTitle.textContent = 'Dettaglio: Trend Mensile';
-          var avgUscite = trendData.dataUscite && trendData.dataUscite.length > 0 
-            ? (trendData.dataUscite.reduce(function(a, b) { return a + b; }, 0) / trendData.dataUscite.length).toFixed(2)
-            : '0.00';
-          modalDetails.innerHTML = `
-            <strong>Evoluzione mensile di entrate e uscite</strong><br>
-            Periodo analizzato: ${trendData.labels.length} mesi | 
-            Media uscite: €${avgUscite}
-          `;
-          chartConfig = {
-            type: 'line',
-            data: {
-              labels: trendData.labels,
-              datasets: [
-                {
-                  label: 'Uscite mensili',
-                  data: trendData.dataUscite || [],
-                  borderColor: '#FF6B6B',
-                  backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                  fill: true,
-                  tension: 0.4,
-                  pointBackgroundColor: '#FF6B6B',
-                  pointRadius: 6,
-                  pointHoverRadius: 8
+            modalTitle.textContent = 'Dettaglio: Trend Mensile';
+            var avgOut = trendData.dataUscite && trendData.dataUscite.length > 0
+                ? (trendData.dataUscite.reduce(function(a, b) { return a + b; }, 0) / trendData.dataUscite.length).toFixed(2)
+                : '0.00';
+            modalDetails.innerHTML =
+                '<strong>Evoluzione mensile</strong><br>' +
+                'Periodo: ' + trendData.labels.length + ' mesi | Media uscite: €' + avgOut;
+            chartConfig = {
+                type: 'line',
+                data: {
+                    labels: trendData.labels,
+                    datasets: [
+                        { label: 'Uscite mensili', data: trendData.dataUscite || [], borderColor: '#FF6B6B', backgroundColor: 'rgba(255, 107, 107, 0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#FF6B6B', pointRadius: 6, pointHoverRadius: 8 },
+                        { label: 'Entrate mensili', data: trendData.dataIngressi || [], borderColor: '#4ECDC4', backgroundColor: 'rgba(78, 205, 196, 0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#4ECDC4', pointRadius: 6, pointHoverRadius: 8 }
+                    ]
                 },
-                {
-                  label: 'Entrate mensili',
-                  data: trendData.dataIngressi || [],
-                  borderColor: '#4ECDC4',
-                  backgroundColor: 'rgba(78, 205, 196, 0.1)',
-                  fill: true,
-                  tension: 0.4,
-                  pointBackgroundColor: '#4ECDC4',
-                  pointRadius: 6,
-                  pointHoverRadius: 8
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: true,
-              plugins: {
-                legend: {
-                  position: 'top',
-                  labels: {
-                    color: colors.text,
-                    boxWidth: 16,
-                    font: { size: 14 },
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                  }
-                },
-                tooltip: {
-                  bodyFont: { size: 14 },
-                  titleFont: { size: 16 },
-                  padding: 12,
-                  callbacks: {
-                    label: function(context) {
-                      return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
+                options: {
+                    responsive: true, maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { bodyFont: { size: 14 }, titleFont: { size: 16 }, padding: 12 }
+                    },
+                    scales: {
+                        x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { color: colors.grid } },
+                        y: { ticks: { color: colors.text, font: { size: 13 }, callback: function(v) { return '€' + v.toFixed(0); } }, grid: { color: colors.grid }, beginAtZero: true }
                     }
-                  }
                 }
-              },
-              scales: {
-                x: {
-                  ticks: { color: colors.text, font: { size: 13 } },
-                  grid: { color: colors.grid }
-                },
-                y: {
-                  ticks: { 
-                    color: colors.text, 
-                    font: { size: 13 },
-                    callback: function(value) {
-                      return '€' + value.toFixed(0);
-                    }
-                  },
-                  grid: { color: colors.grid },
-                  beginAtZero: true
-                }
-              }
-            }
-          };
+            };
         }
 
         if (chartConfig) {
-          modalChartInstance = new Chart(modalCanvas, chartConfig);
+            modalChartInstance = new Chart(modalCanvas, chartConfig);
         }
-      }
+    }
 
-      function closeChartModal() {
+    function closeChartModal() {
         modal.style.display = 'none';
-        if (modalChartInstance) {
-          modalChartInstance.destroy();
-          modalChartInstance = null;
-        }
-      }
+        if (modalChartInstance) { modalChartInstance.destroy(); modalChartInstance = null; }
+    }
 
-      modalCloseBtn.addEventListener('click', closeChartModal);
-      modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeChartModal();
-      });
-      document.addEventListener('keydown', function(e) {
+    modalCloseBtn.addEventListener('click', closeChartModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeChartModal(); });
+    document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') closeChartModal();
-      });
+    });
 
-      var buttons = document.querySelectorAll('.chart-fullscreen');
-      buttons.forEach(function(b){
-        b.addEventListener('click', function(ev){
-          ev.stopPropagation();
-          var card = ev.target.closest('.chart-card');
-          if (!card) return;
-          var chartType = card.getAttribute('data-chart');
-          openChartModal(chartType);
+    document.querySelectorAll('.chart-fullscreen').forEach(function(b) {
+        b.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            var card = ev.target.closest('.chart-card');
+            if (!card) return;
+            openChartModal(card.getAttribute('data-chart'));
         });
-      });
+    });
 
-      // ===== TEMA OBSERVER =====
-      var themeObserver = new MutationObserver(function() {
-        window.location.reload();
-      });
-      var targetNode = document.documentElement;
-      var config = { attributes: true, attributeFilter: ['data-theme'] };
-      themeObserver.observe(targetNode, config);
-      document.addEventListener('themeChanged', function() {
-        window.location.reload();
-      });
-
-    })();
-  </script>
+    // ===== OBSERVER TEMA =====
+    var themeObserver = new MutationObserver(function() { window.location.reload(); });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    document.addEventListener('themeChanged', function() { window.location.reload(); });
+})();
+</script>
 
 </body>
 </html>
