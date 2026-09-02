@@ -1,46 +1,39 @@
 <div id="splash-screen" class="splash-screen" style="display:none;">
-  <svg viewBox="0 0 300 220" width="220" height="160" xmlns="http://www.w3.org/2000/svg">
-    <!-- terreno -->
-    <rect x="0" y="190" width="300" height="30" fill="#888" />
+  <svg viewBox="0 0 300 220" width="200" height="147" xmlns="http://www.w3.org/2000/svg">
+    <!-- Sfondo minimal -->
+    <rect width="300" height="220" fill="transparent" />
 
-    <!-- lampione -->
-    <rect x="205" y="40" width="8" height="150" rx="3" fill="#333" />
-    <circle cx="209" cy="35" r="18" fill="#ddd" />
-    <circle cx="209" cy="35" r="18" fill="none" stroke="#333" stroke-width="3" />
-    <rect x="196" y="18" width="26" height="6" rx="2" fill="#333" />
+    <!-- Forma squircle principale (base) -->
+    <rect id="splash-base" x="50" y="140" width="200" height="50" rx="20" fill="#ddd" opacity="0.3" />
 
-    <!-- pozzetto pipì (appare gradualmente) -->
-    <ellipse id="splash-puddle" cx="196" cy="197" rx="0" ry="0" fill="#aaa" opacity="0.85" />
-
-    <!-- getto pipì -->
-    <path id="splash-stream" d="M 187 150 Q 178 165 190 195" fill="none" stroke="#999" stroke-width="4" stroke-linecap="round" opacity="0" />
-
-    <!-- cane -->
-    <g id="splash-dog" transform="translate(60,150)">
-      <!-- corpo -->
-      <ellipse cx="60" cy="20" rx="38" ry="16" fill="#555" />
-      <!-- testa -->
-      <circle cx="105" cy="10" r="16" fill="#555" />
-      <!-- orecchio -->
-      <path d="M 108 -2 Q 118 -14 116 2 Z" fill="#222" />
-      <!-- occhio -->
-      <circle cx="112" cy="8" r="2" fill="#fff" />
-      <circle cx="111" cy="8" r="1" fill="#000" />
-      <!-- naso -->
-      <circle cx="120" cy="12" r="2.5" fill="#222" />
-      <!-- coda -->
-      <path id="splash-tail" d="M 25 12 Q 8 4 14 -8" fill="none" stroke="#555" stroke-width="7" stroke-linecap="round" />
-      <!-- zampe anteriori -->
-      <rect x="80" y="30" width="7" height="18" rx="3" fill="#333" />
-      <rect x="93" y="30" width="7" height="18" rx="3" fill="#333" />
-      <!-- zampa posteriore a terra -->
-      <rect x="35" y="30" width="8" height="18" rx="3" fill="#333" />
-      <!-- zampa posteriore alzata -->
-      <g id="splash-leg" style="transform-origin: 55px 24px;">
-        <rect x="50" y="20" width="8" height="16" rx="3" fill="#333" />
-      </g>
+    <!-- Cane minimal (solo silhouette) -->
+    <g id="splash-dog" transform="translate(80,130)">
+      <!-- Corpo squircle -->
+      <rect x="20" y="5" width="50" height="28" rx="14" fill="#333" />
+      <!-- Testa squircle -->
+      <rect x="75" y="0" width="24" height="22" rx="11" fill="#333" />
+      <!-- Orecchio -->
+      <rect x="80" y="-4" width="8" height="12" rx="4" fill="#555" />
+      <!-- Coda (squircle allungato) -->
+      <rect id="splash-tail" x="2" y="8" width="18" height="6" rx="3" fill="#444" />
+      <!-- Zampa posteriore alzata -->
+      <rect id="splash-leg" x="40" y="18" width="8" height="14" rx="4" fill="#333" transform-origin="44px 24px" />
+      <!-- Zampa anteriore -->
+      <rect x="62" y="28" width="7" height="10" rx="3.5" fill="#444" />
+      <rect x="72" y="28" width="7" height="10" rx="3.5" fill="#444" />
     </g>
+
+    <!-- Pozzetto (squircle piatto) -->
+    <rect id="splash-puddle" x="170" y="168" width="0" height="0" rx="6" fill="#999" opacity="0.6" />
+
+    <!-- Goccia minimal (squircle) -->
+    <rect id="splash-drop" x="180" y="135" width="6" height="10" rx="3" fill="#888" opacity="0" />
+
+    <!-- Linea di connessione (asta sottile) -->
+    <rect x="130" y="10" width="2" height="160" rx="1" fill="#ccc" opacity="0.5" />
+    <circle cx="131" cy="10" r="10" fill="#ddd" opacity="0.4" />
   </svg>
+
   <div class="splash-text">CiulloTracker</div>
 </div>
 
@@ -49,79 +42,91 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
+    background: #f9f9f9;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    animation: splash-fadeout 0.8s ease forwards;
-    animation-delay: 4.2s;
+    animation: splash-fadeout 0.6s ease forwards;
+    animation-delay: 3.4s;
   }
+
   .splash-text {
-    margin-top: 12px;
-    font-weight: 700;
-    font-size: 1.1rem;
+    margin-top: 16px;
+    font-weight: 300;
+    font-size: 1.3rem;
+    letter-spacing: 4px;
     color: #222;
     opacity: 0;
-    animation: splash-text-in 0.6s ease forwards;
-    animation-delay: 0.5s;
-  }
-  #splash-leg {
-    animation: splash-leg-lift 3.6s ease-in-out;
-  }
-  #splash-tail {
-    animation: splash-tail-wag 0.6s ease-in-out infinite;
-  }
-  #splash-stream {
-    animation: splash-stream-flow 3.6s ease-in-out;
-  }
-  #splash-puddle {
-    animation: splash-puddle-grow 3.6s ease-in-out forwards;
+    animation: splash-text-in 0.8s ease forwards;
+    animation-delay: 0.6s;
   }
 
-  /* TIMING PRECISO - 5 secondi totali:
-     0.0s - 0.5s: testo in fade-in
-     0.0s - 3.6s: animazioni principali (gamba, getto, pozzetto)
-     3.6s - 4.2s: pausa di visualizzazione (0.6s)
-     4.2s - 5.0s: fadeout finale (0.8s)
-  */
+  /* ANIMAZIONI FLUIDE E MINIMAL */
+
+  #splash-leg {
+    animation: leg-lift 3s ease-in-out;
+  }
+
+  #splash-tail {
+    animation: tail-sway 1.2s ease-in-out infinite;
+  }
+
+  #splash-drop {
+    animation: drop-fall 3s ease-in-out;
+  }
+
+  #splash-puddle {
+    animation: puddle-grow 3s ease forwards;
+  }
+
+  #splash-base {
+    animation: base-pulse 3s ease-in-out;
+  }
+
+  /* KEYFRAMES */
 
   @keyframes splash-text-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes splash-leg-lift {
+  @keyframes leg-lift {
     0% { transform: rotate(0deg); }
-    5% { transform: rotate(0deg); }        /* 0.0s - 0.18s: pausa */
-    30% { transform: rotate(-55deg); }     /* 0.18s - 1.08s: solleva */
-    85% { transform: rotate(-55deg); }     /* 1.08s - 3.06s: mantiene */
-    100% { transform: rotate(0deg); }      /* 3.06s - 3.6s: abbassa */
-  }
-
-  @keyframes splash-tail-wag {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(15deg); }
-    50% { transform: rotate(0deg); }
-    75% { transform: rotate(15deg); }
+    10% { transform: rotate(0deg); }
+    35% { transform: rotate(-50deg); }
+    80% { transform: rotate(-50deg); }
     100% { transform: rotate(0deg); }
   }
 
-  @keyframes splash-stream-flow {
-    0% { opacity: 0; }
-    10% { opacity: 0; }                    /* 0.0s - 0.36s: nessun getto */
-    30% { opacity: 1; }                    /* 0.36s - 1.08s: inizia getto */
-    85% { opacity: 1; }                    /* 1.08s - 3.06s: getto attivo */
-    95% { opacity: 0; }                    /* 3.06s - 3.42s: getto termina */
-    100% { opacity: 0; }                   /* 3.42s - 3.6s: nessun getto */
+  @keyframes tail-sway {
+    0% { transform: rotate(0deg); transform-origin: 2px 11px; }
+    50% { transform: rotate(20deg); transform-origin: 2px 11px; }
+    100% { transform: rotate(0deg); transform-origin: 2px 11px; }
   }
 
-  @keyframes splash-puddle-grow {
-    0% { rx: 0; ry: 0; }
-    15% { rx: 0; ry: 0; }                  /* 0.0s - 0.54s: nessuna pozzetta */
-    35% { rx: 8; ry: 3; }                  /* 0.54s - 1.26s: inizia a formarsi */
-    85% { rx: 18; ry: 7; }                 /* 1.26s - 3.06s: cresce gradualmente */
-    100% { rx: 20; ry: 8; }                /* 3.06s - 3.6s: dimensione finale */
+  @keyframes drop-fall {
+    0% { opacity: 0; transform: translateY(-10px); }
+    15% { opacity: 0; }
+    30% { opacity: 1; transform: translateY(0); }
+    70% { opacity: 1; transform: translateY(20px); }
+    85% { opacity: 0.5; transform: translateY(30px); }
+    100% { opacity: 0; transform: translateY(35px); }
+  }
+
+  @keyframes puddle-grow {
+    0% { width: 0; height: 0; opacity: 0.6; }
+    20% { width: 0; height: 0; }
+    50% { width: 30px; height: 8px; }
+    80% { width: 38px; height: 10px; }
+    100% { width: 40px; height: 10px; }
+  }
+
+  @keyframes base-pulse {
+    0% { opacity: 0.3; transform: scaleX(1); }
+    30% { opacity: 0.5; transform: scaleX(0.95); }
+    70% { opacity: 0.5; transform: scaleX(0.95); }
+    100% { opacity: 0.3; transform: scaleX(1); }
   }
 
   @keyframes splash-fadeout {
@@ -138,7 +143,7 @@
         localStorage.setItem('hbt-splash-seen', '1');
       }
     } catch (e) {
-      // localStorage non disponibile: nessuna splash, nessun errore bloccante
+      // localStorage non disponibile: nessuna splash
     }
   })();
 </script>
