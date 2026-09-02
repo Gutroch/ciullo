@@ -571,7 +571,7 @@
       --bg-hover: #f0f0f0;
       --text-primary: #0a0a0a;
       --text-secondary: #6c757d;
-      --border-color: #dee2e6
+      --border-color: #dee2e6;
       --accent: #0a0a0a;
       --danger: #FF6B6B;
     }
@@ -651,8 +651,17 @@
           <div class="kpi-value neutral"><%= topCategoria %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">Totale Movimenti</div>
-          <div class="kpi-value neutral"><%= ultimeSpese.length %></div>
+          <div class="kpi-label">
+            <%= typeof totaleMovimenti !== 'undefined'
+              ? 'Totale Movimenti'
+              : 'Movimenti Mostrati' %>
+          </div>
+
+          <div class="kpi-value neutral">
+            <%= typeof totaleMovimenti !== 'undefined'
+              ? totaleMovimenti
+              : ultimeSpese.length %>
+          </div>
         </div>
       </div>
 
@@ -784,490 +793,1270 @@ var dashboardChartData = {
 };
 
 (function initDashboard() {
+
+    if (window.__ciulloDashboardChartsInitialized) {
+        return;
+    }
+
     if (typeof Chart === 'undefined') {
         setTimeout(initDashboard, 200);
         return;
     }
 
+    window.__ciulloDashboardChartsInitialized = true;
+
     function getThemeColors() {
-        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        var dark =
+            document.documentElement.getAttribute('data-theme') === 'dark';
+
         return {
             text: dark ? '#f5f5f5' : '#0a0a0a',
-            grid: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-            bgPrimary: dark ? '#1e1e1e' : '#ffffff',
+
+            grid: dark
+                ? 'rgba(255,255,255,0.08)'
+                : 'rgba(0,0,0,0.08)',
+
+            bgPrimary:
+                dark ? '#1e1e1e' : '#ffffff',
+
             palette: [
-                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-                '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9',
-                '#F8B500', '#6C5CE7', '#00B894', '#E17055', '#74B9FF'
+                '#FF6B6B',
+                '#4ECDC4',
+                '#45B7D1',
+                '#96CEB4',
+                '#FFEAA7',
+                '#DDA0DD',
+                '#FF8A5C',
+                '#A29BFE',
+                '#FD79A8',
+                '#00CEC9',
+                '#F8B500',
+                '#6C5CE7',
+                '#00B894',
+                '#E17055',
+                '#74B9FF'
             ]
         };
     }
+
     var colors = getThemeColors();
 
-    // Normalizza i dati per retrocompatibilità
+
+    // ============================================================
+    // NORMALIZZAZIONE DATI
+    // ============================================================
+
     function normalizeCategorie(raw) {
-        if (!raw) return { uscite: { labels: [], data: [] }, ingressi: { labels: [], data: [] } };
-        if (raw.uscite || raw.ingressi) {
+
+        if (!raw) {
             return {
-                uscite: raw.uscite || { labels: [], data: [] },
-                ingressi: raw.ingressi || { labels: [], data: [] }
+                uscite: {
+                    labels: [],
+                    data: []
+                },
+
+                ingressi: {
+                    labels: [],
+                    data: []
+                }
             };
         }
+
+        if (raw.uscite || raw.ingressi) {
+
+            return {
+                uscite:
+                    raw.uscite || {
+                        labels: [],
+                        data: []
+                    },
+
+                ingressi:
+                    raw.ingressi || {
+                        labels: [],
+                        data: []
+                    }
+            };
+        }
+
         return {
-            uscite: { labels: raw.labels || [], data: raw.data || [] },
-            ingressi: { labels: [], data: [] }
+            uscite: {
+                labels: raw.labels || [],
+                data: raw.data || []
+            },
+
+            ingressi: {
+                labels: [],
+                data: []
+            }
         };
     }
 
+
     function normalizeSottocategorie(raw) {
-        if (!raw) return { uscite: {}, ingressi: {} };
+
+        if (!raw) {
+            return {
+                uscite: {},
+                ingressi: {}
+            };
+        }
+
         if (raw.uscite || raw.ingressi) {
+
             return {
                 uscite: raw.uscite || {},
                 ingressi: raw.ingressi || {}
             };
         }
-        return { uscite: raw, ingressi: {} };
+
+        return {
+            uscite: raw,
+            ingressi: {}
+        };
     }
 
-    var catData = normalizeCategorie(dashboardChartData.categorie);
-    var subData = normalizeSottocategorie(dashboardChartData.sottocategorie);
-    var giornoData = dashboardChartData.giornaliero || { labels: [], dataIngressi: [], dataUscite: [] };
-    var trendData = dashboardChartData.trend || { labels: [], dataIngressi: [], dataUscite: [] };
 
-    // ===== STATO GRAFICO CATEGORIE =====
-    var ctxCategorie = document.getElementById('chartCategorie');
-    var chartInstance = null;
-    var currentTipo = 'uscite';
-    var currentView = 'macro';
-    var currentCategory = '';
+    var catData =
+        normalizeCategorie(dashboardChartData.categorie);
 
-    var tipoSelect = document.getElementById('chartTipoSelect');
-    var breadcrumb = document.getElementById('chartBreadcrumb');
-    var breadcrumbBack = document.getElementById('breadcrumbBack');
-    var breadcrumbCategory = document.getElementById('breadcrumbCategory');
-    var noDataMsg = document.getElementById('chartNoData');
+    var subData =
+        normalizeSottocategorie(
+            dashboardChartData.sottocategorie
+        );
+
+    var giornoData =
+        dashboardChartData.giornaliero || {
+            labels: [],
+            dataIngressi: [],
+            dataUscite: []
+        };
+
+    var trendData =
+        dashboardChartData.trend || {
+            labels: [],
+            dataIngressi: [],
+            dataUscite: []
+        };
+
+
+    // ============================================================
+    // RICOSTRUZIONE MACRO CATEGORIE
+    // ============================================================
+
+    function rebuildMacroFromSubcategories(tipo) {
+
+        var groups =
+            subData[tipo] || {};
+
+        var labels =
+            Object.keys(groups);
+
+        if (!labels.length) {
+            return null;
+        }
+
+        var data = labels.map(function(category) {
+
+            var row =
+                groups[category] || {};
+
+            return (row.data || []).reduce(
+                function(sum, value) {
+
+                    var n = Number(value);
+
+                    return sum +
+                        (
+                            Number.isFinite(n)
+                                ? n
+                                : 0
+                        );
+                },
+                0
+            );
+        });
+
+
+        var compact = labels
+            .map(function(label, i) {
+
+                return {
+                    label: label,
+                    value: data[i]
+                };
+            })
+
+            .filter(function(item) {
+                return item.value > 0;
+            })
+
+            .sort(function(a, b) {
+                return b.value - a.value;
+            });
+
+
+        return {
+            labels: compact.map(function(item) {
+                return item.label;
+            }),
+
+            data: compact.map(function(item) {
+                return item.value;
+            })
+        };
+    }
+
+
+    var rebuiltUscite =
+        rebuildMacroFromSubcategories('uscite');
+
+
+    if (
+        rebuiltUscite &&
+        rebuiltUscite.labels.length
+    ) {
+        catData.uscite =
+            rebuiltUscite;
+    }
+
+
+    // ============================================================
+    // GRAFICO CATEGORIE
+    // ============================================================
+
+    var ctxCategorie =
+        document.getElementById('chartCategorie');
+
+    var chartInstance =
+        null;
+
+    var currentTipo =
+        'uscite';
+
+    var currentView =
+        'macro';
+
+    var currentCategory =
+        '';
+
+
+    var tipoSelect =
+        document.getElementById(
+            'chartTipoSelect'
+        );
+
+    var breadcrumb =
+        document.getElementById(
+            'chartBreadcrumb'
+        );
+
+    var breadcrumbBack =
+        document.getElementById(
+            'breadcrumbBack'
+        );
+
+    var breadcrumbCategory =
+        document.getElementById(
+            'breadcrumbCategory'
+        );
+
+    var noDataMsg =
+        document.getElementById(
+            'chartNoData'
+        );
+
 
     function getPalette(n) {
+
         var out = [];
+
         for (var i = 0; i < n; i++) {
-            out.push(colors.palette[i % colors.palette.length]);
+
+            out.push(
+                colors.palette[
+                    i % colors.palette.length
+                ]
+            );
         }
+
         return out;
     }
 
-    function renderCategorieChart() {
-        if (!ctxCategorie) return;
 
-        var labels = [], data = [], title = '';
+    function renderCategorieChart() {
+
+        if (!ctxCategorie) {
+            return;
+        }
+
+
+        var labels = [];
+        var data = [];
+        var title = '';
+
+
+        // ========================================================
+        // VISTA MACRO
+        // ========================================================
 
         if (currentView === 'macro') {
-            var src = catData[currentTipo] || { labels: [], data: [] };
-            labels = src.labels || [];
-            data = src.data || [];
-            title = (currentTipo === 'uscite' ? 'Uscite' : 'Entrate') + ' per Categoria';
-            breadcrumb.style.display = 'none';
-        } else {
-            var subs = (subData[currentTipo] || {})[currentCategory];
-            if (subs && subs.labels && subs.labels.length > 0) {
-                labels = subs.labels;
-                data = subs.data;
+
+            var src =
+                catData[currentTipo] || {
+                    labels: [],
+                    data: []
+                };
+
+            labels =
+                src.labels || [];
+
+            data =
+                src.data || [];
+
+            title =
+                (
+                    currentTipo === 'uscite'
+                        ? 'Uscite'
+                        : 'Entrate'
+                ) +
+                ' per Categoria';
+
+            breadcrumb.style.display =
+                'none';
+
+        }
+
+        // ========================================================
+        // VISTA SOTTOCATEGORIE
+        // ========================================================
+
+        else {
+
+            var subs =
+                (
+                    subData[currentTipo] || {}
+                )[currentCategory];
+
+
+            if (
+                subs &&
+                subs.labels &&
+                subs.labels.length > 0
+            ) {
+
+                labels =
+                    subs.labels;
+
+                data =
+                    subs.data;
+
             } else {
-                labels = ['Nessuna sottocategoria'];
-                data = [0];
+
+                labels =
+                    ['Nessuna sottocategoria'];
+
+                data =
+                    [0];
             }
-            title = currentCategory;
-            breadcrumb.style.display = 'flex';
-            breadcrumbCategory.textContent = currentCategory;
+
+
+            title =
+                currentCategory;
+
+
+            breadcrumb.style.display =
+                'flex';
+
+            breadcrumbCategory.textContent =
+                currentCategory;
         }
 
-        if (labels.length === 0 || (labels.length === 1 && data[0] === 0)) {
-            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-            ctxCategorie.style.display = 'none';
-            noDataMsg.style.display = 'block';
+
+        // ========================================================
+        // NESSUN DATO
+        // ========================================================
+
+        if (
+            labels.length === 0 ||
+            (
+                labels.length === 1 &&
+                Number(data[0]) === 0
+            )
+        ) {
+
+            if (chartInstance) {
+
+                chartInstance.destroy();
+
+                chartInstance =
+                    null;
+            }
+
+            ctxCategorie.style.display =
+                'none';
+
+            noDataMsg.style.display =
+                'block';
+
             return;
-        } else {
-            ctxCategorie.style.display = 'block';
-            noDataMsg.style.display = 'none';
         }
 
-        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
-        var bgColors = getPalette(labels.length);
+        ctxCategorie.style.display =
+            'block';
 
-        chartInstance = new Chart(ctxCategorie, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: bgColors,
-                    borderWidth: 2,
-                    borderColor: colors.bgPrimary,
-                    hoverOffset: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                animation: { duration: 500, easing: 'easeOutQuart' },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: colors.text,
-                            boxWidth: 12,
-                            padding: 14,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            font: { size: 12 }
-                        }
+        noDataMsg.style.display =
+            'none';
+
+
+        if (chartInstance) {
+
+            chartInstance.destroy();
+
+            chartInstance =
+                null;
+        }
+
+
+        var bgColors =
+            getPalette(labels.length);
+
+
+        // ========================================================
+        // MACRO = DOUGHNUT
+        // SOTTOCATEGORIE = BARRE ORIZZONTALI
+        // ========================================================
+
+        if (currentView === 'macro') {
+
+            chartInstance =
+                new Chart(ctxCategorie, {
+
+                    type: 'doughnut',
+
+                    data: {
+                        labels: labels,
+
+                        datasets: [{
+                            data: data,
+
+                            backgroundColor:
+                                bgColors,
+
+                            borderWidth: 2,
+
+                            borderColor:
+                                colors.bgPrimary,
+
+                            hoverOffset: 8
+                        }]
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.85)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            title: function(items) {
-                                return items[0].label;
-                            },
-                            label: function(context) {
-                                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                                var perc = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                                var prefix = currentTipo === 'uscite' ? '−' : '+';
-                                return prefix + ' €' + context.parsed.toFixed(2) + ' (' + perc + '%)';
-                            },
-                            afterLabel: function(context) {
-                                if (currentView === 'macro') {
-                                    var subs = (subData[currentTipo] || {})[context.label];
-                                    if (subs && subs.labels && subs.labels.length > 0) {
-                                        return '🔍 Click per vedere le sottocategorie';
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: true,
+
+                        animation: {
+                            duration: 500,
+                            easing: 'easeOutQuart'
+                        },
+
+                        plugins: {
+
+                            legend: {
+                                position: 'bottom',
+
+                                labels: {
+                                    color:
+                                        colors.text,
+
+                                    boxWidth: 12,
+
+                                    padding: 14,
+
+                                    usePointStyle:
+                                        true,
+
+                                    pointStyle:
+                                        'circle',
+
+                                    font: {
+                                        size: 12
                                     }
                                 }
-                                return '';
+                            },
+
+                            tooltip: {
+
+                                backgroundColor:
+                                    'rgba(0,0,0,0.85)',
+
+                                titleColor:
+                                    '#fff',
+
+                                bodyColor:
+                                    '#fff',
+
+                                padding: 12,
+
+                                cornerRadius: 8,
+
+                                callbacks: {
+
+                                    title:
+                                        function(items) {
+
+                                            return items[0]
+                                                .label;
+                                        },
+
+                                    label:
+                                        function(context) {
+
+                                            var total =
+                                                context
+                                                    .dataset
+                                                    .data
+                                                    .reduce(
+                                                        function(a, b) {
+                                                            return a +
+                                                                Number(b);
+                                                        },
+                                                        0
+                                                    );
+
+                                            var value =
+                                                Number(
+                                                    context.parsed
+                                                ) || 0;
+
+                                            var perc =
+                                                total > 0
+                                                    ? (
+                                                        value /
+                                                        total *
+                                                        100
+                                                    ).toFixed(1)
+                                                    : '0.0';
+
+                                            var prefix =
+                                                currentTipo === 'uscite'
+                                                    ? '−'
+                                                    : '+';
+
+                                            return (
+                                                prefix +
+                                                ' €' +
+                                                value.toFixed(2) +
+                                                ' (' +
+                                                perc +
+                                                '%)'
+                                            );
+                                        },
+
+                                    afterLabel:
+                                        function(context) {
+
+                                            if (
+                                                currentView ===
+                                                'macro'
+                                            ) {
+
+                                                var subs =
+                                                    (
+                                                        subData[
+                                                            currentTipo
+                                                        ] || {}
+                                                    )[context.label];
+
+                                                if (
+                                                    subs &&
+                                                    subs.labels &&
+                                                    subs.labels.length
+                                                ) {
+                                                    return '🔍 Click per vedere le sottocategorie';
+                                                }
+                                            }
+
+                                            return '';
+                                        }
+                                }
+                            }
+                        },
+
+                        cutout: '60%',
+
+                        onClick:
+                            handleChartClick
+                    }
+                });
+
+        } else {
+
+            chartInstance =
+                new Chart(ctxCategorie, {
+
+                    type: 'bar',
+
+                    data: {
+
+                        labels: labels,
+
+                        datasets: [{
+                            label:
+                                currentCategory,
+
+                            data: data,
+
+                            backgroundColor:
+                                bgColors,
+
+                            borderColor:
+                                bgColors,
+
+                            borderWidth: 1,
+
+                            borderRadius: 6,
+
+                            barPercentage:
+                                0.7
+                        }]
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio:
+                            true,
+
+                        indexAxis: 'y',
+
+                        animation: {
+                            duration: 400
+                        },
+
+                        plugins: {
+
+                            legend: {
+                                display: false
+                            },
+
+                            tooltip: {
+
+                                backgroundColor:
+                                    'rgba(0,0,0,0.85)',
+
+                                titleColor:
+                                    '#fff',
+
+                                bodyColor:
+                                    '#fff',
+
+                                padding: 12,
+
+                                cornerRadius: 8,
+
+                                callbacks: {
+
+                                    label:
+                                        function(context) {
+
+                                            var value =
+                                                Number(
+                                                    context.parsed.x
+                                                ) || 0;
+
+                                            return (
+                                                '€' +
+                                                value.toFixed(2)
+                                            );
+                                        }
+                                }
+                            }
+                        },
+
+                        scales: {
+
+                            x: {
+
+                                beginAtZero: true,
+
+                                grid: {
+                                    color:
+                                        colors.grid
+                                },
+
+                                ticks: {
+
+                                    color:
+                                        colors.text,
+
+                                    callback:
+                                        function(value) {
+
+                                            return (
+                                                '€' +
+                                                Number(value)
+                                                    .toFixed(0)
+                                            );
+                                        }
+                                }
+                            },
+
+                            y: {
+
+                                grid: {
+                                    display: false
+                                },
+
+                                ticks: {
+                                    color:
+                                        colors.text
+                                }
                             }
                         }
                     }
-                },
-                cutout: '60%',
-                onClick: handleChartClick
-            }
-        });
+                });
+        }
     }
 
-    function handleChartClick(event, elements) {
-        if (currentView !== 'macro') return;
-        if (!elements || elements.length === 0) return;
 
-        var idx = elements[0].index;
-        var clickedLabel = chartInstance.data.labels[idx];
+    // ============================================================
+    // CLICK SU MACRO CATEGORIA
+    // ============================================================
 
-        var subs = (subData[currentTipo] || {})[clickedLabel];
-        if (!subs || !subs.labels || subs.labels.length === 0) {
+    function handleChartClick(
+        event,
+        elements
+    ) {
+
+        if (
+            currentView !== 'macro'
+        ) {
             return;
         }
 
-        currentCategory = clickedLabel;
-        currentView = 'sub';
+        if (
+            !elements ||
+            elements.length === 0
+        ) {
+            return;
+        }
+
+
+        var idx =
+            elements[0].index;
+
+
+        var clickedLabel =
+            chartInstance
+                .data
+                .labels[idx];
+
+
+        var subs =
+            (
+                subData[currentTipo] || {}
+            )[clickedLabel];
+
+
+        if (
+            !subs ||
+            !subs.labels ||
+            subs.labels.length === 0
+        ) {
+            return;
+        }
+
+
+        currentCategory =
+            clickedLabel;
+
+        currentView =
+            'sub';
+
+
         renderCategorieChart();
     }
 
-    // Event listeners
+
+    // ============================================================
+    // SELECT ENTRATE / USCITE
+    // ============================================================
+
     if (tipoSelect) {
-        tipoSelect.addEventListener('change', function() {
-            currentTipo = this.value;
-            currentView = 'macro';
-            currentCategory = '';
-            renderCategorieChart();
-        });
+
+        tipoSelect.addEventListener(
+            'change',
+            function() {
+
+                currentTipo =
+                    this.value;
+
+                currentView =
+                    'macro';
+
+                currentCategory =
+                    '';
+
+                renderCategorieChart();
+            }
+        );
     }
 
+
+    // ============================================================
+    // TORNA ALLE MACRO
+    // ============================================================
+
     if (breadcrumbBack) {
-        breadcrumbBack.addEventListener('click', function() {
-            currentView = 'macro';
-            currentCategory = '';
-            renderCategorieChart();
-        });
+
+        breadcrumbBack.addEventListener(
+            'click',
+            function() {
+
+                currentView =
+                    'macro';
+
+                currentCategory =
+                    '';
+
+                renderCategorieChart();
+            }
+        );
     }
+
+
+    // ============================================================
+    // KPI - CONTROLLO COERENZA
+    // ============================================================
+
+    var renderedKpi = {
+
+        uscite:
+            Number(
+                <%- JSON.stringify(totale) %>
+            ) || 0,
+
+        entrate:
+            Number(
+                <%- JSON.stringify(totaleIngressi) %>
+            ) || 0,
+
+        saldo:
+            Number(
+                <%- JSON.stringify(saldo) %>
+            ) || 0
+    };
+
+
+    function sumValues(values) {
+
+        return (
+            values || []
+        ).reduce(
+            function(sum, value) {
+
+                var n =
+                    Number(value);
+
+                return sum +
+                    (
+                        Number.isFinite(n)
+                            ? n
+                            : 0
+                    );
+            },
+            0
+        );
+    }
+
+
+    var chartTotals = {
+
+        uscite:
+            sumValues(
+                (catData.uscite || {})
+                    .data
+            ),
+
+        entrate:
+            sumValues(
+                (catData.ingressi || {})
+                    .data
+            )
+    };
+
+
+    var epsilon =
+        0.01;
+
+
+    if (
+        Math.abs(
+            chartTotals.uscite -
+            renderedKpi.uscite
+        ) > epsilon ||
+
+        Math.abs(
+            chartTotals.entrate -
+            renderedKpi.entrate
+        ) > epsilon ||
+
+        Math.abs(
+            (
+                renderedKpi.entrate -
+                renderedKpi.uscite
+            ) -
+            renderedKpi.saldo
+        ) > epsilon
+    ) {
+
+        console.warn(
+            '[Dashboard] KPI non coerenti con i dati grafici',
+            {
+                kpi: renderedKpi,
+                grafici: chartTotals
+            }
+        );
+    }
+
+
+    // ============================================================
+    // AVVIO
+    // ============================================================
 
     renderCategorieChart();
 
-    // ===== GRAFICO GIORNALIERO =====
-    var ctxGiornaliero = document.getElementById('chartGiornaliero');
-    if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
-        new Chart(ctxGiornaliero, {
-            type: 'bar',
-            data: {
-                labels: giornoData.labels,
-                datasets: [
-                    {
-                        label: 'Entrate (€)',
-                        data: giornoData.dataIngressi || [],
-                        backgroundColor: 'rgba(78, 205, 196, 0.7)',
-                        borderColor: '#4ECDC4',
-                        borderWidth: 2,
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Uscite (€)',
-                        data: giornoData.dataUscite || [],
-                        backgroundColor: 'rgba(255, 107, 107, 0.7)',
-                        borderColor: '#FF6B6B',
-                        borderWidth: 2,
-                        borderRadius: 4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: colors.text,
-                            boxWidth: 12,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    }
-                },
-                scales: {
-                    x: { ticks: { color: colors.text, maxTicksLimit: 10 }, grid: { display: false } },
-                    y: {
-                        ticks: {
-                            color: colors.text,
-                            callback: function(v) { return '€' + v.toFixed(0); }
-                        },
-                        grid: { color: colors.grid },
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
 
-    // ===== GRAFICO TREND MENSILE =====
-    var ctxTrend = document.getElementById('chartTrend');
-    if (ctxTrend && trendData && trendData.labels && trendData.labels.length > 0) {
-        new Chart(ctxTrend, {
-            type: 'line',
-            data: {
-                labels: trendData.labels,
-                datasets: [
-                    {
-                        label: 'Uscite mensili',
-                        data: trendData.dataUscite || [],
-                        borderColor: '#FF6B6B',
-                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#FF6B6B',
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Entrate mensili',
-                        data: trendData.dataIngressi || [],
-                        borderColor: '#4ECDC4',
-                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#4ECDC4',
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle' }
-                    }
-                },
-                scales: {
-                    x: { ticks: { color: colors.text }, grid: { color: colors.grid } },
-                    y: {
-                        ticks: {
-                            color: colors.text,
-                            callback: function(v) { return '€' + v.toFixed(0); }
-                        },
-                        grid: { color: colors.grid },
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
+    // ============================================================
+    // GRAFICO GIORNALIERO
+    // ============================================================
 
-    // ===== MODAL FULLSCREEN =====
-    var modal = document.getElementById('chart-modal');
-    var modalTitle = document.getElementById('chart-modal-title');
-    var modalCanvas = document.getElementById('chart-modal-canvas');
-    var modalDetails = document.getElementById('chart-modal-details');
-    var modalCloseBtn = document.getElementById('chart-modal-close');
-    var modalChartInstance = null;
+    var ctxGiornaliero =
+        document.getElementById(
+            'chartGiornaliero'
+        );
 
-    function openChartModal(type) {
-        modal.style.display = 'flex';
-        if (modalChartInstance) { modalChartInstance.destroy(); modalChartInstance = null; }
 
-        var chartConfig = null;
+    if (
+        ctxGiornaliero &&
+        giornoData.labels &&
+        giornoData.labels.length > 0
+    ) {
 
-        if (type === 'categorie') {
-            var srcLabels, srcData, viewLabel;
-            if (currentView === 'macro') {
-                var src = catData[currentTipo] || { labels: [], data: [] };
-                srcLabels = src.labels;
-                srcData = src.data;
-                viewLabel = (currentTipo === 'uscite' ? 'Uscite' : 'Entrate') + ' per Categoria';
-            } else {
-                var subs = (subData[currentTipo] || {})[currentCategory] || { labels: [], data: [] };
-                srcLabels = subs.labels;
-                srcData = subs.data;
-                viewLabel = 'Sottocategorie di "' + currentCategory + '"';
-            }
+        new Chart(
+            ctxGiornaliero,
+            {
 
-            modalTitle.textContent = 'Dettaglio: ' + viewLabel;
-            var total = srcData.reduce(function(a, b) { return a + b; }, 0);
-            modalDetails.innerHTML =
-                '<strong>' + viewLabel + '</strong><br>' +
-                'Categorie: ' + srcLabels.length + ' | ' +
-                'Totale: €' + total.toFixed(2);
+                type: 'bar',
 
-            chartConfig = {
-                type: 'doughnut',
                 data: {
-                    labels: srcLabels,
-                    datasets: [{
-                        data: srcData,
-                        backgroundColor: getPalette(srcLabels.length),
-                        borderWidth: 3,
-                        borderColor: colors.bgPrimary
-                    }]
+
+                    labels:
+                        giornoData.labels,
+
+                    datasets: [
+
+                        {
+                            label:
+                                'Entrate (€)',
+
+                            data:
+                                giornoData.dataIngressi ||
+                                [],
+
+                            backgroundColor:
+                                'rgba(78, 205, 196, 0.7)',
+
+                            borderColor:
+                                '#4ECDC4',
+
+                            borderWidth: 2,
+
+                            borderRadius: 6
+                        },
+
+                        {
+                            label:
+                                'Uscite (€)',
+
+                            data:
+                                giornoData.dataUscite ||
+                                [],
+
+                            backgroundColor:
+                                'rgba(255, 107, 107, 0.7)',
+
+                            borderColor:
+                                '#FF6B6B',
+
+                            borderWidth: 2,
+
+                            borderRadius: 6
+                        }
+                    ]
                 },
+
                 options: {
+
                     responsive: true,
-                    maintainAspectRatio: true,
+
+                    maintainAspectRatio:
+                        true,
+
                     plugins: {
+
                         legend: {
-                            position: 'right',
+
+                            display: true,
+
                             labels: {
-                                color: colors.text,
+
+                                color:
+                                    colors.text,
+
                                 boxWidth: 16,
-                                padding: 20,
-                                font: { size: 14 },
-                                usePointStyle: true,
-                                pointStyle: 'circle'
+
+                                font: {
+                                    size: 14
+                                },
+
+                                usePointStyle:
+                                    true,
+
+                                pointStyle:
+                                    'circle'
                             }
                         }
                     },
-                    cutout: '65%'
-                }
-            };
-        } else if (type === 'giornaliero') {
-            modalTitle.textContent = 'Dettaglio: Andamento Giornaliero';
-            var totIn = (giornoData.dataIngressi || []).reduce(function(a, b) { return a + b; }, 0);
-            var totOut = (giornoData.dataUscite || []).reduce(function(a, b) { return a + b; }, 0);
-            modalDetails.innerHTML =
-                '<strong>Distribuzione giornaliera</strong><br>' +
-                'Giorni: ' + giornoData.labels.length + ' | ' +
-                'Entrate: +€' + totIn.toFixed(2) + ' | Uscite: −€' + totOut.toFixed(2);
-            chartConfig = {
-                type: 'bar',
-                data: {
-                    labels: giornoData.labels,
-                    datasets: [
-                        {
-                            label: 'Entrate (€)',
-                            data: giornoData.dataIngressi || [],
-                            backgroundColor: 'rgba(78, 205, 196, 0.7)',
-                            borderColor: '#4ECDC4', borderWidth: 2, borderRadius: 6
+
+                    scales: {
+
+                        x: {
+
+                            ticks: {
+                                color:
+                                    colors.text
+                            },
+
+                            grid: {
+                                display: false
+                            }
                         },
+
+                        y: {
+
+                            ticks: {
+
+                                color:
+                                    colors.text,
+
+                                callback:
+                                    function(v) {
+
+                                        return (
+                                            '€' +
+                                            Number(v)
+                                                .toFixed(0)
+                                        );
+                                    }
+                            },
+
+                            grid: {
+                                color:
+                                    colors.grid
+                            },
+
+                            beginAtZero:
+                                true
+                        }
+                    }
+                }
+            }
+        );
+    }
+
+
+    // ============================================================
+    // TREND MENSILE
+    // ============================================================
+
+    var ctxTrend =
+        document.getElementById(
+            'chartTrend'
+        );
+
+
+    if (
+        ctxTrend &&
+        trendData.labels &&
+        trendData.labels.length > 0
+    ) {
+
+        new Chart(
+            ctxTrend,
+            {
+
+                type: 'line',
+
+                data: {
+
+                    labels:
+                        trendData.labels,
+
+                    datasets: [
+
                         {
-                            label: 'Uscite (€)',
-                            data: giornoData.dataUscite || [],
-                            backgroundColor: 'rgba(255, 107, 107, 0.7)',
-                            borderColor: '#FF6B6B', borderWidth: 2, borderRadius: 6
+                            label:
+                                'Uscite mensili',
+
+                            data:
+                                trendData.dataUscite ||
+                                [],
+
+                            borderColor:
+                                '#FF6B6B',
+
+                            backgroundColor:
+                                'rgba(255, 107, 107, 0.1)',
+
+                            fill:
+                                true,
+
+                            tension:
+                                0.4,
+
+                            pointBackgroundColor:
+                                '#FF6B6B'
+                        },
+
+                        {
+                            label:
+                                'Entrate mensili',
+
+                            data:
+                                trendData.dataIngressi ||
+                                [],
+
+                            borderColor:
+                                '#4ECDC4',
+
+                            backgroundColor:
+                                'rgba(78, 205, 196, 0.1)',
+
+                            fill:
+                                true,
+
+                            tension:
+                                0.4,
+
+                            pointBackgroundColor:
+                                '#4ECDC4'
                         }
                     ]
                 },
+
                 options: {
-                    responsive: true, maintainAspectRatio: true,
+
+                    responsive: true,
+
                     plugins: {
-                        legend: { display: true, labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } }
+
+                        legend: {
+
+                            position:
+                                'top',
+
+                            labels: {
+
+                                color:
+                                    colors.text,
+
+                                usePointStyle:
+                                    true
+                            }
+                        },
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label:
+                                    function(context) {
+
+                                        var value =
+                                            Number(
+                                                context.parsed.y
+                                            ) || 0;
+
+                                        return (
+                                            context.dataset.label +
+                                            ': €' +
+                                            value.toFixed(2)
+                                        );
+                                    }
+                            }
+                        }
                     },
+
                     scales: {
-                        x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { display: false } },
-                        y: { ticks: { color: colors.text, font: { size: 13 }, callback: function(v) { return '€' + v.toFixed(0); } }, grid: { color: colors.grid }, beginAtZero: true }
+
+                        x: {
+
+                            grid: {
+
+                                color:
+                                    colors.grid
+                            },
+
+                            ticks: {
+
+                                color:
+                                    colors.text
+                            }
+                        },
+
+                        y: {
+
+                            grid: {
+
+                                color:
+                                    colors.grid
+                            },
+
+                            ticks: {
+
+                                color:
+                                    colors.text,
+
+                                callback:
+                                    function(value) {
+
+                                        return (
+                                            '€' +
+                                            Number(value)
+                                                .toFixed(0)
+                                        );
+                                    }
+                            },
+
+                            beginAtZero:
+                                true
+                        }
                     }
                 }
-            };
-        } else if (type === 'trend') {
-            modalTitle.textContent = 'Dettaglio: Trend Mensile';
-            var avgOut = trendData.dataUscite && trendData.dataUscite.length > 0
-                ? (trendData.dataUscite.reduce(function(a, b) { return a + b; }, 0) / trendData.dataUscite.length).toFixed(2)
-                : '0.00';
-            modalDetails.innerHTML =
-                '<strong>Evoluzione mensile</strong><br>' +
-                'Periodo: ' + trendData.labels.length + ' mesi | Media uscite: €' + avgOut;
-            chartConfig = {
-                type: 'line',
-                data: {
-                    labels: trendData.labels,
-                    datasets: [
-                        { label: 'Uscite mensili', data: trendData.dataUscite || [], borderColor: '#FF6B6B', backgroundColor: 'rgba(255, 107, 107, 0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#FF6B6B', pointRadius: 6, pointHoverRadius: 8 },
-                        { label: 'Entrate mensili', data: trendData.dataIngressi || [], borderColor: '#4ECDC4', backgroundColor: 'rgba(78, 205, 196, 0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#4ECDC4', pointRadius: 6, pointHoverRadius: 8 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'top', labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } }
-                    },
-                    scales: {
-                        x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { color: colors.grid } },
-                        y: { ticks: { color: colors.text, font: { size: 13 }, callback: function(v) { return '€' + v.toFixed(0); } }, grid: { color: colors.grid }, beginAtZero: true }
-                    }
-                }
-            };
-        }
-
-        if (chartConfig) {
-            modalChartInstance = new Chart(modalCanvas, chartConfig);
-        }
+            }
+        );
     }
 
-    function closeChartModal() {
-        modal.style.display = 'none';
-        if (modalChartInstance) { modalChartInstance.destroy(); modalChartInstance = null; }
-    }
-
-    modalCloseBtn.addEventListener('click', closeChartModal);
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeChartModal(); });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.style.display === 'flex') closeChartModal();
-    });
-
-    document.querySelectorAll('.chart-fullscreen').forEach(function(b) {
-        b.addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            var card = ev.target.closest('.chart-card');
-            if (!card) return;
-            openChartModal(card.getAttribute('data-chart'));
-        });
-    });
-
-    // ===== OBSERVER TEMA =====
-    var themeObserver = new MutationObserver(function() { window.location.reload(); });
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    document.addEventListener('themeChanged', function() { window.location.reload(); });
 })();
+
 </script>
 
 </body>
