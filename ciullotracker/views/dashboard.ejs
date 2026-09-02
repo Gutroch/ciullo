@@ -164,6 +164,40 @@
     .qty-btn.inc { color: #4ECDC4; }
     .qty-btn.dec { color: #FF6B6B; }
 
+    /* Pulsanti nella dashboard */
+    .dashboard-qty-btn {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .dashboard-qty-btn .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .dashboard-qty-btn .qty-btn:hover {
+      background: var(--bg-hover);
+      transform: scale(1.1);
+    }
+
+    .dashboard-qty-btn .qty-btn:active {
+      transform: scale(0.9);
+    }
+
+    .dashboard-qty-btn .qty-btn.inc { color: #4ECDC4; }
+    .dashboard-qty-btn .qty-btn.dec { color: #FF6B6B; }
+
     /* Notifiche toast */
     .toast-notification {
       position: fixed;
@@ -204,6 +238,55 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
+    /* Popup di incremento */
+    .increment-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .increment-popup {
+      background: var(--bg-primary);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .popup-cancel:hover {
+      background: var(--bg-hover);
+    }
+
+    .popup-confirm:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    .popup-confirm:active {
+      transform: scale(0.98);
+    }
+
     /* Modal per grafici fullscreen */
     .chart-modal-overlay {
       position: fixed;
@@ -230,11 +313,6 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       position: relative;
       animation: modalIn 0.3s ease;
-    }
-
-    @keyframes modalIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
     }
 
     .chart-modal-header {
@@ -346,27 +424,23 @@
       <!-- KPI Cards -->
       <div class="grid-4">
         <div class="card squircle kpi-card">
-          <div class="kpi-label">💰 Totale Uscite</div>
+          <div class="kpi-label">Totale Uscite</div>
           <div class="kpi-value negative">€ <%= totale %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">📈 Totale Entrate</div>
+          <div class="kpi-label">Totale Entrate</div>
           <div class="kpi-value positive">€ <%= totaleIngressi %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">⚖️ Saldo</div>
+          <div class="kpi-label">Saldo</div>
           <div class="kpi-value <%= parseFloat(saldo) < 0 ? 'negative' : 'positive' %>">€ <%= saldo %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">🏆 Categoria Top</div>
+          <div class="kpi-label">Categoria Top</div>
           <div class="kpi-value neutral"><%= topCategoria %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">👤 Utente Top</div>
-          <div class="kpi-value neutral"><%= topUtente %></div>
-        </div>
-        <div class="card squircle kpi-card">
-          <div class="kpi-label">📊 Totale Movimenti</div>
+          <div class="kpi-label">Totale Movimenti</div>
           <div class="kpi-value neutral"><%= ultimeSpese.length %></div>
         </div>
       </div>
@@ -375,14 +449,14 @@
       <div class="grid-2">
         <div class="card squircle chart-card" data-chart="categorie">
           <div class="chart-title">
-            <span>📊 Spese per Categoria</span>
+            <span>Spese per Categoria</span>
             <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
           </div>
           <canvas id="chartCategorie"></canvas>
         </div>
         <div class="card squircle chart-card" data-chart="giornaliero">
           <div class="chart-title">
-            <span>📈 Andamento Giornaliero</span>
+            <span>Andamento Giornaliero</span>
             <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
           </div>
           <canvas id="chartGiornaliero"></canvas>
@@ -392,7 +466,7 @@
       <!-- Trend mensile (full width) -->
       <div class="card squircle chart-card" data-chart="trend" style="margin-bottom: 24px;">
         <div class="chart-title">
-          <span>📉 Trend Mensile (Ultimi 6 mesi)</span>
+          <span>Trend Mensile (Ultimi 6 mesi)</span>
           <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
         </div>
         <canvas id="chartTrend"></canvas>
@@ -402,7 +476,7 @@
       <% if (prossimeScadenze && prossimeScadenze.length > 0) { %>
         <div class="card squircle" style="margin-bottom: 24px;">
           <div class="chart-title">
-            <span>⏰ Prossime Scadenze Ricorrenti</span>
+            <span>Prossime Scadenze Ricorrenti</span>
             <a href="/recurring" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Gestisci</a>
           </div>
           <% prossimeScadenze.forEach(function(r) { %>
@@ -423,7 +497,7 @@
       <!-- Ultimi movimenti -->
       <div class="card squircle">
         <div class="chart-title">
-          <span>🕐 Ultimi Movimenti del Mese</span>
+          <span>Ultimi Movimenti del Mese</span>
           <a href="/history" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Vedi tutti</a>
         </div>
         <% if (ultimeSpese.length === 0) { %>
@@ -433,7 +507,7 @@
           </div>
         <% } else { %>
           <% ultimeSpese.forEach(function(e) { %>
-            <div class="expense-item">
+            <div class="expense-item" data-id="<%= e.id %>">
               <div class="expense-meta">
                 <span class="expense-cat"><%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
                 <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
@@ -441,6 +515,7 @@
                   <%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · 
                   <%= e.inserito_da %> → <%= e.per_conto_di %>
                 </span>
+                <!-- I pulsanti +/- verranno aggiunti via JavaScript -->
               </div>
               <div class="expense-amount" style="color: <%= e.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
                 <%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= e.importo.toFixed(2) %>
@@ -529,7 +604,7 @@
                   label: function(context) {
                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                     const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                    return `€${context.parsed.toFixed(2)} (${percentage}%)`;
+                    return '€' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
                   }
                 }
               }
@@ -646,7 +721,7 @@
               tooltip: {
                 callbacks: {
                   label: function(context) {
-                    return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+                    return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
                   }
                 }
               }
@@ -674,7 +749,7 @@
       // 4. LOGICA MODAL POPUP
       const modal = document.getElementById('chart-modal');
       const modalTitle = document.getElementById('chart-modal-title');
-      const modalCanvas = document.getElementById('modal-canvas');
+      const modalCanvas = document.getElementById('chart-modal-canvas');
       const modalDetails = document.getElementById('chart-modal-details');
       const modalCloseBtn = document.getElementById('chart-modal-close');
       let modalChartInstance = null;
@@ -731,7 +806,7 @@
                     label: function(context) {
                       const total = context.dataset.data.reduce((a, b) => a + b, 0);
                       const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                      return `€${context.parsed.toFixed(2)} (${percentage}%)`;
+                      return '€' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
                     }
                   }
                 }
@@ -791,7 +866,7 @@
                   padding: 12,
                   callbacks: {
                     label: function(context) {
-                      return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+                      return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
                     }
                   }
                 }
@@ -872,7 +947,7 @@
                   padding: 12,
                   callbacks: {
                     label: function(context) {
-                      return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+                      return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
                     }
                   }
                 }
@@ -934,8 +1009,6 @@
       // Aggiorna i grafici quando cambia il tema
       const themeObserver = new MutationObserver(function() {
         const newColors = getThemeColors();
-        // Ricarica la pagina per applicare i nuovi colori (o ricrea i grafici)
-        // Per semplicità, ricarichiamo i grafici
         window.location.reload();
       });
 
@@ -946,13 +1019,12 @@
 
       // Aggiungi listener per il tema toggle
       document.addEventListener('themeChanged', function() {
-        // Ricarica i grafici
         window.location.reload();
       });
 
     })();
 
-    // Funzione per notifiche toast (utile per futuri aggiornamenti AJAX)
+    // Funzione per notifiche toast
     function showNotification(message, type) {
       var existing = document.querySelector('.toast-notification');
       if (existing) existing.remove();
@@ -967,6 +1039,178 @@
         setTimeout(function() { toast.remove(); }, 300);
       }, 3000);
     }
+
+    // Gestione pulsanti +/- nella dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      // Funzione per mostrare il popup di incremento per la dashboard
+      function showIncrementPopupForDashboard(expenseId, currentAmount, increment, expenseItem, amountElement) {
+        const newAmount = Math.max(0.01, currentAmount + increment);
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'increment-popup-overlay';
+        
+        const popup = document.createElement('div');
+        popup.className = 'increment-popup';
+        
+        popup.innerHTML = `
+          <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">
+            ${increment > 0 ? 'Incrementa' : 'Decrementa'} Importo
+          </h3>
+          <div style="margin-bottom: 16px;">
+            <p style="margin: 0 0 8px 0; color: var(--text-secondary);">Importo attuale:</p>
+            <p style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0 0 12px 0;">
+              €${currentAmount.toFixed(2)}
+            </p>
+            <p style="margin: 0 0 8px 0; color: var(--text-secondary);">
+              ${increment > 0 ? 'Aggiungi' : 'Sottrai'}:
+              <span style="color: ${increment > 0 ? '#4ECDC4' : '#FF6B6B'}; font-weight: 600;">
+                €${Math.abs(increment).toFixed(2)}
+              </span>
+            </p>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <p style="margin: 0 0 8px 0; color: var(--text-secondary);">Nuovo importo:</p>
+              <p style="font-size: 2rem; font-weight: 700; color: ${increment > 0 ? '#4ECDC4' : '#FF6B6B'}; margin: 0;">
+                €${newAmount.toFixed(2)}
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button class="popup-cancel" style="
+              padding: 10px 20px;
+              border-radius: 8px;
+              border: 1px solid var(--border-color);
+              background: transparent;
+              color: var(--text-secondary);
+              cursor: pointer;
+              transition: all 0.2s;
+              font-weight: 500;
+            ">Annulla</button>
+            <button class="popup-confirm" style="
+              padding: 10px 20px;
+              border-radius: 8px;
+              border: none;
+              background: ${increment > 0 ? '#4ECDC4' : '#FF6B6B'};
+              color: white;
+              cursor: pointer;
+              transition: all 0.2s;
+              font-weight: 600;
+            ">Conferma</button>
+          </div>
+        `;
+
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+
+        popup.querySelector('.popup-cancel').addEventListener('click', function() {
+          overlay.remove();
+        });
+
+        popup.querySelector('.popup-confirm').addEventListener('click', function() {
+          overlay.remove();
+          updateExpenseAmount(expenseId, newAmount, null, amountElement);
+        });
+
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) overlay.remove();
+        });
+
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && document.body.contains(overlay)) {
+            overlay.remove();
+          }
+        });
+      }
+
+      // Funzione per aggiornare l'importo via AJAX
+      function updateExpenseAmount(id, newAmount, row, amountElement) {
+        const formData = new FormData();
+        formData.append('importo', newAmount);
+        
+        fetch('/expenses/' + id + '/update-amount', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            if (amountElement) {
+              amountElement.textContent = (data.isIngresso ? '+' : '−') + ' €' + newAmount.toFixed(2);
+              amountElement.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
+            }
+            
+            // Ricarica la pagina per aggiornare i KPI
+            location.reload();
+            
+            showNotification('Importo aggiornato!', 'success');
+          } else {
+            showNotification('Errore durante l\'aggiornamento', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Errore:', error);
+          showNotification('Errore di connessione', 'error');
+        });
+      }
+
+      // Aggiungi pulsanti +/- nella dashboard
+      function addDashboardButtons() {
+        const expenseItems = document.querySelectorAll('.expense-item');
+        expenseItems.forEach(item => {
+          const expenseMeta = item.querySelector('.expense-meta');
+          const expenseAmount = item.querySelector('.expense-amount');
+          
+          if (expenseMeta && expenseAmount && !item.querySelector('.dashboard-qty-btn')) {
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'qty-btn-group dashboard-qty-btn';
+            
+            const expenseId = item.dataset.id;
+            
+            if (expenseId) {
+              // Pulsante decremento
+              const decBtn = document.createElement('button');
+              decBtn.className = 'qty-btn dec';
+              decBtn.dataset.id = expenseId;
+              decBtn.dataset.value = '-1.00';
+              decBtn.textContent = '−';
+              
+              // Pulsante incremento
+              const incBtn = document.createElement('button');
+              incBtn.className = 'qty-btn inc';
+              incBtn.dataset.id = expenseId;
+              incBtn.dataset.value = '1.00';
+              incBtn.textContent = '+';
+              
+              btnGroup.appendChild(decBtn);
+              btnGroup.appendChild(incBtn);
+              expenseMeta.appendChild(btnGroup);
+              
+              decBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const currentAmount = parseFloat(expenseAmount.textContent.replace(/[€+−\s]/g, '').replace(',', '.').trim());
+                const increment = -1.00;
+                const expenseId = this.dataset.id;
+                const row = this.closest('.expense-item');
+                showIncrementPopupForDashboard(expenseId, currentAmount, increment, row, expenseAmount);
+              });
+              
+              incBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const currentAmount = parseFloat(expenseAmount.textContent.replace(/[€+−\s]/g, '').replace(',', '.').trim());
+                const increment = 1.00;
+                const expenseId = this.dataset.id;
+                const row = this.closest('.expense-item');
+                showIncrementPopupForDashboard(expenseId, currentAmount, increment, row, expenseAmount);
+              });
+            }
+          }
+        });
+      }
+
+      // Aggiungi pulsanti dopo il caricamento
+      setTimeout(addDashboardButtons, 500);
+    });
   </script>
 </body>
 </html>
