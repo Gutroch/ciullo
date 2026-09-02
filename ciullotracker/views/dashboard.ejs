@@ -150,7 +150,6 @@
       text-decoration: underline;
     }
 
-    /* Pulsanti incremento/decremento */
     .qty-btn-group {
       display: flex;
       gap: 4px;
@@ -217,7 +216,6 @@
     .dashboard-qty-btn .qty-btn.inc { color: #4ECDC4; }
     .dashboard-qty-btn .qty-btn.dec { color: #FF6B6B; }
 
-    /* Notifiche toast */
     .toast-notification {
       position: fixed;
       bottom: 30px;
@@ -257,7 +255,6 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Popup di incremento - STILI COMPLETI CON SFONDO SOLIDO */
     .increment-popup-overlay {
       position: fixed;
       top: 0;
@@ -274,19 +271,20 @@
     }
 
     .increment-popup {
-      background: var(--bg-primary, #ffffff);
+      background: #ffffff;
       border-radius: 20px;
       padding: 32px;
       max-width: 420px;
       width: 90%;
       box-shadow: 0 25px 80px rgba(0,0,0,0.4);
       animation: modalIn 0.3s ease;
-      border: 1px solid var(--border-color, #dee2e6);
+      border: 1px solid #dee2e6;
+      color: #0a0a0a;
     }
 
     .increment-popup h3 {
       margin: 0 0 20px 0;
-      color: var(--text-primary, #0a0a0a);
+      color: #0a0a0a;
       font-size: 1.3rem;
       text-align: center;
     }
@@ -300,7 +298,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid var(--border-color, #dee2e6);
+      border-bottom: 1px solid #dee2e6;
     }
 
     .increment-popup .popup-row:last-child {
@@ -308,18 +306,18 @@
     }
 
     .increment-popup .popup-label {
-      color: var(--text-secondary, #6c757d);
+      color: #6c757d;
       font-size: 0.9rem;
     }
 
     .increment-popup .popup-value {
       font-weight: 600;
       font-size: 1.1rem;
-      color: var(--text-primary, #0a0a0a);
+      color: #0a0a0a;
     }
 
     .increment-popup .popup-value.old {
-      color: var(--text-secondary, #6c757d);
+      color: #6c757d;
     }
 
     .increment-popup .popup-value.new {
@@ -345,9 +343,9 @@
     .increment-popup .popup-cancel {
       padding: 10px 24px;
       border-radius: 10px;
-      border: 1px solid var(--border-color, #dee2e6);
+      border: 1px solid #dee2e6;
       background: transparent;
-      color: var(--text-secondary, #6c757d);
+      color: #6c757d;
       cursor: pointer;
       transition: all 0.2s;
       font-weight: 500;
@@ -355,7 +353,7 @@
     }
 
     .increment-popup .popup-cancel:hover {
-      background: var(--bg-hover, #f0f0f0);
+      background: #f0f0f0;
     }
 
     .increment-popup .popup-confirm {
@@ -394,26 +392,26 @@
     .quick-amount-btn {
       padding: 4px 12px;
       border-radius: 6px;
-      border: 1px solid var(--border-color, #dee2e6);
-      background: var(--bg-secondary, #f8f9fa);
-      color: var(--text-secondary, #6c757d);
+      border: 1px solid #dee2e6;
+      background: #f8f9fa;
+      color: #6c757d;
       cursor: pointer;
       font-size: 0.8rem;
       transition: all 0.2s;
     }
 
     .quick-amount-btn:hover {
-      background: var(--bg-hover, #f0f0f0);
-      border-color: var(--accent, #4ECDC4);
+      background: #f0f0f0;
+      border-color: #4ECDC4;
     }
 
     .popup-input {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid var(--border-color, #dee2e6);
+      border: 1px solid #dee2e6;
       border-radius: 8px;
-      background: var(--bg-secondary, #f8f9fa);
-      color: var(--text-primary, #0a0a0a);
+      background: #f8f9fa;
+      color: #0a0a0a;
       font-size: 1.1rem;
       box-sizing: border-box;
       transition: border-color 0.2s;
@@ -421,7 +419,7 @@
 
     .popup-input:focus {
       outline: none;
-      border-color: var(--accent, #4ECDC4);
+      border-color: #4ECDC4;
       box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
     }
 
@@ -435,7 +433,6 @@
       to { transform: scale(1) translateY(0); opacity: 1; }
     }
 
-    /* Modal per grafici fullscreen */
     .chart-modal-overlay {
       position: fixed;
       top: 0;
@@ -568,7 +565,6 @@
       }
     }
 
-    /* Variabili CSS globali con fallback */
     :root {
       --bg-primary: #ffffff;
       --bg-secondary: #f8f9fa;
@@ -630,7 +626,6 @@
             <span>Spese per Categoria</span>
             <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
           </div>
-          <!-- Controlli per il grafico a torta -->
           <div class="chart-controls">
             <label for="chartViewMode">Mostra:</label>
             <select id="chartViewMode" class="input">
@@ -652,7 +647,7 @@
         </div>
       </div>
 
-      <!-- Trend mensile (full width) -->
+      <!-- Trend mensile -->
       <div class="card squircle chart-card" data-chart="trend" style="margin-bottom: 24px;">
         <div class="chart-title">
           <span>Trend Mensile (Ultimi 6 mesi)</span>
@@ -736,17 +731,12 @@
   </script>
 
   <script>
-    // ============================================================
-    //  DASHBOARD - SCRIPT COMPLETO CON GRAFICO DINAMICO E POPUP
-    // ============================================================
-
     (function initDashboard() {
       if (typeof Chart === 'undefined') {
         setTimeout(initDashboard, 200);
         return;
       }
 
-      // ===== FUNZIONE PER I COLORI DEL TEMA =====
       function getThemeColors() {
         var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
@@ -760,15 +750,14 @@
 
       var colors = getThemeColors();
       
-      // ===== DATI DAL SERVER =====
-      // chartData deve essere un oggetto con: { categorie: {labels, data}, sottocategorie: { "Categoria": {labels, data} } }
-      // Passato dal backend come JSON
-      const chartData = <%- JSON.stringify(chartData || { categorie: { labels: [], data: [] }, sottocategorie: {} }) %>;
-      const catData = chartData.categorie;
-      const subData = chartData.sottocategorie || {};
+      // ===== DATI DAL SERVER (con fallback) =====
+      // Usiamo typeof per evitare ReferenceError se chartData non è definito
+      var chartData = typeof chartData !== 'undefined' ? chartData : { categorie: { labels: [], data: [] }, sottocategorie: {} };
+      var catData = chartData.categorie;
+      var subData = chartData.sottocategorie || {};
       
-      const giornoData = <%- JSON.stringify(chartGiornaliero || { labels: [], dataIngressi: [], dataUscite: [] }) %>;
-      const trendData = <%- JSON.stringify(chartTrend || { labels: [], dataIngressi: [], dataUscite: [] }) %>;
+      var giornoData = typeof chartGiornaliero !== 'undefined' ? chartGiornaliero : { labels: [], dataIngressi: [], dataUscite: [] };
+      var trendData = typeof chartTrend !== 'undefined' ? chartTrend : { labels: [], dataIngressi: [], dataUscite: [] };
 
       // ===== 1. GRAFICO CATEGORIE (DINAMICO CON SELECTOR) =====
       var ctxCategorie = document.getElementById('chartCategorie');
@@ -784,7 +773,6 @@
           data = catData.data || [];
           title = 'Spese per Categoria';
         } else {
-          // mode === 'sottocategorie'
           var sub = subData[category];
           if (!sub || !sub.labels || sub.labels.length === 0) {
             labels = ['Nessuna sottocategoria'];
@@ -801,7 +789,6 @@
           chartInstance = null;
         }
 
-        // Se non ci sono dati, mostra un messaggio
         if (!labels || labels.length === 0 || data.length === 0) {
           labels = ['Nessun dato'];
           data = [0];
@@ -852,11 +839,9 @@
         });
       }
 
-      // Popola il dropdown delle categorie
       var categorySelect = document.getElementById('chartCategorySelect');
       var viewModeSelect = document.getElementById('chartViewMode');
 
-      // Pulisci e popola il select
       categorySelect.innerHTML = '';
       var categories = Object.keys(subData);
       if (categories.length === 0) {
@@ -875,7 +860,6 @@
         categorySelect.value = currentCategory;
       }
 
-      // Gestione cambio modalità
       viewModeSelect.addEventListener('change', function() {
         currentMode = this.value;
         if (currentMode === 'sottocategorie') {
@@ -887,7 +871,6 @@
         }
       });
 
-      // Gestione cambio categoria
       categorySelect.addEventListener('change', function() {
         if (currentMode === 'sottocategorie') {
           currentCategory = this.value;
@@ -895,7 +878,6 @@
         }
       });
 
-      // Render iniziale
       renderPieChart('categorie');
 
       // ===== 2. GRAFICO GIORNALIERO =====
@@ -1031,12 +1013,12 @@
       }
 
       // ===== 4. MODAL GRAFICI FULLSCREEN =====
-      const modal = document.getElementById('chart-modal');
-      const modalTitle = document.getElementById('chart-modal-title');
-      const modalCanvas = document.getElementById('chart-modal-canvas');
-      const modalDetails = document.getElementById('chart-modal-details');
-      const modalCloseBtn = document.getElementById('chart-modal-close');
-      let modalChartInstance = null;
+      var modal = document.getElementById('chart-modal');
+      var modalTitle = document.getElementById('chart-modal-title');
+      var modalCanvas = document.getElementById('chart-modal-canvas');
+      var modalDetails = document.getElementById('chart-modal-details');
+      var modalCloseBtn = document.getElementById('chart-modal-close');
+      var modalChartInstance = null;
 
       function openChartModal(type) {
         modal.style.display = 'flex';
@@ -1044,10 +1026,9 @@
           modalChartInstance.destroy();
           modalChartInstance = null;
         }
-        let chartConfig = null;
+        var chartConfig = null;
 
         if (type === 'categorie') {
-          // Usa i dati correnti del grafico a torta
           var currentLabels = chartInstance ? chartInstance.data.labels : catData.labels || ['Nessun dato'];
           var currentData = chartInstance ? chartInstance.data.datasets[0].data : catData.data || [0];
           
@@ -1292,286 +1273,17 @@
       });
 
       // ===== TEMA OBSERVER =====
-      const themeObserver = new MutationObserver(function() {
-        const newColors = getThemeColors();
-        // Ricarica la pagina per applicare i nuovi colori ai grafici
+      var themeObserver = new MutationObserver(function() {
         window.location.reload();
       });
-      const targetNode = document.documentElement;
-      const config = { attributes: true, attributeFilter: ['data-theme'] };
+      var targetNode = document.documentElement;
+      var config = { attributes: true, attributeFilter: ['data-theme'] };
       themeObserver.observe(targetNode, config);
       document.addEventListener('themeChanged', function() {
         window.location.reload();
       });
 
     })();
-
-    // ============================================================
-    //  GESTIONE PULSANTI +/- CON POPUP PERSONALIZZABILE (DASHBOARD)
-    // ============================================================
-
-    document.addEventListener('DOMContentLoaded', function() {
-
-      // ---------- NOTIFICHE TOAST ----------
-      function showNotification(message, type) {
-        var existing = document.querySelector('.toast-notification');
-        if (existing) existing.remove();
-        var toast = document.createElement('div');
-        toast.className = 'toast-notification ' + type;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(function() {
-          toast.classList.add('fade-out');
-          setTimeout(function() { toast.remove(); }, 300);
-        }, 3000);
-      }
-
-      // ---------- AGGIORNAMENTO IMPORT VIA AJAX (JSON) ----------
-      function updateExpenseAmount(id, newAmount, row, amountElement) {
-        var payload = { importo: newAmount };
-        var headers = { 'Content-Type': 'application/json' };
-
-        var csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (csrfToken) {
-          headers['X-CSRF-Token'] = csrfToken.getAttribute('content');
-        }
-
-        var buttons = [];
-        if (row) {
-          buttons = row.querySelectorAll('.qty-btn');
-        } else if (amountElement) {
-          var parent = amountElement.closest('.expense-item');
-          if (parent) buttons = parent.querySelectorAll('.qty-btn');
-        }
-
-        buttons.forEach(function(b) {
-          b.disabled = true;
-          b.style.opacity = '0.5';
-          b.style.cursor = 'not-allowed';
-        });
-
-        fetch('/expenses/' + id + '/update-amount', {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify(payload)
-        })
-        .then(function(response) {
-          if (!response.ok) {
-            return response.json().then(function(err) {
-              throw new Error(err.error || 'Errore del server');
-            });
-          }
-          return response.json();
-        })
-        .then(function(data) {
-          if (data.success) {
-            if (row) {
-              var amountCell = row.querySelector('.amount-cell');
-              if (amountCell) {
-                amountCell.textContent = '€' + newAmount.toFixed(2);
-                amountCell.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
-              }
-            } else if (amountElement) {
-              amountElement.textContent = (data.isIngresso ? '+' : '−') + ' €' + newAmount.toFixed(2);
-              amountElement.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
-              // Ricarica per aggiornare i KPI
-              setTimeout(function() { location.reload(); }, 500);
-            }
-            showNotification('✅ Importo aggiornato a €' + newAmount.toFixed(2), 'success');
-          } else {
-            showNotification('❌ Errore: ' + (data.error || 'Aggiornamento fallito'), 'error');
-          }
-        })
-        .catch(function(error) {
-          console.error('Errore:', error);
-          showNotification('❌ ' + error.message, 'error');
-        })
-        .finally(function() {
-          buttons.forEach(function(b) {
-            b.disabled = false;
-            b.style.opacity = '1';
-            b.style.cursor = 'pointer';
-          });
-        });
-      }
-
-      // ---------- POPUP CON IMPORT PERSONALIZZATO ----------
-      function showCustomAmountPopup(expenseId, currentAmount, isIncrement, row, amountElement) {
-        var existing = document.querySelector('.increment-popup-overlay');
-        if (existing) existing.remove();
-
-        var overlay = document.createElement('div');
-        overlay.className = 'increment-popup-overlay';
-
-        var defaultAmount = 1.00;
-
-        var popup = document.createElement('div');
-        popup.className = 'increment-popup';
-
-        var sign = isIncrement ? '+' : '−';
-        var actionLabel = isIncrement ? 'Aggiungi' : 'Sottrai';
-        var colorClass = isIncrement ? 'positive' : 'negative';
-        var colorHex = isIncrement ? '#4ECDC4' : '#FF6B6B';
-
-        popup.innerHTML = [
-          '<h3>',
-            isIncrement ? '➕ Incrementa' : '➖ Decrementa',
-          '</h3>',
-          '<div style="margin-bottom:20px;">',
-            '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color, #dee2e6);">',
-              '<span style="color:var(--text-secondary, #6c757d);">Importo attuale</span>',
-              '<span style="font-weight:600;color:var(--text-primary, #0a0a0a);">€' + currentAmount.toFixed(2) + '</span>',
-            '</div>',
-            '<div style="margin-top:16px;">',
-              '<label style="display:block;color:var(--text-secondary, #6c757d);font-size:0.9rem;margin-bottom:6px;">',
-                actionLabel + ' (€)',
-              '</label>',
-              '<input type="text" id="popup-amount-input" class="popup-input" value="' + defaultAmount.toFixed(2) + '" autofocus>',
-              '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">',
-                '<button class="quick-amount-btn" data-value="0.50">0,50</button>',
-                '<button class="quick-amount-btn" data-value="1.00">1,00</button>',
-                '<button class="quick-amount-btn" data-value="2.00">2,00</button>',
-                '<button class="quick-amount-btn" data-value="5.00">5,00</button>',
-                '<button class="quick-amount-btn" data-value="10.00">10,00</button>',
-                '<button class="quick-amount-btn" data-value="20.00">20,00</button>',
-                '<button class="quick-amount-btn" data-value="50.00">50,00</button>',
-              '</div>',
-            '</div>',
-            '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-color, #dee2e6);">',
-              '<span style="color:var(--text-secondary, #6c757d);">Nuovo importo</span>',
-              '<span id="popup-new-amount" style="display:block;font-weight:700;font-size:2rem;color:' + colorHex + ';margin-top:4px;">',
-                '€' + currentAmount.toFixed(2),
-              '</span>',
-            '</div>',
-          '</div>',
-          '<div style="display:flex;gap:12px;justify-content:flex-end;">',
-            '<button class="popup-cancel">Annulla</button>',
-            '<button class="popup-confirm ' + colorClass + '">Conferma</button>',
-          '</div>'
-        ].join('');
-
-        overlay.appendChild(popup);
-        document.body.appendChild(overlay);
-
-        var inputField = popup.querySelector('#popup-amount-input');
-        var newAmountDisplay = popup.querySelector('#popup-new-amount');
-        var confirmBtn = popup.querySelector('.popup-confirm');
-        var cancelBtn = popup.querySelector('.popup-cancel');
-
-        function updatePreview() {
-          var val = inputField.value.replace(',', '.').trim();
-          var parsed = parseFloat(val);
-          if (isNaN(parsed) || parsed < 0) parsed = 0;
-          var newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
-          newAmountDisplay.textContent = '€' + newAmount.toFixed(2);
-          newAmountDisplay.style.color = isIncrement ? '#4ECDC4' : '#FF6B6B';
-        }
-
-        inputField.addEventListener('input', updatePreview);
-
-        popup.querySelectorAll('.quick-amount-btn').forEach(function(qbtn) {
-          qbtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var val = parseFloat(this.dataset.value);
-            if (!isNaN(val) && val >= 0) {
-              inputField.value = val.toFixed(2);
-              updatePreview();
-              inputField.focus();
-              inputField.select();
-            }
-          });
-        });
-
-        inputField.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            confirmBtn.click();
-          }
-        });
-
-        setTimeout(function() {
-          inputField.focus();
-          inputField.select();
-        }, 100);
-
-        function closePopup() { overlay.remove(); }
-
-        cancelBtn.addEventListener('click', closePopup);
-
-        confirmBtn.addEventListener('click', function() {
-          var val = inputField.value.replace(',', '.').trim();
-          var parsed = parseFloat(val);
-          if (isNaN(parsed) || parsed <= 0) {
-            showNotification('⚠️ Inserisci un importo valido maggiore di zero', 'error');
-            return;
-          }
-          var newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
-          closePopup();
-          updateExpenseAmount(expenseId, newAmount, row, amountElement);
-        });
-
-        overlay.addEventListener('click', function(e) {
-          if (e.target === overlay) closePopup();
-        });
-
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape' && document.body.contains(overlay)) closePopup();
-        });
-
-        updatePreview();
-      }
-
-      // ---------- AGGIUNGI PULSANTI +/- ALLA DASHBOARD ----------
-      function addDashboardButtons() {
-        var expenseItems = document.querySelectorAll('.expense-item');
-        expenseItems.forEach(function(item) {
-          var expenseMeta = item.querySelector('.expense-meta');
-          var expenseAmount = item.querySelector('.expense-amount');
-          if (!expenseMeta || !expenseAmount) return;
-          if (item.querySelector('.dashboard-qty-btn')) return;
-
-          var expenseId = item.dataset.id;
-          if (!expenseId) return;
-
-          var btnGroup = document.createElement('div');
-          btnGroup.className = 'qty-btn-group dashboard-qty-btn';
-
-          var decBtn = document.createElement('button');
-          decBtn.className = 'qty-btn dec';
-          decBtn.dataset.id = expenseId;
-          decBtn.textContent = '−';
-
-          var incBtn = document.createElement('button');
-          incBtn.className = 'qty-btn inc';
-          incBtn.dataset.id = expenseId;
-          incBtn.textContent = '+';
-
-          btnGroup.appendChild(decBtn);
-          btnGroup.appendChild(incBtn);
-          expenseMeta.appendChild(btnGroup);
-
-          decBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var currentAmount = parseFloat(expenseAmount.textContent.replace(/[€+−\s]/g, '').replace(',', '.').trim());
-            if (isNaN(currentAmount)) return;
-            showCustomAmountPopup(expenseId, currentAmount, false, null, expenseAmount);
-          });
-
-          incBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var currentAmount = parseFloat(expenseAmount.textContent.replace(/[€+−\s]/g, '').replace(',', '.').trim());
-            if (isNaN(currentAmount)) return;
-            showCustomAmountPopup(expenseId, currentAmount, true, null, expenseAmount);
-          });
-        });
-      }
-
-      // Esegui dopo il caricamento
-      setTimeout(addDashboardButtons, 500);
-
-    });
   </script>
 
 </body>

@@ -3,7 +3,6 @@
 <head>
   <%- include('partials/head', { title: 'Storico · CiulloTracker' }) %>
   <style>
-    /* Stili specifici per lo storico */
     .filters-bar {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -107,7 +106,6 @@
       color: #FF6B6B;
     }
 
-    /* Pulsanti incremento/decremento */
     .qty-btn-group {
       display: flex;
       gap: 4px;
@@ -168,7 +166,6 @@
       flex-wrap: wrap;
     }
 
-    /* Notifiche toast */
     .toast-notification {
       position: fixed;
       bottom: 30px;
@@ -199,28 +196,15 @@
     }
 
     @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
 
     @keyframes slideOut {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(100%);
-        opacity: 0;
-      }
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Popup di incremento - STILI COMPLETI CON SFONDO SOLIDO */
     .increment-popup-overlay {
       position: fixed;
       top: 0;
@@ -237,19 +221,20 @@
     }
 
     .increment-popup {
-      background: var(--bg-primary, #ffffff);
+      background: #ffffff;
       border-radius: 20px;
       padding: 32px;
       max-width: 420px;
       width: 90%;
       box-shadow: 0 25px 80px rgba(0,0,0,0.4);
       animation: modalIn 0.3s ease;
-      border: 1px solid var(--border-color, #dee2e6);
+      border: 1px solid #dee2e6;
+      color: #0a0a0a;
     }
 
     .increment-popup h3 {
       margin: 0 0 20px 0;
-      color: var(--text-primary, #0a0a0a);
+      color: #0a0a0a;
       font-size: 1.3rem;
       text-align: center;
     }
@@ -263,7 +248,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid var(--border-color, #dee2e6);
+      border-bottom: 1px solid #dee2e6;
     }
 
     .increment-popup .popup-row:last-child {
@@ -271,18 +256,18 @@
     }
 
     .increment-popup .popup-label {
-      color: var(--text-secondary, #6c757d);
+      color: #6c757d;
       font-size: 0.9rem;
     }
 
     .increment-popup .popup-value {
       font-weight: 600;
       font-size: 1.1rem;
-      color: var(--text-primary, #0a0a0a);
+      color: #0a0a0a;
     }
 
     .increment-popup .popup-value.old {
-      color: var(--text-secondary, #6c757d);
+      color: #6c757d;
     }
 
     .increment-popup .popup-value.new {
@@ -308,9 +293,9 @@
     .increment-popup .popup-cancel {
       padding: 10px 24px;
       border-radius: 10px;
-      border: 1px solid var(--border-color, #dee2e6);
+      border: 1px solid #dee2e6;
       background: transparent;
-      color: var(--text-secondary, #6c757d);
+      color: #6c757d;
       cursor: pointer;
       transition: all 0.2s;
       font-weight: 500;
@@ -318,7 +303,7 @@
     }
 
     .increment-popup .popup-cancel:hover {
-      background: var(--bg-hover, #f0f0f0);
+      background: #f0f0f0;
     }
 
     .increment-popup .popup-confirm {
@@ -357,26 +342,26 @@
     .quick-amount-btn {
       padding: 4px 12px;
       border-radius: 6px;
-      border: 1px solid var(--border-color, #dee2e6);
-      background: var(--bg-secondary, #f8f9fa);
-      color: var(--text-secondary, #6c757d);
+      border: 1px solid #dee2e6;
+      background: #f8f9fa;
+      color: #6c757d;
       cursor: pointer;
       font-size: 0.8rem;
       transition: all 0.2s;
     }
 
     .quick-amount-btn:hover {
-      background: var(--bg-hover, #f0f0f0);
-      border-color: var(--accent, #4ECDC4);
+      background: #f0f0f0;
+      border-color: #4ECDC4;
     }
 
     .popup-input {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid var(--border-color, #dee2e6);
+      border: 1px solid #dee2e6;
       border-radius: 8px;
-      background: var(--bg-secondary, #f8f9fa);
-      color: var(--text-primary, #0a0a0a);
+      background: #f8f9fa;
+      color: #0a0a0a;
       font-size: 1.1rem;
       box-sizing: border-box;
       transition: border-color 0.2s;
@@ -384,7 +369,7 @@
 
     .popup-input:focus {
       outline: none;
-      border-color: var(--accent, #4ECDC4);
+      border-color: #4ECDC4;
       box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
     }
 
@@ -398,7 +383,6 @@
       to { transform: scale(1) translateY(0); opacity: 1; }
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .filters-bar {
         grid-template-columns: 1fr 1fr;
@@ -461,7 +445,6 @@
       }
     }
 
-    /* Variabili CSS globali con fallback */
     :root {
       --bg-primary: #ffffff;
       --bg-secondary: #f8f9fa;
@@ -545,13 +528,13 @@
       <div class="export-bar">
         <span class="label">Esporta:</span>
         <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
-          ⬇ CSV
+          CSV
         </a>
         <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
-          ⬇ Excel
+          Excel
         </a>
         <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
-          ⬇ JSON
+          JSON
         </a>
         <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);">
           <strong><%= expenses ? expenses.length : 0 %></strong> movimenti trovati
@@ -612,9 +595,9 @@
                   </td>
                   <td>
                     <div class="action-buttons">
-                      <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm" title="Modifica">✏️</a>
+                      <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm" title="Modifica">Mod</a>
                       <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');" style="display: inline;">
-                        <button type="submit" class="btn btn-danger btn-sm" title="Elimina">🗑️</button>
+                        <button type="submit" class="btn btn-danger btn-sm" title="Elimina">Elim</button>
                       </form>
                     </div>
                   </td>
@@ -644,10 +627,8 @@
     </main>
   </div>
 
-  <!-- Inclusione del file JavaScript per i pulsanti -->
   <script src="/js/history-buttons.js"></script>
 
-  <!-- Script per le animazioni CSS (se non presenti nel file) -->
   <style>
     @keyframes fadeIn {
       from { opacity: 0; }
