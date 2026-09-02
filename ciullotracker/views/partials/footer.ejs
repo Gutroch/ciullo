@@ -1,0 +1,21 @@
+<footer class="site-footer">
+  <div class="site-footer-brand">
+    <img src="/favicon.svg" alt="" class="site-footer-logo" />
+    <span>CiulloTracker</span>
+  </div>
+  <span class="site-footer-copy">CiulloTracking · <%= new Date().getFullYear() %></span>
+  
+  <span class="site-footer-credits">
+    Realizzato da <a href="https://moneoo.top" target="_blank" rel="noopener noreferrer">moneoo.top</a> · 
+    <a href="mailto:contactme@moneoo.top">contactme@moneoo.top</a>
+  </span>
+
+  <% if (typeof user !== 'undefined' && user) { %>
+    <form action="/logout" method="POST" class="site-footer-logout-form">
+      <button type="submit" class="btn btn-secondary btn-sm site-footer-logout" title="Esci dall'account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
+        Logout
+      </button>
+    </form>
+  <% } %>
+</footer>

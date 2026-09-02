@@ -81,7 +81,7 @@ body > .app-shell { animation: page-enter 420ms ease both; }
 
 .chart-card canvas,
 #chart-modal-canvas {
-  filter: grayscale(1) contrast(1.08);
+  filter: saturate(1.18) contrast(1.04);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -232,6 +232,30 @@ ul { list-style: none; }
   min-width: 0;
   padding: 20px 16px 40px;
 }
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+.site-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+.site-footer-logo { width: 20px; height: 20px; }
+.site-footer-copy { flex: 1; }
+.site-footer-logout-form { margin-left: auto; }
+.site-footer-logout { display: inline-flex; align-items: center; gap: 7px; }
+.site-footer-logout svg { width: 16px; height: 16px; }
 
 /* Animazioni leggere per carte e elementi */
 @keyframes card-pop {
@@ -502,6 +526,11 @@ table.data-table tr:last-child td { border-bottom: none; }
 }
 @media (max-width: 899px) {
   .app-shell { display: block; }
+}
+@media (max-width: 520px) {
+  .site-footer { padding: 16px; }
+  .site-footer-copy { flex-basis: 100%; order: 3; }
+  .site-footer-logout-form { margin-left: auto; }
 }
 
 /* Piccola utility per empty states */

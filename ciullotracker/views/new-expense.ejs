@@ -110,6 +110,8 @@
     </main>
   </div>
 
+  <%- include('partials/footer', { user: user }) %>
+
   <script>
     // Dati passati dal backend
     const categorieSpese = <%- JSON.stringify(categorieSpese) %>;

@@ -145,6 +145,8 @@
     </main>
   </div>
 
+  <%- include('partials/footer', { user: user }) %>
+
   <script>
     const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
     const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;

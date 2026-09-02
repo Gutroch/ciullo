@@ -13,5 +13,7 @@
       <a href="/" class="btn btn-primary btn-block">Torna alla Dashboard</a>
     </div>
   </div>
+
+  <%- include('partials/footer', { user: typeof user !== 'undefined' ? user : null }) %>
 </body>
 </html>
