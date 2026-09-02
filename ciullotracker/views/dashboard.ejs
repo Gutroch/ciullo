@@ -665,6 +665,21 @@
     cursor: pointer;
     transition: opacity 0.2s;
 }
+
+.chart-modal-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* se usi width:100%, il canvas occuperà tutto lo spazio del flex container, 
+   quindi sarà già centrato perché il container lo è */
+.chart-modal-body canvas {
+  width: 100% !important;
+  max-height: 60vh;
+  height: auto !important;
+}
   </style>
 </head>
 <body>
