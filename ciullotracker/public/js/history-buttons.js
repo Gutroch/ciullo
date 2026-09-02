@@ -11,10 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const row = this.closest('tr');
             const amountCell = row.querySelector('.amount-cell');
-            if (!amountCell) return;
+            if (!amountCell) {
+                showNotification('❌ Dati non validi', 'error');
+                return;
+            }
 
             const currentAmount = parseFloat(amountCell.textContent.replace('€', '').replace(',', '.').trim());
-            // Determiniamo se è incremento o decremento dal pulsante (dec/inc)
             const isIncrement = this.classList.contains('inc');
             const expenseId = this.dataset.id;
 
@@ -28,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ========== GESTIONE PULSANTI NELLA DASHBOARD ==========
+    // ========== GESTIONE PULSANTI NELLA DASHBOARD (se presente) ==========
     function addDashboardButtons() {
         const expenseItems = document.querySelectorAll('.expense-item');
         expenseItems.forEach(item => {
@@ -48,13 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
             decBtn.className = 'qty-btn dec';
             decBtn.dataset.id = expenseId;
             decBtn.textContent = '−';
-            decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-secondary); color: #FF6B6B; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
+            decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, #dee2e6); background: var(--bg-secondary, #f8f9fa); color: #FF6B6B; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
             const incBtn = document.createElement('button');
             incBtn.className = 'qty-btn inc';
             incBtn.dataset.id = expenseId;
             incBtn.textContent = '+';
-            incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-secondary); color: #4ECDC4; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
+            incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, #dee2e6); background: var(--bg-secondary, #f8f9fa); color: #4ECDC4; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
             btnGroup.appendChild(decBtn);
             btnGroup.appendChild(incBtn);
@@ -78,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Aggiungi pulsanti dashboard dopo un breve ritardo
     setTimeout(addDashboardButtons, 500);
 
     // ========== POPUP CON INPUT PERSONALIZZATO ==========
@@ -100,51 +103,53 @@ document.addEventListener('DOMContentLoaded', function() {
         const popup = document.createElement('div');
         popup.className = 'increment-popup';
         popup.style.cssText = `
-            background: var(--bg-primary);
+            background: var(--bg-primary, #ffffff);
             border-radius: 20px;
             padding: 32px;
             max-width: 420px;
             width: 90%;
             box-shadow: 0 25px 80px rgba(0,0,0,0.4);
             animation: modalIn 0.3s ease;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color, #dee2e6);
         `;
 
-        // Valore predefinito 1.00 (o 0.00 se decremento? Lasciamo 1.00)
+        // Valore predefinito 1.00
         const defaultAmount = 1.00;
 
         popup.innerHTML = `
-            <h3 style="margin: 0 0 20px 0; color: var(--text-primary); font-size: 1.3rem; text-align: center;">
+            <h3 style="margin: 0 0 20px 0; color: var(--text-primary, #0a0a0a); font-size: 1.3rem; text-align: center;">
                 ${isIncrement ? '➕ Incrementa' : '➖ Decrementa'} importo
             </h3>
             <div style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
-                    <span style="color: var(--text-secondary);">Importo attuale</span>
-                    <span style="font-weight: 600; color: var(--text-primary);">€${currentAmount.toFixed(2)}</span>
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color, #dee2e6);">
+                    <span style="color: var(--text-secondary, #6c757d);">Importo attuale</span>
+                    <span style="font-weight: 600; color: var(--text-primary, #0a0a0a);">€${currentAmount.toFixed(2)}</span>
                 </div>
                 <div style="margin-top: 16px;">
-                    <label style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 6px;">
+                    <label style="display: block; color: var(--text-secondary, #6c757d); font-size: 0.9rem; margin-bottom: 6px;">
                         ${isIncrement ? 'Aggiungi' : 'Sottrai'} (€)
                     </label>
-                    <input type="text" id="popup-amount-input" class="input" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1.1rem; box-sizing: border-box;" value="${defaultAmount.toFixed(2)}" autofocus>
-                    <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
-                        <button class="quick-amount" data-value="0.50" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+0.50</button>
-                        <button class="quick-amount" data-value="1.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+1.00</button>
-                        <button class="quick-amount" data-value="2.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+2.00</button>
-                        <button class="quick-amount" data-value="5.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+5.00</button>
-                        <button class="quick-amount" data-value="10.00" style="padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;">+10.00</button>
+                    <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" autofocus>
+                    <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                        <button class="quick-amount-btn" data-value="0.50">0,50</button>
+                        <button class="quick-amount-btn" data-value="1.00">1,00</button>
+                        <button class="quick-amount-btn" data-value="2.00">2,00</button>
+                        <button class="quick-amount-btn" data-value="5.00">5,00</button>
+                        <button class="quick-amount-btn" data-value="10.00">10,00</button>
+                        <button class="quick-amount-btn" data-value="20.00">20,00</button>
+                        <button class="quick-amount-btn" data-value="50.00">50,00</button>
                     </div>
                 </div>
-                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
-                    <span style="color: var(--text-secondary);">Nuovo importo</span>
+                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color, #dee2e6);">
+                    <span style="color: var(--text-secondary, #6c757d);">Nuovo importo</span>
                     <span id="popup-new-amount" style="display: block; font-weight: 700; font-size: 2rem; color: ${isIncrement ? '#4ECDC4' : '#FF6B6B'}; margin-top: 4px;">
                         €${currentAmount.toFixed(2)}
                     </span>
                 </div>
             </div>
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="popup-cancel" style="padding: 10px 24px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-weight: 500; font-size: 0.95rem;">Annulla</button>
-                <button class="popup-confirm" style="padding: 10px 24px; border-radius: 10px; border: none; background: ${isIncrement ? '#4ECDC4' : '#FF6B6B'}; color: white; cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.95rem;">Conferma</button>
+                <button class="popup-cancel">Annulla</button>
+                <button class="popup-confirm ${isIncrement ? 'positive' : 'negative'}">Conferma</button>
             </div>
         `;
 
@@ -164,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isNaN(parsed) || parsed < 0) parsed = 0;
             const newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
             newAmountDisplay.textContent = `€${newAmount.toFixed(2)}`;
-            // Colore dinamico
             newAmountDisplay.style.color = isIncrement ? '#4ECDC4' : '#FF6B6B';
         }
 
@@ -172,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         inputField.addEventListener('input', updatePreview);
 
         // Pulsanti rapidi
-        popup.querySelectorAll('.quick-amount').forEach(qbtn => {
+        popup.querySelectorAll('.quick-amount-btn').forEach(qbtn => {
             qbtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const val = parseFloat(this.dataset.value);
@@ -228,8 +232,9 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePreview();
     }
 
-    // ========== AGGIORNAMENTO IMPORT VIA AJAX (JSON) ==========
+    // ========== AGGIORNAMENTO IMPORT VIA AJAX (JSON con fallback FormData) ==========
     function updateExpenseAmount(id, newAmount, row, amountElement) {
+        // Prova prima con JSON
         const payload = { importo: newAmount };
         const headers = { 'Content-Type': 'application/json' };
 
@@ -253,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
             b.style.cursor = 'not-allowed';
         });
 
+        // Prova con JSON
         fetch(`/expenses/${id}/update-amount`, {
             method: 'POST',
             headers: headers,
@@ -260,7 +266,20 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.error || 'Errore del server'); });
+                // Se il server non accetta JSON, prova con FormData
+                return fetch(`/expenses/${id}/update-amount`, {
+                    method: 'POST',
+                    body: (() => {
+                        const fd = new FormData();
+                        fd.append('importo', newAmount);
+                        return fd;
+                    })()
+                }).then(res => {
+                    if (!res.ok) {
+                        return res.json().then(err => { throw new Error(err.error || 'Errore del server'); });
+                    }
+                    return res.json();
+                });
             }
             return response.json();
         })
@@ -276,8 +295,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (amountElement) {
                     amountElement.textContent = `${data.isIngresso ? '+' : '−'} €${newAmount.toFixed(2)}`;
                     amountElement.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
+                    // Se siamo nella dashboard, ricarica per aggiornare KPI
                     if (window.location.pathname === '/') {
-                        // Ricarica per aggiornare KPI
                         setTimeout(() => location.reload(), 500);
                     }
                 }
@@ -346,8 +365,8 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 30px;
             padding: 12px 24px;
             border-radius: 12px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
+            background: var(--bg-secondary, #f8f9fa);
+            border: 1px solid var(--border-color, #dee2e6);
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             font-weight: 500;
             z-index: 9999;
@@ -367,24 +386,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========== STILI PER ANIMAZIONI ==========
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes modalIn {
-            from { transform: scale(0.9) translateY(20px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(styleSheet);
+    // Aggiungi stili se non esistono già
+    if (!document.getElementById('popup-styles')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'popup-styles';
+        styleSheet.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes modalIn {
+                from { transform: scale(0.9) translateY(20px); opacity: 0; }
+                to { transform: scale(1) translateY(0); opacity: 1; }
+            }
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
 });

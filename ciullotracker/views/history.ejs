@@ -220,6 +220,184 @@
       }
     }
 
+    /* Popup di incremento - STILI COMPLETI CON SFONDO SOLIDO */
+    .increment-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .increment-popup {
+      background: var(--bg-primary, #ffffff);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      animation: modalIn 0.3s ease;
+      border: 1px solid var(--border-color, #dee2e6);
+    }
+
+    .increment-popup h3 {
+      margin: 0 0 20px 0;
+      color: var(--text-primary, #0a0a0a);
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    .increment-popup .popup-body {
+      margin-bottom: 24px;
+    }
+
+    .increment-popup .popup-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color, #dee2e6);
+    }
+
+    .increment-popup .popup-row:last-child {
+      border-bottom: none;
+    }
+
+    .increment-popup .popup-label {
+      color: var(--text-secondary, #6c757d);
+      font-size: 0.9rem;
+    }
+
+    .increment-popup .popup-value {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--text-primary, #0a0a0a);
+    }
+
+    .increment-popup .popup-value.old {
+      color: var(--text-secondary, #6c757d);
+    }
+
+    .increment-popup .popup-value.new {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .increment-popup .popup-value.new.positive {
+      color: #4ECDC4;
+    }
+
+    .increment-popup .popup-value.new.negative {
+      color: #FF6B6B;
+    }
+
+    .increment-popup .popup-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .increment-popup .popup-cancel {
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color, #dee2e6);
+      background: transparent;
+      color: var(--text-secondary, #6c757d);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .increment-popup .popup-cancel:hover {
+      background: var(--bg-hover, #f0f0f0);
+    }
+
+    .increment-popup .popup-confirm {
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .increment-popup .popup-confirm.positive {
+      background: #4ECDC4;
+    }
+
+    .increment-popup .popup-confirm.positive:hover {
+      background: #3dbdb5;
+      transform: scale(1.02);
+    }
+
+    .increment-popup .popup-confirm.negative {
+      background: #FF6B6B;
+    }
+
+    .increment-popup .popup-confirm.negative:hover {
+      background: #e85a5a;
+      transform: scale(1.02);
+    }
+
+    .increment-popup .popup-confirm:active {
+      transform: scale(0.98);
+    }
+
+    .quick-amount-btn {
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color, #dee2e6);
+      background: var(--bg-secondary, #f8f9fa);
+      color: var(--text-secondary, #6c757d);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .quick-amount-btn:hover {
+      background: var(--bg-hover, #f0f0f0);
+      border-color: var(--accent, #4ECDC4);
+    }
+
+    .popup-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color, #dee2e6);
+      border-radius: 8px;
+      background: var(--bg-secondary, #f8f9fa);
+      color: var(--text-primary, #0a0a0a);
+      font-size: 1.1rem;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .popup-input:focus {
+      outline: none;
+      border-color: var(--accent, #4ECDC4);
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.9) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .filters-bar {
@@ -283,149 +461,26 @@
       }
     }
 
-    /* Popup di incremento - STILI COMPLETI */
-.increment-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-  animation: fadeIn 0.3s ease;
-}
+    /* Variabili CSS globali con fallback */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-hover: #f0f0f0;
+      --text-primary: #0a0a0a;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+      --accent: #4ECDC4;
+      --danger: #FF6B6B;
+    }
 
-.increment-popup {
-  background: var(--bg-primary);
-  border-radius: 20px;
-  padding: 32px;
-  max-width: 420px;
-  width: 90%;
-  box-shadow: 0 25px 80px rgba(0,0,0,0.4);
-  animation: modalIn 0.3s ease;
-  border: 1px solid var(--border-color);
-}
-
-.increment-popup h3 {
-  margin: 0 0 20px 0;
-  color: var(--text-primary);
-  font-size: 1.3rem;
-  text-align: center;
-}
-
-.increment-popup .popup-body {
-  margin-bottom: 24px;
-}
-
-.increment-popup .popup-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.increment-popup .popup-row:last-child {
-  border-bottom: none;
-}
-
-.increment-popup .popup-label {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
-.increment-popup .popup-value {
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-}
-
-.increment-popup .popup-value.old {
-  color: var(--text-secondary);
-}
-
-.increment-popup .popup-value.new {
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.increment-popup .popup-value.new.positive {
-  color: #4ECDC4;
-}
-
-.increment-popup .popup-value.new.negative {
-  color: #FF6B6B;
-}
-
-.increment-popup .popup-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 8px;
-}
-
-.increment-popup .popup-cancel {
-  padding: 10px 24px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.increment-popup .popup-cancel:hover {
-  background: var(--bg-hover);
-}
-
-.increment-popup .popup-confirm {
-  padding: 10px 24px;
-  border-radius: 10px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.increment-popup .popup-confirm.positive {
-  background: #4ECDC4;
-}
-
-.increment-popup .popup-confirm.positive:hover {
-  background: #3dbdb5;
-  transform: scale(1.02);
-}
-
-.increment-popup .popup-confirm.negative {
-  background: #FF6B6B;
-}
-
-.increment-popup .popup-confirm.negative:hover {
-  background: #e85a5a;
-  transform: scale(1.02);
-}
-
-.increment-popup .popup-confirm:active {
-  transform: scale(0.98);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes modalIn {
-  from { transform: scale(0.9) translateY(20px); opacity: 0; }
-  to { transform: scale(1) translateY(0); opacity: 1; }
-}
+    [data-theme="dark"] {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #2d2d2d;
+      --bg-hover: #3a3a3a;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --border-color: #444444;
+    }
   </style>
 </head>
 <body>
@@ -541,11 +596,11 @@
                   </td>
                   <td>
                     <div class="qty-btn-group">
-                      <button class="qty-btn dec" data-id="<%= e.id %>" data-value="-1" title="Decrementa di 1€">−</button>
+                      <button class="qty-btn dec" data-id="<%= e.id %>" title="Decrementa">−</button>
                       <span class="amount-cell" style="color: <%= e.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
                         € <%= parseFloat(e.importo).toFixed(2) %>
                       </span>
-                      <button class="qty-btn inc" data-id="<%= e.id %>" data-value="1" title="Incrementa di 1€">+</button>
+                      <button class="qty-btn inc" data-id="<%= e.id %>" title="Incrementa">+</button>
                     </div>
                   </td>
                   <td><%= e.categoria || '—' %></td>
@@ -589,127 +644,27 @@
     </main>
   </div>
 
-  <!-- Script per i pulsanti incremento/decremento -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Gestione pulsanti +/- nella tabella
-      document.querySelectorAll('.qty-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const row = this.closest('tr');
-          const amountCell = row.querySelector('.amount-cell');
-          const currentAmount = parseFloat(amountCell.textContent.replace('€', '').replace(',', '.').trim());
-          const increment = parseFloat(this.dataset.value);
-          const expenseId = this.dataset.id;
-          
-          const newAmount = Math.max(0.01, currentAmount + increment);
-          
-          if (newAmount !== currentAmount) {
-            updateExpenseAmount(expenseId, newAmount, row);
-          }
-        });
-      });
+  <!-- Inclusione del file JavaScript per i pulsanti -->
+  <script src="/js/history-buttons.js"></script>
 
-      // Funzione per aggiornare l'importo via AJAX
-      function updateExpenseAmount(id, newAmount, row) {
-        const formData = new FormData();
-        formData.append('importo', newAmount);
-        
-        // Disabilita i pulsanti durante l'aggiornamento
-        const buttons = row.querySelectorAll('.qty-btn');
-        buttons.forEach(b => b.disabled = true);
-        buttons.forEach(b => b.style.opacity = '0.5');
-        
-        fetch(`/expenses/${id}/update-amount`, {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            const amountCell = row.querySelector('.amount-cell');
-            amountCell.textContent = `€${newAmount.toFixed(2)}`;
-            amountCell.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
-            
-            // Aggiorna totali nel footer
-            updateTotals();
-            
-            // Feedback visivo
-            showNotification('✅ Importo aggiornato a €' + newAmount.toFixed(2), 'success');
-          } else {
-            showNotification('❌ Errore: ' + (data.error || 'Aggiornamento fallito'), 'error');
-          }
-        })
-        .catch(error => {
-          console.error('Errore:', error);
-          showNotification('❌ Errore di connessione al server', 'error');
-        })
-        .finally(() => {
-          // Riabilita i pulsanti
-          buttons.forEach(b => b.disabled = false);
-          buttons.forEach(b => b.style.opacity = '1');
-        });
-      }
-
-      // Aggiorna totali nel footer
-      function updateTotals() {
-        const rows = document.querySelectorAll('.data-table tbody tr:not(.empty-state)');
-        let totalUscite = 0;
-        let totalEntrate = 0;
-        
-        rows.forEach(row => {
-          const amountText = row.querySelector('.amount-cell');
-          if (amountText) {
-            const amount = parseFloat(amountText.textContent.replace('€', '').replace(',', '.').trim());
-            if (!isNaN(amount)) {
-              const badge = row.querySelector('.badge');
-              if (badge) {
-                const type = badge.textContent.trim();
-                if (type === 'Uscita') {
-                  totalUscite += amount;
-                } else if (type === 'Entrata') {
-                  totalEntrate += amount;
-                }
-              }
-            }
-          }
-        });
-        
-        const footer = document.querySelector('.data-table tfoot');
-        if (footer) {
-          const cells = footer.querySelectorAll('td');
-          if (cells.length >= 3) {
-            cells[0].textContent = `Uscite: €${totalUscite.toFixed(2)}`;
-            cells[1].textContent = `Entrate: €${totalEntrate.toFixed(2)}`;
-            cells[2].textContent = `Saldo: €${(totalEntrate - totalUscite).toFixed(2)}`;
-          }
-        }
-        
-        // Aggiorna anche il contatore dei movimenti
-        const countSpan = document.querySelector('.export-bar strong');
-        if (countSpan) {
-          countSpan.textContent = rows.length;
-        }
-      }
-
-      // Notifiche toast
-      function showNotification(message, type) {
-        const existing = document.querySelector('.toast-notification');
-        if (existing) existing.remove();
-        
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-          toast.classList.add('fade-out');
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      }
-    });
-  </script>
+  <!-- Script per le animazioni CSS (se non presenti nel file) -->
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes modalIn {
+      from { transform: scale(0.9) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
 </body>
 </html>

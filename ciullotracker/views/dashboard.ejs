@@ -73,6 +73,26 @@
       max-width: 100%;
     }
 
+    .chart-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chart-controls label {
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .chart-controls .input {
+      width: auto;
+      flex: 0;
+      padding: 6px 12px;
+    }
+
     .expense-item {
       display: flex;
       justify-content: space-between;
@@ -237,7 +257,7 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Popup di incremento - STILI COMPLETI */
+    /* Popup di incremento - STILI COMPLETI CON SFONDO SOLIDO */
     .increment-popup-overlay {
       position: fixed;
       top: 0;
@@ -254,19 +274,19 @@
     }
 
     .increment-popup {
-      background: var(--bg-primary);
+      background: var(--bg-primary, #ffffff);
       border-radius: 20px;
       padding: 32px;
       max-width: 420px;
       width: 90%;
       box-shadow: 0 25px 80px rgba(0,0,0,0.4);
       animation: modalIn 0.3s ease;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-color, #dee2e6);
     }
 
     .increment-popup h3 {
       margin: 0 0 20px 0;
-      color: var(--text-primary);
+      color: var(--text-primary, #0a0a0a);
       font-size: 1.3rem;
       text-align: center;
     }
@@ -280,7 +300,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color, #dee2e6);
     }
 
     .increment-popup .popup-row:last-child {
@@ -288,18 +308,18 @@
     }
 
     .increment-popup .popup-label {
-      color: var(--text-secondary);
+      color: var(--text-secondary, #6c757d);
       font-size: 0.9rem;
     }
 
     .increment-popup .popup-value {
       font-weight: 600;
       font-size: 1.1rem;
-      color: var(--text-primary);
+      color: var(--text-primary, #0a0a0a);
     }
 
     .increment-popup .popup-value.old {
-      color: var(--text-secondary);
+      color: var(--text-secondary, #6c757d);
     }
 
     .increment-popup .popup-value.new {
@@ -325,9 +345,9 @@
     .increment-popup .popup-cancel {
       padding: 10px 24px;
       border-radius: 10px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-color, #dee2e6);
       background: transparent;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #6c757d);
       cursor: pointer;
       transition: all 0.2s;
       font-weight: 500;
@@ -335,7 +355,7 @@
     }
 
     .increment-popup .popup-cancel:hover {
-      background: var(--bg-hover);
+      background: var(--bg-hover, #f0f0f0);
     }
 
     .increment-popup .popup-confirm {
@@ -374,26 +394,26 @@
     .quick-amount-btn {
       padding: 4px 12px;
       border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
+      border: 1px solid var(--border-color, #dee2e6);
+      background: var(--bg-secondary, #f8f9fa);
+      color: var(--text-secondary, #6c757d);
       cursor: pointer;
       font-size: 0.8rem;
       transition: all 0.2s;
     }
 
     .quick-amount-btn:hover {
-      background: var(--bg-hover);
-      border-color: var(--accent);
+      background: var(--bg-hover, #f0f0f0);
+      border-color: var(--accent, #4ECDC4);
     }
 
     .popup-input {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-color, #dee2e6);
       border-radius: 8px;
-      background: var(--bg-secondary);
-      color: var(--text-primary);
+      background: var(--bg-secondary, #f8f9fa);
+      color: var(--text-primary, #0a0a0a);
       font-size: 1.1rem;
       box-sizing: border-box;
       transition: border-color 0.2s;
@@ -401,7 +421,7 @@
 
     .popup-input:focus {
       outline: none;
-      border-color: var(--accent);
+      border-color: var(--accent, #4ECDC4);
       box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
     }
 
@@ -432,7 +452,7 @@
     }
 
     .chart-modal-content {
-      background: var(--bg-primary);
+      background: var(--bg-primary, #ffffff);
       border-radius: 16px;
       max-width: 90vw;
       max-height: 90vh;
@@ -449,13 +469,13 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color, #dee2e6);
     }
 
     .chart-modal-header h3 {
       margin: 0;
       font-size: 1.2rem;
-      color: var(--text-primary);
+      color: var(--text-primary, #0a0a0a);
     }
 
     .chart-modal-close-btn {
@@ -463,13 +483,13 @@
       border: none;
       font-size: 2rem;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #6c757d);
       padding: 0 8px;
       transition: color 0.2s;
     }
 
     .chart-modal-close-btn:hover {
-      color: var(--text-primary);
+      color: var(--text-primary, #0a0a0a);
     }
 
     .chart-modal-body {
@@ -484,8 +504,8 @@
 
     .chart-modal-footer {
       padding-top: 12px;
-      border-top: 1px solid var(--border-color);
-      color: var(--text-secondary);
+      border-top: 1px solid var(--border-color, #dee2e6);
+      color: var(--text-secondary, #6c757d);
       font-size: 0.9rem;
       text-align: center;
     }
@@ -496,12 +516,12 @@
       padding: 4px 8px;
       font-size: 1.2rem;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #6c757d);
       transition: color 0.2s;
     }
 
     .chart-fullscreen:hover {
-      color: var(--text-primary);
+      color: var(--text-primary, #0a0a0a);
     }
 
     .btn-sm {
@@ -537,6 +557,36 @@
         margin-left: 0;
         align-self: flex-end;
       }
+
+      .chart-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .chart-controls .input {
+        width: 100%;
+      }
+    }
+
+    /* Variabili CSS globali con fallback */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-hover: #f0f0f0;
+      --text-primary: #0a0a0a;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+      --accent: #4ECDC4;
+      --danger: #FF6B6B;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #2d2d2d;
+      --bg-hover: #3a3a3a;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --border-color: #444444;
     }
   </style>
 </head>
@@ -579,6 +629,17 @@
           <div class="chart-title">
             <span>Spese per Categoria</span>
             <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+          </div>
+          <!-- Controlli per il grafico a torta -->
+          <div class="chart-controls">
+            <label for="chartViewMode">Mostra:</label>
+            <select id="chartViewMode" class="input">
+              <option value="categorie">Categorie</option>
+              <option value="sottocategorie">Sottocategorie</option>
+            </select>
+            <select id="chartCategorySelect" class="input" style="display:none;">
+              <!-- Popolato da JavaScript -->
+            </select>
           </div>
           <canvas id="chartCategorie"></canvas>
         </div>
@@ -676,15 +737,16 @@
 
   <script>
     // ============================================================
-    //  DASHBOARD - SCRIPT COMPLETO CON POPUP PERSONALIZZABILE
+    //  DASHBOARD - SCRIPT COMPLETO CON GRAFICO DINAMICO E POPUP
     // ============================================================
 
-    (function initCharts() {
+    (function initDashboard() {
       if (typeof Chart === 'undefined') {
-        setTimeout(initCharts, 200);
+        setTimeout(initDashboard, 200);
         return;
       }
 
+      // ===== FUNZIONE PER I COLORI DEL TEMA =====
       function getThemeColors() {
         var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
@@ -697,22 +759,68 @@
       }
 
       var colors = getThemeColors();
-      const catData = <%- JSON.stringify(chartCategorie) %>;
-      const giornoData = <%- JSON.stringify(chartGiornaliero) %>;
-      const trendData = <%- JSON.stringify(chartTrend) %>;
+      
+      // ===== DATI DAL SERVER =====
+      // chartData deve essere un oggetto con: { categorie: {labels, data}, sottocategorie: { "Categoria": {labels, data} } }
+      // Passato dal backend come JSON
+      const chartData = <%- JSON.stringify(chartData || { categorie: { labels: [], data: [] }, sottocategorie: {} }) %>;
+      const catData = chartData.categorie;
+      const subData = chartData.sottocategorie || {};
+      
+      const giornoData = <%- JSON.stringify(chartGiornaliero || { labels: [], dataIngressi: [], dataUscite: [] }) %>;
+      const trendData = <%- JSON.stringify(chartTrend || { labels: [], dataIngressi: [], dataUscite: [] }) %>;
 
-      // 1. GRAFICO CATEGORIE
+      // ===== 1. GRAFICO CATEGORIE (DINAMICO CON SELECTOR) =====
       var ctxCategorie = document.getElementById('chartCategorie');
-      if (ctxCategorie && catData.labels && catData.labels.length > 0) {
-        new Chart(ctxCategorie, {
+      var chartInstance = null;
+      var currentMode = 'categorie';
+      var currentCategory = '';
+
+      function renderPieChart(mode, category) {
+        var labels, data, title;
+        
+        if (mode === 'categorie') {
+          labels = catData.labels || [];
+          data = catData.data || [];
+          title = 'Spese per Categoria';
+        } else {
+          // mode === 'sottocategorie'
+          var sub = subData[category];
+          if (!sub || !sub.labels || sub.labels.length === 0) {
+            labels = ['Nessuna sottocategoria'];
+            data = [0];
+          } else {
+            labels = sub.labels;
+            data = sub.data;
+          }
+          title = 'Sottocategorie di "' + category + '"';
+        }
+
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+        }
+
+        // Se non ci sono dati, mostra un messaggio
+        if (!labels || labels.length === 0 || data.length === 0) {
+          labels = ['Nessun dato'];
+          data = [0];
+        }
+
+        var palette = colors.palette || ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9'];
+        var backgroundColors = labels.map(function(_, i) {
+          return palette[i % palette.length];
+        });
+
+        chartInstance = new Chart(ctxCategorie, {
           type: 'doughnut',
           data: {
-            labels: catData.labels,
+            labels: labels,
             datasets: [{
-              data: catData.data,
-              backgroundColor: colors.palette.slice(0, catData.labels.length),
+              data: data,
+              backgroundColor: backgroundColors,
               borderWidth: 2,
-              borderColor: 'var(--bg-primary)'
+              borderColor: 'var(--bg-primary, #ffffff)'
             }]
           },
           options: {
@@ -732,8 +840,8 @@
               tooltip: {
                 callbacks: {
                   label: function(context) {
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                    var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                    var percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
                     return '€' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
                   }
                 }
@@ -744,7 +852,53 @@
         });
       }
 
-      // 2. GRAFICO GIORNALIERO
+      // Popola il dropdown delle categorie
+      var categorySelect = document.getElementById('chartCategorySelect');
+      var viewModeSelect = document.getElementById('chartViewMode');
+
+      // Pulisci e popola il select
+      categorySelect.innerHTML = '';
+      var categories = Object.keys(subData);
+      if (categories.length === 0) {
+        var opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Nessuna categoria';
+        categorySelect.appendChild(opt);
+      } else {
+        categories.forEach(function(cat) {
+          var opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          categorySelect.appendChild(opt);
+        });
+        currentCategory = categories[0];
+        categorySelect.value = currentCategory;
+      }
+
+      // Gestione cambio modalità
+      viewModeSelect.addEventListener('change', function() {
+        currentMode = this.value;
+        if (currentMode === 'sottocategorie') {
+          categorySelect.style.display = 'inline-block';
+          renderPieChart('sottocategorie', categorySelect.value);
+        } else {
+          categorySelect.style.display = 'none';
+          renderPieChart('categorie');
+        }
+      });
+
+      // Gestione cambio categoria
+      categorySelect.addEventListener('change', function() {
+        if (currentMode === 'sottocategorie') {
+          currentCategory = this.value;
+          renderPieChart('sottocategorie', currentCategory);
+        }
+      });
+
+      // Render iniziale
+      renderPieChart('categorie');
+
+      // ===== 2. GRAFICO GIORNALIERO =====
       var ctxGiornaliero = document.getElementById('chartGiornaliero');
       if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
         new Chart(ctxGiornaliero, {
@@ -754,7 +908,7 @@
             datasets: [
               {
                 label: 'Entrate (€)',
-                data: giornoData.dataIngressi,
+                data: giornoData.dataIngressi || [],
                 backgroundColor: 'rgba(78, 205, 196, 0.7)',
                 borderColor: '#4ECDC4',
                 borderWidth: 2,
@@ -762,7 +916,7 @@
               },
               {
                 label: 'Uscite (€)',
-                data: giornoData.dataUscite,
+                data: giornoData.dataUscite || [],
                 backgroundColor: 'rgba(255, 107, 107, 0.7)',
                 borderColor: '#FF6B6B',
                 borderWidth: 2,
@@ -804,7 +958,7 @@
         });
       }
 
-      // 3. GRAFICO TREND MENSILE
+      // ===== 3. GRAFICO TREND MENSILE =====
       var ctxTrend = document.getElementById('chartTrend');
       if (ctxTrend && trendData && trendData.labels && trendData.labels.length > 0) {
         new Chart(ctxTrend, {
@@ -814,7 +968,7 @@
             datasets: [
               {
                 label: 'Uscite mensili',
-                data: trendData.dataUscite,
+                data: trendData.dataUscite || [],
                 borderColor: '#FF6B6B',
                 backgroundColor: 'rgba(255, 107, 107, 0.1)',
                 fill: true,
@@ -825,7 +979,7 @@
               },
               {
                 label: 'Entrate mensili',
-                data: trendData.dataIngressi,
+                data: trendData.dataIngressi || [],
                 borderColor: '#4ECDC4',
                 backgroundColor: 'rgba(78, 205, 196, 0.1)',
                 fill: true,
@@ -876,7 +1030,7 @@
         });
       }
 
-      // 4. MODAL GRAFICI FULLSCREEN
+      // ===== 4. MODAL GRAFICI FULLSCREEN =====
       const modal = document.getElementById('chart-modal');
       const modalTitle = document.getElementById('chart-modal-title');
       const modalCanvas = document.getElementById('chart-modal-canvas');
@@ -893,21 +1047,25 @@
         let chartConfig = null;
 
         if (type === 'categorie') {
+          // Usa i dati correnti del grafico a torta
+          var currentLabels = chartInstance ? chartInstance.data.labels : catData.labels || ['Nessun dato'];
+          var currentData = chartInstance ? chartInstance.data.datasets[0].data : catData.data || [0];
+          
           modalTitle.textContent = 'Dettaglio: Spese per Categoria';
           modalDetails.innerHTML = `
             <strong>Analisi dettagliata delle tue spese per categoria</strong><br>
-            Totale categorie: ${catData.labels.length} | 
-            Spesa totale: €${catData.data.reduce((a, b) => a + b, 0).toFixed(2)}
+            Totale categorie: ${currentLabels.length} | 
+            Spesa totale: €${currentData.reduce(function(a, b) { return a + b; }, 0).toFixed(2)}
           `;
           chartConfig = {
             type: 'doughnut',
             data: {
-              labels: catData.labels,
+              labels: currentLabels,
               datasets: [{
-                data: catData.data,
-                backgroundColor: colors.palette.slice(0, catData.labels.length),
+                data: currentData,
+                backgroundColor: colors.palette.slice(0, currentLabels.length),
                 borderWidth: 3,
-                borderColor: 'var(--bg-primary)'
+                borderColor: 'var(--bg-primary, #ffffff)'
               }]
             },
             options: {
@@ -931,8 +1089,8 @@
                   padding: 12,
                   callbacks: {
                     label: function(context) {
-                      const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                      const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                      var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                      var percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
                       return '€' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
                     }
                   }
@@ -946,8 +1104,8 @@
           modalDetails.innerHTML = `
             <strong>Distribuzione giornaliera di entrate e uscite</strong><br>
             Giorni analizzati: ${giornoData.labels.length} | 
-            Totale entrate: €${giornoData.dataIngressi.reduce((a, b) => a + b, 0).toFixed(2)} | 
-            Totale uscite: €${giornoData.dataUscite.reduce((a, b) => a + b, 0).toFixed(2)}
+            Totale entrate: €${(giornoData.dataIngressi || []).reduce(function(a, b) { return a + b; }, 0).toFixed(2)} | 
+            Totale uscite: €${(giornoData.dataUscite || []).reduce(function(a, b) { return a + b; }, 0).toFixed(2)}
           `;
           chartConfig = {
             type: 'bar',
@@ -956,7 +1114,7 @@
               datasets: [
                 {
                   label: 'Entrate (€)',
-                  data: giornoData.dataIngressi,
+                  data: giornoData.dataIngressi || [],
                   backgroundColor: 'rgba(78, 205, 196, 0.7)',
                   borderColor: '#4ECDC4',
                   borderWidth: 2,
@@ -964,7 +1122,7 @@
                 },
                 {
                   label: 'Uscite (€)',
-                  data: giornoData.dataUscite,
+                  data: giornoData.dataUscite || [],
                   backgroundColor: 'rgba(255, 107, 107, 0.7)',
                   borderColor: '#FF6B6B',
                   borderWidth: 2,
@@ -1018,10 +1176,13 @@
           };
         } else if (type === 'trend') {
           modalTitle.textContent = 'Dettaglio: Trend Mensile';
+          var avgUscite = trendData.dataUscite && trendData.dataUscite.length > 0 
+            ? (trendData.dataUscite.reduce(function(a, b) { return a + b; }, 0) / trendData.dataUscite.length).toFixed(2)
+            : '0.00';
           modalDetails.innerHTML = `
             <strong>Evoluzione mensile di entrate e uscite</strong><br>
             Periodo analizzato: ${trendData.labels.length} mesi | 
-            Media uscite: €${(trendData.dataUscite.reduce((a, b) => a + b, 0) / trendData.dataUscite.length).toFixed(2)}
+            Media uscite: €${avgUscite}
           `;
           chartConfig = {
             type: 'line',
@@ -1030,7 +1191,7 @@
               datasets: [
                 {
                   label: 'Uscite mensili',
-                  data: trendData.dataUscite,
+                  data: trendData.dataUscite || [],
                   borderColor: '#FF6B6B',
                   backgroundColor: 'rgba(255, 107, 107, 0.1)',
                   fill: true,
@@ -1041,7 +1202,7 @@
                 },
                 {
                   label: 'Entrate mensili',
-                  data: trendData.dataIngressi,
+                  data: trendData.dataIngressi || [],
                   borderColor: '#4ECDC4',
                   backgroundColor: 'rgba(78, 205, 196, 0.1)',
                   fill: true,
@@ -1130,8 +1291,10 @@
         });
       });
 
+      // ===== TEMA OBSERVER =====
       const themeObserver = new MutationObserver(function() {
         const newColors = getThemeColors();
+        // Ricarica la pagina per applicare i nuovi colori ai grafici
         window.location.reload();
       });
       const targetNode = document.documentElement;
@@ -1239,29 +1402,11 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'increment-popup-overlay';
-        overlay.style.cssText = [
-          'position: fixed; top: 0; left: 0; right: 0; bottom: 0;',
-          'background: rgba(0,0,0,0.6);',
-          'backdrop-filter: blur(8px);',
-          'display: flex; justify-content: center; align-items: center;',
-          'z-index: 10000;',
-          'animation: fadeIn 0.3s ease;'
-        ].join('');
 
         var defaultAmount = 1.00;
 
         var popup = document.createElement('div');
         popup.className = 'increment-popup';
-        popup.style.cssText = [
-          'background: var(--bg-primary);',
-          'border-radius: 20px;',
-          'padding: 32px;',
-          'max-width: 420px;',
-          'width: 90%;',
-          'box-shadow: 0 25px 80px rgba(0,0,0,0.4);',
-          'animation: modalIn 0.3s ease;',
-          'border: 1px solid var(--border-color);'
-        ].join('');
 
         var sign = isIncrement ? '+' : '−';
         var actionLabel = isIncrement ? 'Aggiungi' : 'Sottrai';
@@ -1269,39 +1414,39 @@
         var colorHex = isIncrement ? '#4ECDC4' : '#FF6B6B';
 
         popup.innerHTML = [
-          '<h3 style="margin:0 0 20px 0;color:var(--text-primary);font-size:1.3rem;text-align:center;">',
+          '<h3>',
             isIncrement ? '➕ Incrementa' : '➖ Decrementa',
           '</h3>',
           '<div style="margin-bottom:20px;">',
-            '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">',
-              '<span style="color:var(--text-secondary);">Importo attuale</span>',
-              '<span style="font-weight:600;color:var(--text-primary);">€' + currentAmount.toFixed(2) + '</span>',
+            '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color, #dee2e6);">',
+              '<span style="color:var(--text-secondary, #6c757d);">Importo attuale</span>',
+              '<span style="font-weight:600;color:var(--text-primary, #0a0a0a);">€' + currentAmount.toFixed(2) + '</span>',
             '</div>',
             '<div style="margin-top:16px;">',
-              '<label style="display:block;color:var(--text-secondary);font-size:0.9rem;margin-bottom:6px;">',
+              '<label style="display:block;color:var(--text-secondary, #6c757d);font-size:0.9rem;margin-bottom:6px;">',
                 actionLabel + ' (€)',
               '</label>',
               '<input type="text" id="popup-amount-input" class="popup-input" value="' + defaultAmount.toFixed(2) + '" autofocus>',
               '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">',
-                '<button class="quick-amount-btn" data-value="0.50">+0,50</button>',
-                '<button class="quick-amount-btn" data-value="1.00">+1,00</button>',
-                '<button class="quick-amount-btn" data-value="2.00">+2,00</button>',
-                '<button class="quick-amount-btn" data-value="5.00">+5,00</button>',
-                '<button class="quick-amount-btn" data-value="10.00">+10,00</button>',
-                '<button class="quick-amount-btn" data-value="20.00">+20,00</button>',
-                '<button class="quick-amount-btn" data-value="50.00">+50,00</button>',
+                '<button class="quick-amount-btn" data-value="0.50">0,50</button>',
+                '<button class="quick-amount-btn" data-value="1.00">1,00</button>',
+                '<button class="quick-amount-btn" data-value="2.00">2,00</button>',
+                '<button class="quick-amount-btn" data-value="5.00">5,00</button>',
+                '<button class="quick-amount-btn" data-value="10.00">10,00</button>',
+                '<button class="quick-amount-btn" data-value="20.00">20,00</button>',
+                '<button class="quick-amount-btn" data-value="50.00">50,00</button>',
               '</div>',
             '</div>',
-            '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-color);">',
-              '<span style="color:var(--text-secondary);">Nuovo importo</span>',
+            '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-color, #dee2e6);">',
+              '<span style="color:var(--text-secondary, #6c757d);">Nuovo importo</span>',
               '<span id="popup-new-amount" style="display:block;font-weight:700;font-size:2rem;color:' + colorHex + ';margin-top:4px;">',
                 '€' + currentAmount.toFixed(2),
               '</span>',
             '</div>',
           '</div>',
           '<div style="display:flex;gap:12px;justify-content:flex-end;">',
-            '<button class="popup-cancel" style="padding:10px 24px;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;font-weight:500;font-size:0.95rem;">Annulla</button>',
-            '<button class="popup-confirm ' + colorClass + '" style="padding:10px 24px;border-radius:10px;border:none;background:' + colorHex + ';color:white;cursor:pointer;transition:all 0.2s;font-weight:600;font-size:0.95rem;">Conferma</button>',
+            '<button class="popup-cancel">Annulla</button>',
+            '<button class="popup-confirm ' + colorClass + '">Conferma</button>',
           '</div>'
         ].join('');
 
@@ -1390,19 +1535,16 @@
 
           var btnGroup = document.createElement('div');
           btnGroup.className = 'qty-btn-group dashboard-qty-btn';
-          btnGroup.style.cssText = 'margin-top: 8px; display: flex; gap: 4px;';
 
           var decBtn = document.createElement('button');
           decBtn.className = 'qty-btn dec';
           decBtn.dataset.id = expenseId;
           decBtn.textContent = '−';
-          decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-secondary); color: #FF6B6B; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
           var incBtn = document.createElement('button');
           incBtn.className = 'qty-btn inc';
           incBtn.dataset.id = expenseId;
           incBtn.textContent = '+';
-          incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-secondary); color: #4ECDC4; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
           btnGroup.appendChild(decBtn);
           btnGroup.appendChild(incBtn);
