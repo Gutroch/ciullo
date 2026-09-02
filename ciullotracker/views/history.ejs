@@ -2,6 +2,287 @@
 <html lang="it">
 <head>
   <%- include('partials/head', { title: 'Storico · CiulloTracker' }) %>
+  <style>
+    /* Stili specifici per lo storico */
+    .filters-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 20px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .filters-bar .field {
+      margin-bottom: 0;
+    }
+
+    .filters-bar .btn {
+      height: 42px;
+      align-self: end;
+    }
+
+    .export-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      align-items: center;
+    }
+
+    .export-bar .label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-right: 8px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 12px 12px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .data-table .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    .data-table tfoot {
+      font-weight: 600;
+      background: var(--bg-secondary);
+      border-top: 2px solid var(--border-color);
+    }
+
+    .data-table tfoot td {
+      padding: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-success {
+      background: rgba(78, 205, 196, 0.15);
+      color: #4ECDC4;
+    }
+
+    .badge-danger {
+      background: rgba(255, 107, 107, 0.15);
+      color: #FF6B6B;
+    }
+
+    /* Pulsanti incremento/decremento */
+    .qty-btn-group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .qty-btn:hover {
+      background: var(--bg-hover);
+      transform: scale(1.1);
+    }
+
+    .qty-btn:active {
+      transform: scale(0.9);
+    }
+
+    .qty-btn.inc {
+      color: #4ECDC4;
+    }
+
+    .qty-btn.dec {
+      color: #FF6B6B;
+    }
+
+    .qty-btn.inc:hover {
+      background: rgba(78, 205, 196, 0.15);
+    }
+
+    .qty-btn.dec:hover {
+      background: rgba(255, 107, 107, 0.15);
+    }
+
+    .amount-cell {
+      font-weight: 600;
+      min-width: 70px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    /* Notifiche toast */
+    .toast-notification {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      font-weight: 500;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 90%;
+    }
+
+    .toast-notification.success {
+      border-left: 4px solid #4ECDC4;
+      color: #4ECDC4;
+    }
+
+    .toast-notification.error {
+      border-left: 4px solid #FF6B6B;
+      color: #FF6B6B;
+    }
+
+    .toast-notification.fade-out {
+      animation: slideOut 0.3s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .filters-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .filters-bar .btn {
+        grid-column: 1 / -1;
+      }
+
+      .data-table {
+        font-size: 0.8rem;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 8px;
+      }
+
+      .qty-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.85rem;
+      }
+
+      .amount-cell {
+        min-width: 50px;
+        font-size: 0.85rem;
+      }
+
+      .action-buttons .btn-sm {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+      }
+
+      .export-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .export-bar .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .filters-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .data-table th,
+      .data-table td {
+        min-width: 80px;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('partials/splash') %>
@@ -10,7 +291,7 @@
 
     <main class="main-content">
       <div class="page-title">Storico &amp; Esportazione</div>
-      <div class="page-subtitle">Filtra e scarica i dati delle spese registrate</div>
+      <div class="page-subtitle">Filtra, modifica e scarica i dati delle spese registrate</div>
 
       <!-- Filtri -->
       <form method="GET" action="/history" class="card squircle filters-bar">
@@ -55,15 +336,27 @@
             <% } %>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary">Filtra</button>
-        <a href="/history" class="btn btn-secondary">Reset</a>
+        <div class="field" style="display: flex; gap: 8px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Filtra</button>
+          <a href="/history" class="btn btn-secondary" style="flex: 1; text-align: center;">Reset</a>
+        </div>
       </form>
 
-      <!-- Export -->
+      <!-- Export Bar -->
       <div class="export-bar">
-        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">⬇ CSV</a>
-        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">⬇ Excel</a>
-        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">⬇ JSON</a>
+        <span class="label">📤 Esporta:</span>
+        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+          ⬇ CSV
+        </a>
+        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+          ⬇ Excel
+        </a>
+        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+          ⬇ JSON
+        </a>
+        <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);">
+          <strong><%= expenses ? expenses.length : 0 %></strong> movimenti trovati
+        </span>
       </div>
 
       <!-- Tabella -->
@@ -84,27 +377,45 @@
           </thead>
           <tbody>
             <% if (!expenses || expenses.length === 0) { %>
-              <tr><td colspan="9" class="empty-state">Nessuna spesa trovata con i filtri selezionati.</td></tr>
+              <tr>
+                <td colspan="9" class="empty-state">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <span style="font-size: 2rem;">📭</span>
+                    <span>Nessuna spesa trovata con i filtri selezionati.</span>
+                    <a href="/expenses/new" class="btn btn-primary" style="display: inline-block;">Aggiungi una spesa</a>
+                  </div>
+                </td>
+              </tr>
             <% } else { %>
               <% expenses.forEach(function(e) { %>
                 <tr>
                   <td><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
-                  <td><span class="badge <%= e.tipo === 'ingresso' ? 'badge-success' : 'badge-danger' %>">
-                    <%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %>
-                  </span></td>
-                  <td style="color: <%= e.tipo === 'ingresso' ? '#148c50' : 'var(--danger)' %>; font-weight: 600;">
-                    € <%= parseFloat(e.importo).toFixed(2) %>
+                  <td>
+                    <span class="badge <%= e.tipo === 'ingresso' ? 'badge-success' : 'badge-danger' %>">
+                      <%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="qty-btn-group">
+                      <button class="qty-btn dec" data-id="<%= e.id %>" data-value="-1" title="Decrementa di 1€">−</button>
+                      <span class="amount-cell" style="color: <%= e.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
+                        € <%= parseFloat(e.importo).toFixed(2) %>
+                      </span>
+                      <button class="qty-btn inc" data-id="<%= e.id %>" data-value="1" title="Incrementa di 1€">+</button>
+                    </div>
                   </td>
                   <td><%= e.categoria || '—' %></td>
                   <td><%= e.sottocategoria || '—' %></td>
                   <td><%= e.inserito_da || '—' %></td>
                   <td><%= e.per_conto_di || '—' %></td>
-                  <td><%= e.note || '—' %></td>
+                  <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= e.note || '' %>">
+                    <%= e.note || '—' %>
+                  </td>
                   <td>
-                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                      <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm">Modifica</a>
+                    <div class="action-buttons">
+                      <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm" title="Modifica">✏️</a>
                       <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');" style="display: inline;">
-                        <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
+                        <button type="submit" class="btn btn-danger btn-sm" title="Elimina">🗑️</button>
                       </form>
                     </div>
                   </td>
@@ -112,23 +423,149 @@
               <% }); %>
             <% } %>
           </tbody>
-          <tfoot>
-            <tr style="font-weight: 600; background: var(--bg-secondary);">
-              <td colspan="2">Totali:</td>
-              <td style="color: var(--danger);">
-                Uscite: € <%= expenses && expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
-              </td>
-              <td style="color: #148c50;">
-                Entrate: € <%= expenses && expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
-              </td>
-              <td colspan="5" style="color: var(--text-primary);">
-                Saldo: € <%= expenses && (expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0) - expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0)).toFixed(2) %>
-              </td>
-            </tr>
-          </tfoot>
+          <% if (expenses && expenses.length > 0) { %>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>Totali</strong></td>
+                <td style="color: #FF6B6B;">
+                  Uscite: € <%= expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
+                </td>
+                <td style="color: #4ECDC4;">
+                  Entrate: € <%= expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
+                </td>
+                <td colspan="5" style="color: var(--text-primary);">
+                  Saldo: € <%= (expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0) - 
+                                expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0)).toFixed(2) %>
+                </td>
+              </tr>
+            </tfoot>
+          <% } %>
         </table>
       </div>
     </main>
   </div>
+
+  <!-- Script per i pulsanti incremento/decremento -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Gestione pulsanti +/- nella tabella
+      document.querySelectorAll('.qty-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const row = this.closest('tr');
+          const amountCell = row.querySelector('.amount-cell');
+          const currentAmount = parseFloat(amountCell.textContent.replace('€', '').replace(',', '.').trim());
+          const increment = parseFloat(this.dataset.value);
+          const expenseId = this.dataset.id;
+          
+          const newAmount = Math.max(0.01, currentAmount + increment);
+          
+          if (newAmount !== currentAmount) {
+            updateExpenseAmount(expenseId, newAmount, row);
+          }
+        });
+      });
+
+      // Funzione per aggiornare l'importo via AJAX
+      function updateExpenseAmount(id, newAmount, row) {
+        const formData = new FormData();
+        formData.append('importo', newAmount);
+        
+        // Disabilita i pulsanti durante l'aggiornamento
+        const buttons = row.querySelectorAll('.qty-btn');
+        buttons.forEach(b => b.disabled = true);
+        buttons.forEach(b => b.style.opacity = '0.5');
+        
+        fetch(`/expenses/${id}/update-amount`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const amountCell = row.querySelector('.amount-cell');
+            amountCell.textContent = `€${newAmount.toFixed(2)}`;
+            amountCell.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
+            
+            // Aggiorna totali nel footer
+            updateTotals();
+            
+            // Feedback visivo
+            showNotification('✅ Importo aggiornato a €' + newAmount.toFixed(2), 'success');
+          } else {
+            showNotification('❌ Errore: ' + (data.error || 'Aggiornamento fallito'), 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Errore:', error);
+          showNotification('❌ Errore di connessione al server', 'error');
+        })
+        .finally(() => {
+          // Riabilita i pulsanti
+          buttons.forEach(b => b.disabled = false);
+          buttons.forEach(b => b.style.opacity = '1');
+        });
+      }
+
+      // Aggiorna totali nel footer
+      function updateTotals() {
+        const rows = document.querySelectorAll('.data-table tbody tr:not(.empty-state)');
+        let totalUscite = 0;
+        let totalEntrate = 0;
+        
+        rows.forEach(row => {
+          const amountText = row.querySelector('.amount-cell');
+          if (amountText) {
+            const amount = parseFloat(amountText.textContent.replace('€', '').replace(',', '.').trim());
+            if (!isNaN(amount)) {
+              const badge = row.querySelector('.badge');
+              if (badge) {
+                const type = badge.textContent.trim();
+                if (type === 'Uscita') {
+                  totalUscite += amount;
+                } else if (type === 'Entrata') {
+                  totalEntrate += amount;
+                }
+              }
+            }
+          }
+        });
+        
+        const footer = document.querySelector('.data-table tfoot');
+        if (footer) {
+          const cells = footer.querySelectorAll('td');
+          if (cells.length >= 3) {
+            cells[0].textContent = `Uscite: €${totalUscite.toFixed(2)}`;
+            cells[1].textContent = `Entrate: €${totalEntrate.toFixed(2)}`;
+            cells[2].textContent = `Saldo: €${(totalEntrate - totalUscite).toFixed(2)}`;
+          }
+        }
+        
+        // Aggiorna anche il contatore dei movimenti
+        const countSpan = document.querySelector('.export-bar strong');
+        if (countSpan) {
+          countSpan.textContent = rows.length;
+        }
+      }
+
+      // Notifiche toast
+      function showNotification(message, type) {
+        const existing = document.querySelector('.toast-notification');
+        if (existing) existing.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.classList.add('fade-out');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+    });
+  </script>
 </body>
 </html>

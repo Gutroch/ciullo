@@ -20,14 +20,17 @@ router.get('/', requireAuth, async (req, res) => {
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
+    // Processa le spese ricorrenti scadute
     await Recurring.processDueRecurring();
 
     const all = await Expenses.getAllExpenses();
     const monthly = all.filter((e) => isInMonth(e.data_spesa, month, year));
 
+    // Filtra uscite e ingressi del mese corrente
     const uscite = monthly.filter((e) => e.tipo !== 'ingresso');
     const ingressi = monthly.filter((e) => e.tipo === 'ingresso');
 
+    // Calcoli totali
     const totale = uscite.reduce((sum, e) => sum + e.importo, 0);
     const totaleIngressi = ingressi.reduce((sum, e) => sum + e.importo, 0);
     const saldo = totaleIngressi - totale;
@@ -46,6 +49,7 @@ router.get('/', requireAuth, async (req, res) => {
       }
     });
 
+    // Utente con la spesa più alta
     const perUtente = {};
     uscite.forEach((e) => {
       perUtente[e.per_conto_di] = (perUtente[e.per_conto_di] || 0) + e.importo;
@@ -59,13 +63,16 @@ router.get('/', requireAuth, async (req, res) => {
       }
     });
 
+    // Ultime 10 spese del mese
     const ultimeSpese = monthly.slice(0, 10);
 
+    // Dati per il grafico a torta delle categorie
     const chartCategorie = {
       labels: Object.keys(perCategoria),
       data: Object.values(perCategoria).map((v) => parseFloat(v.toFixed(2))),
     };
 
+    // Dati per il grafico giornaliero (andamento nel mese)
     const giorniNelMese = new Date(year, month, 0).getDate();
     const perGiornoUscite = Array(giorniNelMese).fill(0);
     const perGiornoIngressi = Array(giorniNelMese).fill(0);
@@ -83,20 +90,98 @@ router.get('/', requireAuth, async (req, res) => {
       dataIngressi: perGiornoIngressi.map((v) => parseFloat(v.toFixed(2))),
     };
 
+    // Trend mensile (ultimi 6 mesi)
+    const trendData = [];
+    const trendIngressi = [];
+    const trendLabels = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthTrend = d.getMonth() + 1;
+      const yearTrend = d.getFullYear();
+      const monthExpenses = all.filter(e => isInMonth(e.data_spesa, monthTrend, yearTrend));
+      const usciteTrend = monthExpenses.filter(e => e.tipo !== 'ingresso');
+      const ingressiTrend = monthExpenses.filter(e => e.tipo === 'ingresso');
+      trendData.push(usciteTrend.reduce((sum, e) => sum + e.importo, 0));
+      trendIngressi.push(ingressiTrend.reduce((sum, e) => sum + e.importo, 0));
+      trendLabels.push(d.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' }));
+    }
+    const chartTrend = {
+      labels: trendLabels,
+      dataUscite: trendData.map(v => parseFloat(v.toFixed(2))),
+      dataIngressi: trendIngressi.map(v => parseFloat(v.toFixed(2))),
+    };
+
+    // Distribuzione per utente (tutte le uscite dell'anno in corso)
+    const perUtenteAll = {};
+    all.filter(e => e.tipo !== 'ingresso').forEach(e => {
+      const key = e.per_conto_di || 'Sconosciuto';
+      perUtenteAll[key] = (perUtenteAll[key] || 0) + e.importo;
+    });
+    const chartUtenti = {
+      labels: Object.keys(perUtenteAll),
+      data: Object.values(perUtenteAll).map(v => parseFloat(v.toFixed(2))),
+    };
+
+    // Distribuzione per categoria (tutte le uscite dell'anno in corso)
+    const perCategoriaAll = {};
+    all.filter(e => e.tipo !== 'ingresso').forEach(e => {
+      perCategoriaAll[e.categoria] = (perCategoriaAll[e.categoria] || 0) + e.importo;
+    });
+    const chartCategorieAll = {
+      labels: Object.keys(perCategoriaAll),
+      data: Object.values(perCategoriaAll).map(v => parseFloat(v.toFixed(2))),
+    };
+
+    // Statistiche aggiuntive
+    const numeroMovimenti = monthly.length;
+    const numeroUscite = uscite.length;
+    const numeroIngressi = ingressi.length;
+    const spesaMediaGiornaliera = giorniNelMese > 0 ? totale / giorniNelMese : 0;
+    const entrataMediaGiornaliera = giorniNelMese > 0 ? totaleIngressi / giorniNelMese : 0;
+
+    // Spesa per giorno della settimana
+    const giorniSettimana = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+    const perGiornoSettimana = Array(7).fill(0);
+    uscite.forEach((e) => {
+      const giorno = new Date(e.data_spesa).getDay();
+      perGiornoSettimana[giorno] += e.importo;
+    });
+    const chartSettimana = {
+      labels: giorniSettimana,
+      data: perGiornoSettimana.map(v => parseFloat(v.toFixed(2))),
+    };
+
+    // Prossime scadenze (7 giorni)
     const prossimeScadenze = await Recurring.getUpcoming(7);
+
+    // Mese label formattata
+    const meseLabel = now.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
 
     res.render('dashboard', {
       user: req.session.user,
+      // KPI principali
       totale: totale.toFixed(2),
       totaleIngressi: totaleIngressi.toFixed(2),
       saldo: saldo.toFixed(2),
       topCategoria,
       topUtente,
+      // Liste
       ultimeSpese,
+      prossimeScadenze,
+      // Grafici
       chartCategorie,
       chartGiornaliero,
-      prossimeScadenze,
-      meseLabel: now.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }),
+      chartTrend,
+      chartUtenti,
+      chartCategorieAll,
+      chartSettimana,
+      // Statistiche aggiuntive
+      numeroMovimenti,
+      numeroUscite,
+      numeroIngressi,
+      spesaMediaGiornaliera: spesaMediaGiornaliera.toFixed(2),
+      entrataMediaGiornaliera: entrataMediaGiornaliera.toFixed(2),
+      meseLabel,
     });
   } catch (error) {
     console.error('❌ Errore dashboard:', error);
@@ -327,6 +412,38 @@ router.post('/expenses/:id/delete', requireAuth, async (req, res) => {
       user: req.session.user,
       message: 'Si è verificato un errore nell\'eliminazione della spesa.'
     });
+  }
+});
+
+// POST /expenses/:id/update-amount - Aggiornamento rapido importo (AJAX)
+router.post('/expenses/:id/update-amount', requireAuth, async (req, res) => {
+  try {
+    const { importo } = req.body;
+    const id = req.params.id;
+    
+    if (!importo || isNaN(parseFloat(importo)) || parseFloat(importo) <= 0) {
+      return res.status(400).json({ success: false, error: 'Importo non valido' });
+    }
+    
+    const all = await Expenses.getAllExpenses();
+    const expense = all.find(e => e.id === id);
+    if (!expense) {
+      return res.status(404).json({ success: false, error: 'Spesa non trovata' });
+    }
+    
+    await Expenses.updateExpense(id, {
+      ...expense,
+      importo: parseFloat(importo)
+    });
+    
+    res.json({ 
+      success: true, 
+      isIngresso: expense.tipo === 'ingresso',
+      newAmount: parseFloat(importo)
+    });
+  } catch (error) {
+    console.error('❌ Errore aggiornamento rapido:', error);
+    res.status(500).json({ success: false, error: 'Errore del server' });
   }
 });
 

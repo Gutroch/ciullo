@@ -2,6 +2,337 @@
 <html lang="it">
 <head>
   <%- include('partials/head', { title: 'Dashboard · CiulloTracker' }) %>
+  <style>
+    /* Stili specifici per la dashboard */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .kpi-value.positive { color: #4ECDC4; }
+    .kpi-value.negative { color: #FF6B6B; }
+    .kpi-value.neutral { color: var(--text-primary); }
+
+    .chart-card {
+      padding: 20px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .chart-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .chart-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .chart-card canvas {
+      max-height: 280px;
+      max-width: 100%;
+    }
+
+    .expense-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.2s;
+    }
+
+    .expense-item:last-child {
+      border-bottom: none;
+    }
+
+    .expense-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .expense-meta {
+      flex: 1;
+    }
+
+    .expense-cat {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .expense-name {
+      font-weight: 500;
+      display: block;
+      margin: 2px 0;
+    }
+
+    .expense-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .expense-amount {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-left: 16px;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    /* Pulsanti incremento/decremento */
+    .qty-btn-group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .qty-btn:hover {
+      background: var(--bg-hover);
+      transform: scale(1.1);
+    }
+
+    .qty-btn:active {
+      transform: scale(0.9);
+    }
+
+    .qty-btn.inc { color: #4ECDC4; }
+    .qty-btn.dec { color: #FF6B6B; }
+
+    /* Notifiche toast */
+    .toast-notification {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      font-weight: 500;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 90%;
+    }
+
+    .toast-notification.success {
+      border-left: 4px solid #4ECDC4;
+      color: #4ECDC4;
+    }
+
+    .toast-notification.error {
+      border-left: 4px solid #FF6B6B;
+      color: #FF6B6B;
+    }
+
+    .toast-notification.fade-out {
+      animation: slideOut 0.3s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Modal per grafici fullscreen */
+    .chart-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9998;
+      padding: 20px;
+    }
+
+    .chart-modal-content {
+      background: var(--bg-primary);
+      border-radius: 16px;
+      max-width: 90vw;
+      max-height: 90vh;
+      width: 800px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .chart-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .chart-modal-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+    }
+
+    .chart-modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0 8px;
+      transition: color 0.2s;
+    }
+
+    .chart-modal-close-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .chart-modal-body {
+      margin-bottom: 20px;
+    }
+
+    .chart-modal-body canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 60vh;
+    }
+
+    .chart-modal-footer {
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .chart-fullscreen {
+      background: none !important;
+      border: none !important;
+      padding: 4px 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+
+    .chart-fullscreen:hover {
+      color: var(--text-primary);
+    }
+
+    .btn-sm {
+      padding: 4px 12px;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .kpi-value {
+        font-size: 1.4rem;
+      }
+      
+      .chart-modal-content {
+        padding: 16px;
+        width: 95vw;
+      }
+      
+      .expense-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .expense-amount {
+        margin-left: 0;
+        align-self: flex-end;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('partials/splash') %>
@@ -13,68 +344,105 @@
       <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
 
       <!-- KPI Cards -->
-      <div class="grid grid-4" style="margin-bottom: 20px;">
+      <div class="grid-4">
         <div class="card squircle kpi-card">
-          <div class="kpi-label">Totale speso nel mese</div>
-          <div class="kpi-value">€ <%= totale %></div>
+          <div class="kpi-label">💰 Totale Uscite</div>
+          <div class="kpi-value negative">€ <%= totale %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">Totale entrate nel mese</div>
-          <div class="kpi-value">€ <%= totaleIngressi %></div>
+          <div class="kpi-label">📈 Totale Entrate</div>
+          <div class="kpi-value positive">€ <%= totaleIngressi %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">Saldo</div>
-          <div class="kpi-value" style="color: <%= parseFloat(saldo) < 0 ? 'var(--danger)' : '#148c50' %>;">€ <%= saldo %></div>
+          <div class="kpi-label">⚖️ Saldo</div>
+          <div class="kpi-value <%= parseFloat(saldo) < 0 ? 'negative' : 'positive' %>">€ <%= saldo %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">Categoria principale</div>
-          <div class="kpi-value"><%= topCategoria %></div>
+          <div class="kpi-label">🏆 Categoria Top</div>
+          <div class="kpi-value neutral"><%= topCategoria %></div>
+        </div>
+        <div class="card squircle kpi-card">
+          <div class="kpi-label">👤 Utente Top</div>
+          <div class="kpi-value neutral"><%= topUtente %></div>
+        </div>
+        <div class="card squircle kpi-card">
+          <div class="kpi-label">📊 Totale Movimenti</div>
+          <div class="kpi-value neutral"><%= ultimeSpese.length %></div>
         </div>
       </div>
 
       <!-- Grafici -->
-      <div class="grid grid-2" style="margin-bottom: 20px;">
+      <div class="grid-2">
         <div class="card squircle chart-card" data-chart="categorie">
-          <div class="chart-title">Spese per categoria <button class="btn btn-sm btn-secondary chart-fullscreen" title="Apri a tutto schermo">⤢</button></div>
+          <div class="chart-title">
+            <span>📊 Spese per Categoria</span>
+            <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+          </div>
           <canvas id="chartCategorie"></canvas>
         </div>
         <div class="card squircle chart-card" data-chart="giornaliero">
-          <div class="chart-title">Andamento giornaliero <button class="btn btn-sm btn-secondary chart-fullscreen" title="Apri a tutto schermo">⤢</button></div>
+          <div class="chart-title">
+            <span>📈 Andamento Giornaliero</span>
+            <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+          </div>
           <canvas id="chartGiornaliero"></canvas>
         </div>
       </div>
 
-      <!-- Promemoria spese ricorrenti in scadenza -->
+      <!-- Trend mensile (full width) -->
+      <div class="card squircle chart-card" data-chart="trend" style="margin-bottom: 24px;">
+        <div class="chart-title">
+          <span>📉 Trend Mensile (Ultimi 6 mesi)</span>
+          <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+        </div>
+        <canvas id="chartTrend"></canvas>
+      </div>
+
+      <!-- Prossime scadenze -->
       <% if (prossimeScadenze && prossimeScadenze.length > 0) { %>
-        <div class="card squircle" style="margin-bottom: 20px;">
-          <div class="chart-title">Prossime scadenze ricorrenti <a href="/recurring" style="font-weight:400; font-size:0.85rem; text-decoration:underline; float:right;">Gestisci</a></div>
+        <div class="card squircle" style="margin-bottom: 24px;">
+          <div class="chart-title">
+            <span>⏰ Prossime Scadenze Ricorrenti</span>
+            <a href="/recurring" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Gestisci</a>
+          </div>
           <% prossimeScadenze.forEach(function(r) { %>
-            <div class="expense-item squircle-sm">
+            <div class="expense-item">
               <div class="expense-meta">
                 <span class="expense-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %></span>
                 <span class="expense-name"><%= r.descrizione %></span>
-                <span class="expense-sub">Scade il <%= r.prossimaData.toLocaleDateString('it-IT') %></span>
+                <span class="expense-sub">Scade il <%= new Date(r.prossimaData).toLocaleDateString('it-IT') %></span>
               </div>
-              <div class="expense-amount"><%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %></div>
+              <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
+                <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
+              </div>
             </div>
           <% }); %>
         </div>
       <% } %>
 
-      <!-- Feed ultimi movimenti -->
+      <!-- Ultimi movimenti -->
       <div class="card squircle">
-        <div class="chart-title">Ultimi movimenti del mese</div>
+        <div class="chart-title">
+          <span>🕐 Ultimi Movimenti del Mese</span>
+          <a href="/history" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Vedi tutti</a>
+        </div>
         <% if (ultimeSpese.length === 0) { %>
-          <div class="empty-state">Nessun movimento registrato questo mese. <a href="/expenses/new" style="text-decoration:underline;">Aggiungine uno</a>.</div>
+          <div class="empty-state">
+            Nessun movimento registrato questo mese. 
+            <a href="/expenses/new">Aggiungine uno</a>.
+          </div>
         <% } else { %>
           <% ultimeSpese.forEach(function(e) { %>
-            <div class="expense-item squircle-sm">
+            <div class="expense-item">
               <div class="expense-meta">
                 <span class="expense-cat"><%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
                 <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
-                <span class="expense-sub"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · <%= e.inserito_da %> → <%= e.per_conto_di %></span>
+                <span class="expense-sub">
+                  <%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · 
+                  <%= e.inserito_da %> → <%= e.per_conto_di %>
+                </span>
               </div>
-              <div class="expense-amount" style="color: <%= e.tipo === 'ingresso' ? '#148c50' : 'var(--danger)' %>;">
+              <div class="expense-amount" style="color: <%= e.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
                 <%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= e.importo.toFixed(2) %>
               </div>
             </div>
@@ -84,167 +452,521 @@
     </main>
   </div>
 
-  <!-- MODAL POPUP PER GRAFICI -->
-<div id="chart-modal" class="chart-modal-overlay" style="display: none;">
-  <div class="chart-modal-content">
-    <div class="chart-modal-header">
-      <h3 id="chart-modal-title">Dettagli Grafico</h3>
-      <button id="chart-modal-close" class="chart-modal-close-btn">&times;</button>
-    </div>
-    <div class="chart-modal-body">
-      <canvas id="chart-modal-canvas"></canvas>
-    </div>
-    <div class="chart-modal-footer" id="chart-modal-details">
-      <!-- I dettagli verranno inseriti qui via JS -->
+  <!-- MODAL PER GRAFICI FULLSCREEN -->
+  <div id="chart-modal" class="chart-modal-overlay" style="display: none;">
+    <div class="chart-modal-content">
+      <div class="chart-modal-header">
+        <h3 id="chart-modal-title">Dettagli Grafico</h3>
+        <button id="chart-modal-close" class="chart-modal-close-btn">&times;</button>
+      </div>
+      <div class="chart-modal-body">
+        <canvas id="chart-modal-canvas"></canvas>
+      </div>
+      <div class="chart-modal-footer" id="chart-modal-details">
+        <!-- I dettagli verranno inseriti qui via JS -->
+      </div>
     </div>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"
-        onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';document.head.appendChild(s);"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"
+          onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';document.head.appendChild(s);">
+  </script>
 
-<script>
-(function initCharts() {
-  if (typeof Chart === 'undefined') {
-    setTimeout(initCharts, 200);
-    return;
-  }
-
-  // Colori tema
-  function getThemeColors() {
-    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    return {
-      text: dark ? '#f5f5f5' : '#0a0a0a',
-      grid: dark ? '#2a2a2e' : '#e3e3e6',
-      palette: dark
-        ? ['#ffffff', '#c9c9cf', '#9a9aa0', '#6b6b70', '#4a4a4f', '#2a2a2e', '#1a1a1c']
-        : ['#0a0a0a', '#3a3a3d', '#5a5a5e', '#7a7a7e', '#9a9a9e', '#bdbdbf', '#e0e0e2']
-    };
-  }
-  
-  var colors = getThemeColors();
-  const catData = <%- JSON.stringify(chartCategorie) %>;
-  const giornoData = <%- JSON.stringify(chartGiornaliero) %>;
-
-  // 1. GRAFICI NORMALI (Nella pagina)
-  new Chart(document.getElementById('chartCategorie'), {
-    type: 'doughnut',
-    data: {
-      labels: catData.labels,
-      datasets: [{ data: catData.data, backgroundColor: colors.palette, borderWidth: 0 }]
-    },
-    options: {
-      plugins: { legend: { position: 'bottom', labels: { color: colors.text, boxWidth: 12, padding: 14 } } }
-    }
-  });
-
-  new Chart(document.getElementById('chartGiornaliero'), {
-    type: 'bar',
-    data: {
-      labels: giornoData.labels,
-      datasets: [
-        { label: 'Entrate (€)', data: giornoData.dataIngressi, backgroundColor: colors.palette[1] || colors.text, borderRadius: 6 },
-        { label: 'Uscite (€)', data: giornoData.dataUscite, backgroundColor: colors.text, borderRadius: 6 }
-      ]
-    },
-    options: {
-      plugins: { legend: { display: true, labels: { color: colors.text, boxWidth: 12 } } },
-      scales: {
-        x: { ticks: { color: colors.text }, grid: { display: false } },
-        y: { ticks: { color: colors.text }, grid: { color: colors.grid } }
+  <script>
+    (function initCharts() {
+      if (typeof Chart === 'undefined') {
+        setTimeout(initCharts, 200);
+        return;
       }
-    }
-  });
 
-  // 2. LOGICA POPUP / MODAL
-  const modal = document.getElementById('chart-modal');
-  const modalTitle = document.getElementById('chart-modal-title');
-  const modalCanvas = document.getElementById('chart-modal-canvas');
-  const modalDetails = document.getElementById('chart-modal-details');
-  const modalCloseBtn = document.getElementById('chart-modal-close');
-  let modalChartInstance = null;
+      // Funzione per ottenere i colori in base al tema
+      function getThemeColors() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+          text: dark ? '#f5f5f5' : '#0a0a0a',
+          grid: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+          palette: dark 
+            ? ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9']
+            : ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF8A5C', '#A29BFE', '#FD79A8', '#00CEC9']
+        };
+      }
 
-  function openChartModal(type) {
-    modal.style.display = 'flex';
-    
-    if (modalChartInstance) modalChartInstance.destroy();
+      var colors = getThemeColors();
+      const catData = <%- JSON.stringify(chartCategorie) %>;
+      const giornoData = <%- JSON.stringify(chartGiornaliero) %>;
+      const trendData = <%- JSON.stringify(chartTrend) %>;
 
-    if (type === 'categorie') {
-      modalTitle.textContent = 'Dettaglio: Spese per categoria';
-      modalDetails.textContent = `Totale categorie monitorate: ${catData.labels.length} | Clicca fuori o premi ESC per chiudere`;
-      
-      modalChartInstance = new Chart(modalCanvas, {
-        type: 'doughnut',
-        data: {
-          labels: catData.labels,
-          datasets: [{ data: catData.data, backgroundColor: colors.palette, borderWidth: 0 }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: { 
-            legend: { position: 'right', labels: { color: colors.text, boxWidth: 16, padding: 20, font: { size: 14 } } },
-            tooltip: { bodyFont: { size: 14 }, titleFont: { size: 16 }, padding: 12 }
-          }
-        }
-      });
-    } else if (type === 'giornaliero') {
-      modalTitle.textContent = 'Dettaglio: Andamento giornaliero';
-      modalDetails.textContent = `Giorni analizzati: ${giornoData.labels.length} | Clicca fuori o premi ESC per chiudere`;
-      
-      modalChartInstance = new Chart(modalCanvas, {
-        type: 'bar',
-        data: {
-          labels: giornoData.labels,
-          datasets: [
-            { label: 'Entrate (€)', data: giornoData.dataIngressi, backgroundColor: colors.palette[1] || colors.text, borderRadius: 8 },
-            { label: 'Uscite (€)', data: giornoData.dataUscite, backgroundColor: colors.text, borderRadius: 8 }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: { 
-            legend: { display: true, labels: { color: colors.text, boxWidth: 16, font: { size: 14 } } },
-            tooltip: { bodyFont: { size: 14 }, titleFont: { size: 16 }, padding: 12 }
+      // 1. GRAFICO CATEGORIE
+      var ctxCategorie = document.getElementById('chartCategorie');
+      if (ctxCategorie && catData.labels && catData.labels.length > 0) {
+        new Chart(ctxCategorie, {
+          type: 'doughnut',
+          data: {
+            labels: catData.labels,
+            datasets: [{
+              data: catData.data,
+              backgroundColor: colors.palette.slice(0, catData.labels.length),
+              borderWidth: 2,
+              borderColor: 'var(--bg-primary)'
+            }]
           },
-          scales: {
-            x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { display: false } },
-            y: { ticks: { color: colors.text, font: { size: 13 } }, grid: { color: colors.grid } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: colors.text,
+                  boxWidth: 12,
+                  padding: 14,
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                    return `€${context.parsed.toFixed(2)} (${percentage}%)`;
+                  }
+                }
+              }
+            },
+            cutout: '60%'
           }
+        });
+      }
+
+      // 2. GRAFICO GIORNALIERO
+      var ctxGiornaliero = document.getElementById('chartGiornaliero');
+      if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
+        new Chart(ctxGiornaliero, {
+          type: 'bar',
+          data: {
+            labels: giornoData.labels,
+            datasets: [
+              {
+                label: 'Entrate (€)',
+                data: giornoData.dataIngressi,
+                backgroundColor: 'rgba(78, 205, 196, 0.7)',
+                borderColor: '#4ECDC4',
+                borderWidth: 2,
+                borderRadius: 4
+              },
+              {
+                label: 'Uscite (€)',
+                data: giornoData.dataUscite,
+                backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                borderColor: '#FF6B6B',
+                borderWidth: 2,
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: {
+                  color: colors.text,
+                  boxWidth: 12,
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: colors.text, maxTicksLimit: 10 },
+                grid: { display: false }
+              },
+              y: {
+                ticks: { 
+                  color: colors.text,
+                  callback: function(value) {
+                    return '€' + value.toFixed(0);
+                  }
+                },
+                grid: { color: colors.grid },
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
+
+      // 3. GRAFICO TREND MENSILE
+      var ctxTrend = document.getElementById('chartTrend');
+      if (ctxTrend && trendData && trendData.labels && trendData.labels.length > 0) {
+        new Chart(ctxTrend, {
+          type: 'line',
+          data: {
+            labels: trendData.labels,
+            datasets: [
+              {
+                label: 'Uscite mensili',
+                data: trendData.dataUscite,
+                borderColor: '#FF6B6B',
+                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#FF6B6B',
+                pointRadius: 4,
+                pointHoverRadius: 6
+              },
+              {
+                label: 'Entrate mensili',
+                data: trendData.dataIngressi,
+                borderColor: '#4ECDC4',
+                backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#4ECDC4',
+                pointRadius: 4,
+                pointHoverRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  color: colors.text,
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: colors.text },
+                grid: { color: colors.grid }
+              },
+              y: {
+                ticks: { 
+                  color: colors.text,
+                  callback: function(value) {
+                    return '€' + value.toFixed(0);
+                  }
+                },
+                grid: { color: colors.grid },
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
+
+      // 4. LOGICA MODAL POPUP
+      const modal = document.getElementById('chart-modal');
+      const modalTitle = document.getElementById('chart-modal-title');
+      const modalCanvas = document.getElementById('modal-canvas');
+      const modalDetails = document.getElementById('chart-modal-details');
+      const modalCloseBtn = document.getElementById('chart-modal-close');
+      let modalChartInstance = null;
+
+      function openChartModal(type) {
+        modal.style.display = 'flex';
+        
+        if (modalChartInstance) {
+          modalChartInstance.destroy();
+          modalChartInstance = null;
         }
+
+        let chartConfig = null;
+
+        if (type === 'categorie') {
+          modalTitle.textContent = 'Dettaglio: Spese per Categoria';
+          modalDetails.innerHTML = `
+            <strong>Analisi dettagliata delle tue spese per categoria</strong><br>
+            Totale categorie: ${catData.labels.length} | 
+            Spesa totale: €${catData.data.reduce((a, b) => a + b, 0).toFixed(2)}
+          `;
+          
+          chartConfig = {
+            type: 'doughnut',
+            data: {
+              labels: catData.labels,
+              datasets: [{
+                data: catData.data,
+                backgroundColor: colors.palette.slice(0, catData.labels.length),
+                borderWidth: 3,
+                borderColor: 'var(--bg-primary)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    color: colors.text,
+                    boxWidth: 16,
+                    padding: 20,
+                    font: { size: 14 },
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  }
+                },
+                tooltip: {
+                  bodyFont: { size: 14 },
+                  titleFont: { size: 16 },
+                  padding: 12,
+                  callbacks: {
+                    label: function(context) {
+                      const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                      const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                      return `€${context.parsed.toFixed(2)} (${percentage}%)`;
+                    }
+                  }
+                }
+              },
+              cutout: '65%'
+            }
+          };
+        } else if (type === 'giornaliero') {
+          modalTitle.textContent = 'Dettaglio: Andamento Giornaliero';
+          modalDetails.innerHTML = `
+            <strong>Distribuzione giornaliera di entrate e uscite</strong><br>
+            Giorni analizzati: ${giornoData.labels.length} | 
+            Totale entrate: €${giornoData.dataIngressi.reduce((a, b) => a + b, 0).toFixed(2)} | 
+            Totale uscite: €${giornoData.dataUscite.reduce((a, b) => a + b, 0).toFixed(2)}
+          `;
+          
+          chartConfig = {
+            type: 'bar',
+            data: {
+              labels: giornoData.labels,
+              datasets: [
+                {
+                  label: 'Entrate (€)',
+                  data: giornoData.dataIngressi,
+                  backgroundColor: 'rgba(78, 205, 196, 0.7)',
+                  borderColor: '#4ECDC4',
+                  borderWidth: 2,
+                  borderRadius: 6
+                },
+                {
+                  label: 'Uscite (€)',
+                  data: giornoData.dataUscite,
+                  backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                  borderColor: '#FF6B6B',
+                  borderWidth: 2,
+                  borderRadius: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  display: true,
+                  labels: {
+                    color: colors.text,
+                    boxWidth: 16,
+                    font: { size: 14 },
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  }
+                },
+                tooltip: {
+                  bodyFont: { size: 14 },
+                  titleFont: { size: 16 },
+                  padding: 12,
+                  callbacks: {
+                    label: function(context) {
+                      return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  ticks: { color: colors.text, font: { size: 13 } },
+                  grid: { display: false }
+                },
+                y: {
+                  ticks: { 
+                    color: colors.text, 
+                    font: { size: 13 },
+                    callback: function(value) {
+                      return '€' + value.toFixed(0);
+                    }
+                  },
+                  grid: { color: colors.grid },
+                  beginAtZero: true
+                }
+              }
+            }
+          };
+        } else if (type === 'trend') {
+          modalTitle.textContent = 'Dettaglio: Trend Mensile';
+          modalDetails.innerHTML = `
+            <strong>Evoluzione mensile di entrate e uscite</strong><br>
+            Periodo analizzato: ${trendData.labels.length} mesi | 
+            Media uscite: €${(trendData.dataUscite.reduce((a, b) => a + b, 0) / trendData.dataUscite.length).toFixed(2)}
+          `;
+          
+          chartConfig = {
+            type: 'line',
+            data: {
+              labels: trendData.labels,
+              datasets: [
+                {
+                  label: 'Uscite mensili',
+                  data: trendData.dataUscite,
+                  borderColor: '#FF6B6B',
+                  backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                  fill: true,
+                  tension: 0.4,
+                  pointBackgroundColor: '#FF6B6B',
+                  pointRadius: 6,
+                  pointHoverRadius: 8
+                },
+                {
+                  label: 'Entrate mensili',
+                  data: trendData.dataIngressi,
+                  borderColor: '#4ECDC4',
+                  backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                  fill: true,
+                  tension: 0.4,
+                  pointBackgroundColor: '#4ECDC4',
+                  pointRadius: 6,
+                  pointHoverRadius: 8
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    color: colors.text,
+                    boxWidth: 16,
+                    font: { size: 14 },
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  }
+                },
+                tooltip: {
+                  bodyFont: { size: 14 },
+                  titleFont: { size: 16 },
+                  padding: 12,
+                  callbacks: {
+                    label: function(context) {
+                      return `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  ticks: { color: colors.text, font: { size: 13 } },
+                  grid: { color: colors.grid }
+                },
+                y: {
+                  ticks: { 
+                    color: colors.text, 
+                    font: { size: 13 },
+                    callback: function(value) {
+                      return '€' + value.toFixed(0);
+                    }
+                  },
+                  grid: { color: colors.grid },
+                  beginAtZero: true
+                }
+              }
+            }
+          };
+        }
+
+        if (chartConfig) {
+          modalChartInstance = new Chart(modalCanvas, chartConfig);
+        }
+      }
+
+      function closeChartModal() {
+        modal.style.display = 'none';
+        if (modalChartInstance) {
+          modalChartInstance.destroy();
+          modalChartInstance = null;
+        }
+      }
+
+      modalCloseBtn.addEventListener('click', closeChartModal);
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeChartModal();
       });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeChartModal();
+      });
+
+      // Apri modale quando clicchi sul pulsante fullscreen
+      var buttons = document.querySelectorAll('.chart-fullscreen');
+      buttons.forEach(function(b){
+        b.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          var card = ev.target.closest('.chart-card');
+          if (!card) return;
+          var chartType = card.getAttribute('data-chart');
+          openChartModal(chartType);
+        });
+      });
+
+      // Aggiorna i grafici quando cambia il tema
+      const themeObserver = new MutationObserver(function() {
+        const newColors = getThemeColors();
+        // Ricarica la pagina per applicare i nuovi colori (o ricrea i grafici)
+        // Per semplicità, ricarichiamo i grafici
+        window.location.reload();
+      });
+
+      // Osserva il tema
+      const targetNode = document.documentElement;
+      const config = { attributes: true, attributeFilter: ['data-theme'] };
+      themeObserver.observe(targetNode, config);
+
+      // Aggiungi listener per il tema toggle
+      document.addEventListener('themeChanged', function() {
+        // Ricarica i grafici
+        window.location.reload();
+      });
+
+    })();
+
+    // Funzione per notifiche toast (utile per futuri aggiornamenti AJAX)
+    function showNotification(message, type) {
+      var existing = document.querySelector('.toast-notification');
+      if (existing) existing.remove();
+      
+      var toast = document.createElement('div');
+      toast.className = 'toast-notification ' + type;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(function() {
+        toast.classList.add('fade-out');
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 3000);
     }
-  }
-
-  function closeChartModal() {
-    modal.style.display = 'none';
-    if (modalChartInstance) {
-      modalChartInstance.destroy();
-      modalChartInstance = null;
-    }
-  }
-
-  modalCloseBtn.addEventListener('click', closeChartModal);
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) closeChartModal();
-  });
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && modal.style.display === 'flex') closeChartModal();
-  });
-
-  var buttons = document.querySelectorAll('.chart-fullscreen');
-  buttons.forEach(function(b){
-    b.addEventListener('click', function(ev){
-      var card = ev.target.closest('.chart-card');
-      if (!card) return;
-      var chartType = card.getAttribute('data-chart');
-      openChartModal(chartType);
-    });
-  });
-
-})();
-</script>
-  
+  </script>
 </body>
 </html>
