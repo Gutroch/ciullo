@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Storico · CiulloTracker' }) %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'history' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Storico &amp; Esportazione</div>
+      <div class="page-subtitle">Filtra e scarica i dati delle spese registrate</div>
+
+      <!-- Filtri -->
+      <form method="GET" action="/history" class="card squircle filters-bar">
+        <div class="field">
+          <label for="mese">Mese</label>
+          <select class="input" name="mese" id="mese">
+            <option value="">Tutti</option>
+            <% var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']; %>
+            <% mesi.forEach(function(m, i) { %>
+              <option value="<%= i+1 %>" <%= filtri.mese == (i+1) ? 'selected' : '' %>><%= m %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="anno">Anno</label>
+          <select class="input" name="anno" id="anno">
+            <option value="">Tutti</option>
+            <% anniDisponibili.forEach(function(a) { %>
+              <option value="<%= a %>" <%= filtri.anno == a ? 'selected' : '' %>><%= a %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="categoria">Categoria</label>
+          <select class="input" name="categoria" id="categoria">
+            <option value="">Tutte</option>
+            <% categorie.forEach(function(c) { %>
+              <option value="<%= c %>" <%= filtri.categoria === c ? 'selected' : '' %>><%= c %></option>
+            <% }); %>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filtra</button>
+      </form>
+
+      <!-- Export -->
+      <div class="export-bar">
+        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>">⬇ CSV</a>
+        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>">⬇ Excel</a>
+        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>">⬇ JSON</a>
+      </div>
+
+      <!-- Tabella -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Importo</th>
+              <th>Categoria</th>
+              <th>Autore Inserimento</th>
+              <th>Beneficiario</th>
+              <th>Note</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (expenses.length === 0) { %>
+              <tr><td colspan="8" class="empty-state">Nessuna spesa trovata con i filtri selezionati.</td></tr>
+            <% } %>
+            <% expenses.forEach(function(e) { %>
+              <tr>
+                <td><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
+                <td><%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %></td>
+                <td style="color: <%= e.tipo === 'ingresso' ? '#148c50' : 'var(--danger)' %>;">€ <%= e.importo.toFixed(2) %></td>
+                <td><%= e.categoria %></td>
+                <td><%= e.inserito_da %></td>
+                <td><%= e.per_conto_di %></td>
+                <td><%= e.note %></td>
+                <td>
+                  <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

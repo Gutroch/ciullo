@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Accedi · CiulloTracker' }) %>
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-card squircle-lg">
+      <div class="login-logo squircle-sm">€</div>
+      <div class="login-title">Home CiulloTracker</div>
+      <div class="login-subtitle">Accedi per gestire il budget di famiglia</div>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <form action="/login" method="POST" autocomplete="off">
+        <div class="field">
+          <label for="username">Username</label>
+          <input class="input" type="text" id="username" name="username" required autofocus />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" type="password" id="password" name="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Accedi</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Applica il tema anche sulla schermata di login (nessuna sidebar disponibile qui)
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Admin · CiulloTracker' }) %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'admin' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Pannello Amministratore</div>
+      <div class="page-subtitle">Gestisci gli utenti che possono accedere all'app</div>
+
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+      <div class="grid grid-2" style="align-items:start;">
+        <!-- Form creazione utente -->
+        <div class="card squircle">
+          <div class="chart-title">Crea nuovo utente</div>
+          <form action="/admin/users" method="POST">
+            <div class="field">
+              <label for="username">Username</label>
+              <input class="input" type="text" id="username" name="username" required />
+            </div>
+            <div class="field">
+              <label for="password">Password iniziale</label>
+              <input class="input" type="text" id="password" name="password" required />
+            </div>
+            <div class="field">
+              <label for="ruolo">Ruolo</label>
+              <select class="input" id="ruolo" name="ruolo">
+                <option value="user">Utente</option>
+                <option value="admin">Amministratore</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Crea Utente</button>
+          </form>
+        </div>
+
+        <!-- Tabella utenti -->
+        <div class="card squircle">
+          <div class="chart-title">Utenti censiti (<%= utenti.length %>)</div>
+          <% utenti.forEach(function(u) { %>
+            <div class="expense-item squircle-sm">
+              <div class="expense-meta">
+                <span class="expense-name"><%= u.username %></span>
+                <span class="expense-sub"><%= u.ruolo %></span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <form action="/admin/users/<%= u.id %>/reset" method="POST" onsubmit="return promptReset(this);">
+                  <input type="hidden" name="newPassword" class="reset-input" />
+                  <button type="submit" class="btn btn-secondary btn-sm">Reset PW</button>
+                </form>
+                <form action="/admin/users/<%= u.id %>/delete" method="POST" onsubmit="return confirm('Eliminare l\'utente <%= u.username %>?');">
+                  <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Chiede la nuova password prima di inviare il form di reset
+    function promptReset(form) {
+      var pwd = prompt('Inserisci la nuova password per questo utente:');
+      if (!pwd) return false;
+      form.querySelector('.reset-input').value = pwd;
+      return true;
+    }
+  </script>
+</body>
+</html>
