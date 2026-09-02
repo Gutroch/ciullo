@@ -776,7 +776,6 @@
   </script>
 
   <script>
-
 var dashboardChartData = {
     categorie: <%- JSON.stringify(chartCategorie) %>,
     sottocategorie: <%- JSON.stringify(chartSottocategorie || {}) %>,
@@ -805,19 +804,15 @@ var dashboardChartData = {
     }
     var colors = getThemeColors();
 
-    // ===== NORMALIZZAZIONE DATI =====
-    // Accetta sia il nuovo formato {uscite:{...}, ingressi:{...}}
-    // sia il vecchio formato {labels:[], data:[]} per retrocompatibilità
+    // Normalizza i dati per retrocompatibilità
     function normalizeCategorie(raw) {
         if (!raw) return { uscite: { labels: [], data: [] }, ingressi: { labels: [], data: [] } };
-        // Nuovo formato
         if (raw.uscite || raw.ingressi) {
             return {
                 uscite: raw.uscite || { labels: [], data: [] },
                 ingressi: raw.ingressi || { labels: [], data: [] }
             };
         }
-        // Vecchio formato: assume che siano uscite
         return {
             uscite: { labels: raw.labels || [], data: raw.data || [] },
             ingressi: { labels: [], data: [] }
@@ -832,7 +827,6 @@ var dashboardChartData = {
                 ingressi: raw.ingressi || {}
             };
         }
-        // Vecchio formato: { "Cat1": {labels, data}, ... } → assume uscite
         return { uscite: raw, ingressi: {} };
     }
 
@@ -844,9 +838,9 @@ var dashboardChartData = {
     // ===== STATO GRAFICO CATEGORIE =====
     var ctxCategorie = document.getElementById('chartCategorie');
     var chartInstance = null;
-    var currentTipo = 'uscite';      // 'uscite' | 'ingressi'
-    var currentView = 'macro';       // 'macro' | 'sub'
-    var currentCategory = '';        // nome macrocategoria in drill-down
+    var currentTipo = 'uscite';
+    var currentView = 'macro';
+    var currentCategory = '';
 
     var tipoSelect = document.getElementById('chartTipoSelect');
     var breadcrumb = document.getElementById('chartBreadcrumb');
@@ -887,7 +881,6 @@ var dashboardChartData = {
             breadcrumbCategory.textContent = currentCategory;
         }
 
-        // Gestione "nessun dato"
         if (labels.length === 0 || (labels.length === 1 && data[0] === 0)) {
             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
             ctxCategorie.style.display = 'none';
@@ -947,7 +940,6 @@ var dashboardChartData = {
                                 return prefix + ' €' + context.parsed.toFixed(2) + ' (' + perc + '%)';
                             },
                             afterLabel: function(context) {
-                                // Suggerimento drill-down solo in vista macro
                                 if (currentView === 'macro') {
                                     var subs = (subData[currentTipo] || {})[context.label];
                                     if (subs && subs.labels && subs.labels.length > 0) {
@@ -965,18 +957,16 @@ var dashboardChartData = {
         });
     }
 
-    // ===== DRILL-DOWN: click su una fetta → sottocategorie =====
     function handleChartClick(event, elements) {
-        if (currentView !== 'macro') return; // drill-down solo dalla vista macro
+        if (currentView !== 'macro') return;
         if (!elements || elements.length === 0) return;
 
         var idx = elements[0].index;
         var clickedLabel = chartInstance.data.labels[idx];
 
-        // Verifica che esistano sottocategorie per questa categoria
         var subs = (subData[currentTipo] || {})[clickedLabel];
         if (!subs || !subs.labels || subs.labels.length === 0) {
-            return; // niente sottocategorie, non fare nulla
+            return;
         }
 
         currentCategory = clickedLabel;
@@ -984,21 +974,24 @@ var dashboardChartData = {
         renderCategorieChart();
     }
 
-    // ===== EVENTI UI =====
-    tipoSelect.addEventListener('change', function() {
-        currentTipo = this.value;
-        currentView = 'macro';
-        currentCategory = '';
-        renderCategorieChart();
-    });
+    // Event listeners
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            currentTipo = this.value;
+            currentView = 'macro';
+            currentCategory = '';
+            renderCategorieChart();
+        });
+    }
 
-    breadcrumbBack.addEventListener('click', function() {
-        currentView = 'macro';
-        currentCategory = '';
-        renderCategorieChart();
-    });
+    if (breadcrumbBack) {
+        breadcrumbBack.addEventListener('click', function() {
+            currentView = 'macro';
+            currentCategory = '';
+            renderCategorieChart();
+        });
+    }
 
-    // Prima renderizzazione
     renderCategorieChart();
 
     // ===== GRAFICO GIORNALIERO =====
@@ -1038,14 +1031,6 @@ var dashboardChartData = {
                             boxWidth: 12,
                             usePointStyle: true,
                             pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                var prefix = ctx.dataset.label.indexOf('Entrate') === 0 ? '+' : '−';
-                                return ctx.dataset.label + ': ' + prefix + ' €' + ctx.parsed.y.toFixed(2);
-                            }
                         }
                     }
                 },
@@ -1103,14 +1088,6 @@ var dashboardChartData = {
                     legend: {
                         position: 'top',
                         labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle' }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                var prefix = ctx.dataset.label.indexOf('Entrate') === 0 ? '+' : '−';
-                                return ctx.dataset.label + ': ' + prefix + ' €' + ctx.parsed.y.toFixed(2);
-                            }
-                        }
                     }
                 },
                 scales: {
@@ -1128,7 +1105,7 @@ var dashboardChartData = {
         });
     }
 
-    // ===== MODAL FULLSCREEN (aggiornato per supportare drill-down) =====
+    // ===== MODAL FULLSCREEN =====
     var modal = document.getElementById('chart-modal');
     var modalTitle = document.getElementById('chart-modal-title');
     var modalCanvas = document.getElementById('chart-modal-canvas');
@@ -1143,7 +1120,6 @@ var dashboardChartData = {
         var chartConfig = null;
 
         if (type === 'categorie') {
-            // Nel modal mostriamo la vista corrente (macro o sub)
             var srcLabels, srcData, viewLabel;
             if (currentView === 'macro') {
                 var src = catData[currentTipo] || { labels: [], data: [] };
@@ -1189,19 +1165,6 @@ var dashboardChartData = {
                                 usePointStyle: true,
                                 pointStyle: 'circle'
                             }
-                        },
-                        tooltip: {
-                            bodyFont: { size: 14 },
-                            titleFont: { size: 16 },
-                            padding: 12,
-                            callbacks: {
-                                label: function(ctx) {
-                                    var t = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                                    var p = t > 0 ? ((ctx.parsed / t) * 100).toFixed(1) : 0;
-                                    var prefix = currentTipo === 'uscite' ? '−' : '+';
-                                    return prefix + ' €' + ctx.parsed.toFixed(2) + ' (' + p + '%)';
-                                }
-                            }
                         }
                     },
                     cutout: '65%'
@@ -1237,8 +1200,7 @@ var dashboardChartData = {
                 options: {
                     responsive: true, maintainAspectRatio: true,
                     plugins: {
-                        legend: { display: true, labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } },
-                        tooltip: { bodyFont: { size: 14 }, titleFont: { size: 16 }, padding: 12 }
+                        legend: { display: true, labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } }
                     },
                     scales: {
                         x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { display: false } },
@@ -1266,8 +1228,7 @@ var dashboardChartData = {
                 options: {
                     responsive: true, maintainAspectRatio: true,
                     plugins: {
-                        legend: { position: 'top', labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } },
-                        tooltip: { bodyFont: { size: 14 }, titleFont: { size: 16 }, padding: 12 }
+                        legend: { position: 'top', labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' } }
                     },
                     scales: {
                         x: { ticks: { color: colors.text, font: { size: 13 } }, grid: { color: colors.grid } },
