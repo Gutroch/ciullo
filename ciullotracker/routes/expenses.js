@@ -66,50 +66,92 @@ router.get('/', requireAuth, async (req, res) => {
     // Ultime 10 spese del mese
     const ultimeSpese = monthly.slice(0, 10);
 
-    // Dati per il grafico a torta delle categorie
-    const chartCategorie = {
-      labels: Object.keys(perCategoria),
-      data: Object.values(perCategoria).map((v) => parseFloat(v.toFixed(2))),
-    };
+    // ===== DATI PER GRAFICI =====
 
-    // Dati per il grafico giornaliero (andamento nel mese)
-    const giorniNelMese = new Date(year, month, 0).getDate();
-    const perGiornoUscite = Array(giorniNelMese).fill(0);
-    const perGiornoIngressi = Array(giorniNelMese).fill(0);
-    uscite.forEach((e) => {
-      const giorno = new Date(e.data_spesa).getDate();
-      if (giorno >= 1 && giorno <= giorniNelMese) perGiornoUscite[giorno - 1] += e.importo;
-    });
-    ingressi.forEach((e) => {
-      const giorno = new Date(e.data_spesa).getDate();
-      if (giorno >= 1 && giorno <= giorniNelMese) perGiornoIngressi[giorno - 1] += e.importo;
-    });
-    const chartGiornaliero = {
-      labels: Array.from({ length: giorniNelMese }, (_, i) => String(i + 1)),
-      dataUscite: perGiornoUscite.map((v) => parseFloat(v.toFixed(2))),
-      dataIngressi: perGiornoIngressi.map((v) => parseFloat(v.toFixed(2))),
-    };
+// 1. Grafico categorie: separa ingressi e uscite
+const macroUscite = {};
+const macroIngressi = {};
+monthly.forEach((e) => {
+  const bucket = e.tipo === 'ingresso' ? macroIngressi : macroUscite;
+  bucket[e.categoria] = (bucket[e.categoria] || 0) + e.importo;
+});
 
-    // Trend mensile (ultimi 6 mesi)
-    const trendData = [];
-    const trendIngressi = [];
-    const trendLabels = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthTrend = d.getMonth() + 1;
-      const yearTrend = d.getFullYear();
-      const monthExpenses = all.filter(e => isInMonth(e.data_spesa, monthTrend, yearTrend));
-      const usciteTrend = monthExpenses.filter(e => e.tipo !== 'ingresso');
-      const ingressiTrend = monthExpenses.filter(e => e.tipo === 'ingresso');
-      trendData.push(usciteTrend.reduce((sum, e) => sum + e.importo, 0));
-      trendIngressi.push(ingressiTrend.reduce((sum, e) => sum + e.importo, 0));
-      trendLabels.push(d.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' }));
-    }
-    const chartTrend = {
-      labels: trendLabels,
-      dataUscite: trendData.map(v => parseFloat(v.toFixed(2))),
-      dataIngressi: trendIngressi.map(v => parseFloat(v.toFixed(2))),
+const chartCategorie = {
+  uscite: {
+    labels: Object.keys(macroUscite),
+    data: Object.values(macroUscite).map(v => parseFloat(v.toFixed(2)))
+  },
+  ingressi: {
+    labels: Object.keys(macroIngressi),
+    data: Object.values(macroIngressi).map(v => parseFloat(v.toFixed(2)))
+  }
+};
+
+// 2. Grafico sottocategorie: per ogni macrocategoria, somma per sottocategoria
+const subUscite = {};
+const subIngressi = {};
+monthly.forEach((e) => {
+  if (!e.sottocategoria) return;
+  const bucket = e.tipo === 'ingresso' ? subIngressi : subUscite;
+  if (!bucket[e.categoria]) bucket[e.categoria] = {};
+  bucket[e.categoria][e.sottocategoria] = 
+    (bucket[e.categoria][e.sottocategoria] || 0) + e.importo;
+});
+
+function packSub(bucket) {
+  const out = {};
+  Object.keys(bucket).forEach(cat => {
+    out[cat] = {
+      labels: Object.keys(bucket[cat]),
+      data: Object.values(bucket[cat]).map(v => parseFloat(v.toFixed(2)))
     };
+  });
+  return out;
+}
+
+const chartSottocategorie = {
+  uscite: packSub(subUscite),
+  ingressi: packSub(subIngressi)
+};
+
+// 3. Grafico giornaliero (invariato)
+const giorniNelMese = new Date(year, month, 0).getDate();
+const perGiornoUscite = Array(giorniNelMese).fill(0);
+const perGiornoIngressi = Array(giorniNelMese).fill(0);
+uscite.forEach((e) => {
+  const giorno = new Date(e.data_spesa).getDate();
+  if (giorno >= 1 && giorno <= giorniNelMese) perGiornoUscite[giorno - 1] += e.importo;
+});
+ingressi.forEach((e) => {
+  const giorno = new Date(e.data_spesa).getDate();
+  if (giorno >= 1 && giorno <= giorniNelMese) perGiornoIngressi[giorno - 1] += e.importo;
+});
+const chartGiornaliero = {
+  labels: Array.from({ length: giorniNelMese }, (_, i) => String(i + 1)),
+  dataUscite: perGiornoUscite.map((v) => parseFloat(v.toFixed(2))),
+  dataIngressi: perGiornoIngressi.map((v) => parseFloat(v.toFixed(2))),
+};
+
+// 4. Trend mensile (invariato)
+const trendData = [];
+const trendIngressi = [];
+const trendLabels = [];
+for (let i = 5; i >= 0; i--) {
+  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+  const monthTrend = d.getMonth() + 1;
+  const yearTrend = d.getFullYear();
+  const monthExpenses = all.filter(e => isInMonth(e.data_spesa, monthTrend, yearTrend));
+  const usciteTrend = monthExpenses.filter(e => e.tipo !== 'ingresso');
+  const ingressiTrend = monthExpenses.filter(e => e.tipo === 'ingresso');
+  trendData.push(usciteTrend.reduce((sum, e) => sum + e.importo, 0));
+  trendIngressi.push(ingressiTrend.reduce((sum, e) => sum + e.importo, 0));
+  trendLabels.push(d.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' }));
+}
+const chartTrend = {
+  labels: trendLabels,
+  dataUscite: trendData.map(v => parseFloat(v.toFixed(2))),
+  dataIngressi: trendIngressi.map(v => parseFloat(v.toFixed(2))),
+};
 
     // Distribuzione per utente (tutte le uscite dell'anno in corso)
     const perUtenteAll = {};
@@ -170,6 +212,7 @@ router.get('/', requireAuth, async (req, res) => {
       prossimeScadenze,
       // Grafici
       chartCategorie,
+      chartSottocategorie,
       chartGiornaliero,
       chartTrend,
       chartUtenti,
