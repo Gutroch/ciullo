@@ -1,12 +1,14 @@
 // server.js
 const express = require('express');
 const session = require('express-session');
+const RedisStore = require('connect-redis').default;
 const path = require('path');
 
 // Importa i modelli Redis
 const Users = require('./models/users');
 const Expenses = require('./models/expenses');
 const Recurring = require('./models/recurring');
+const { getRedisClient } = require('./config/redis');
 
 // Importa utility CSV per migrazione
 const { readCsv } = require('./utils/csv');
@@ -77,9 +79,14 @@ app.use(express.json());
 // Ma per compatibilità, manteniamo anche public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Gestione sessione ---
+// --- Gestione sessione (salvata su Redis, non in memoria) ---
+// Necessario in produzione: MemoryStore perde le sessioni ad ogni
+// riavvio/scaling del processo e causa il redirect continuo al login.
+app.set('trust proxy', 1); // necessario dietro proxy/load balancer per i cookie "secure"
+
 app.use(
   session({
+    store: new RedisStore({ client: getRedisClient(), prefix: 'ciullotracker:sess:' }),
     secret: process.env.SESSION_SECRET || 'home-budget-tracker-secret-cambia-in-produzione',
     resave: false,
     saveUninitialized: false,
@@ -125,7 +132,7 @@ migrateDataFromCsv().then(() => {
   setInterval(() => Recurring.processDueRecurring(), 1000 * 60 * 60 * 6);
 
   app.listen(PORT, () => {
-    console.log(`✅ Home CiulloTracker in ascolto sulla porta ${PORT}`);
+    console.log(`✅ CiulloTracker in ascolto sulla porta ${PORT}`);
   });
 });
 

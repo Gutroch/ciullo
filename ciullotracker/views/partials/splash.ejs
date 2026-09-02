@@ -1,0 +1,121 @@
+<div id="splash-screen" class="splash-screen" style="display:none;">
+  <svg viewBox="0 0 300 220" width="220" height="160" xmlns="http://www.w3.org/2000/svg">
+    <!-- terreno -->
+    <rect x="0" y="190" width="300" height="30" fill="#8bc27a" />
+
+    <!-- lampione -->
+    <rect x="205" y="40" width="8" height="150" rx="3" fill="#5b6470" />
+    <circle cx="209" cy="35" r="18" fill="#ffe9a8" />
+    <circle cx="209" cy="35" r="18" fill="none" stroke="#5b6470" stroke-width="3" />
+    <rect x="196" y="18" width="26" height="6" rx="2" fill="#5b6470" />
+
+    <!-- pozzetto pipì (appare gradualmente) -->
+    <ellipse id="splash-puddle" cx="196" cy="197" rx="0" ry="0" fill="#ffd873" opacity="0.85" />
+
+    <!-- getto pipì -->
+    <path id="splash-stream" d="M 187 150 Q 178 165 190 195" fill="none" stroke="#ffd873" stroke-width="4" stroke-linecap="round" opacity="0" />
+
+    <!-- cane -->
+    <g id="splash-dog" transform="translate(60,150)">
+      <!-- corpo -->
+      <ellipse cx="60" cy="20" rx="38" ry="16" fill="#c98b4a" />
+      <!-- testa -->
+      <circle cx="105" cy="10" r="16" fill="#c98b4a" />
+      <!-- orecchio -->
+      <path d="M 108 -2 Q 118 -14 116 2 Z" fill="#8a5a2b" />
+      <!-- occhio -->
+      <circle cx="112" cy="8" r="2" fill="#2a2a2a" />
+      <!-- naso -->
+      <circle cx="120" cy="12" r="2.5" fill="#2a2a2a" />
+      <!-- coda -->
+      <path id="splash-tail" d="M 25 12 Q 8 4 14 -8" fill="none" stroke="#c98b4a" stroke-width="7" stroke-linecap="round" />
+      <!-- zampe anteriori -->
+      <rect x="80" y="30" width="7" height="18" rx="3" fill="#8a5a2b" />
+      <rect x="93" y="30" width="7" height="18" rx="3" fill="#8a5a2b" />
+      <!-- zampa posteriore a terra -->
+      <rect x="35" y="30" width="8" height="18" rx="3" fill="#8a5a2b" />
+      <!-- zampa posteriore alzata -->
+      <g id="splash-leg" style="transform-origin: 55px 24px;">
+        <rect x="50" y="20" width="8" height="16" rx="3" fill="#8a5a2b" />
+      </g>
+    </g>
+  </svg>
+  <div class="splash-text">CiulloTracker</div>
+</div>
+
+<style>
+  .splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(180deg, #bfe4ff 0%, #eaf7ff 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: splash-fadeout 0.5s ease forwards;
+    animation-delay: 1.6s;
+  }
+  .splash-text {
+    margin-top: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #2a2a2a;
+    opacity: 0;
+    animation: splash-text-in 0.4s ease forwards;
+    animation-delay: 0.3s;
+  }
+  #splash-leg {
+    animation: splash-leg-lift 1.4s ease-in-out;
+  }
+  #splash-tail {
+    animation: splash-tail-wag 0.5s ease-in-out infinite;
+  }
+  #splash-stream {
+    animation: splash-stream-flow 1.4s ease-in-out;
+  }
+  #splash-puddle {
+    animation: splash-puddle-grow 1.4s ease-in-out forwards;
+  }
+
+  @keyframes splash-text-in {
+    to { opacity: 1; }
+  }
+  @keyframes splash-leg-lift {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-55deg); }
+    85% { transform: rotate(-55deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes splash-tail-wag {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(12deg); }
+  }
+  @keyframes splash-stream-flow {
+    0%, 20% { opacity: 0; }
+    28% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes splash-puddle-grow {
+    0%, 25% { rx: 0; ry: 0; }
+    40% { rx: 10; ry: 4; }
+    100% { rx: 16; ry: 6; }
+  }
+  @keyframes splash-fadeout {
+    to { opacity: 0; visibility: hidden; pointer-events: none; }
+  }
+</style>
+
+<script>
+  (function () {
+    try {
+      if (!localStorage.getItem('hbt-splash-seen')) {
+        document.getElementById('splash-screen').style.display = 'flex';
+        localStorage.setItem('hbt-splash-seen', '1');
+      }
+    } catch (e) {
+      // localStorage non disponibile: nessuna splash, nessun errore bloccante
+    }
+  })();
+</script>
