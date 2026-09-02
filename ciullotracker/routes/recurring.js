@@ -7,7 +7,6 @@ const { requireAuth } = require('../middleware/auth');
 
 router.get('/recurring', requireAuth, async (req, res) => {
   try {
-    // Applica eventuali scadenze prima di mostrare l'elenco
     await Recurring.processDueRecurring();
 
     const utenti = await Users.getAllUsers();
@@ -17,7 +16,9 @@ router.get('/recurring', requireAuth, async (req, res) => {
       user: req.session.user,
       voci,
       utenti,
-      categorie: Expenses.CATEGORIE,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
       error: null,
       success: null,
     });
@@ -35,10 +36,9 @@ router.get('/recurring', requireAuth, async (req, res) => {
 // ---------------------------------------------------------------
 router.post('/recurring', requireAuth, async (req, res) => {
   try {
-    const { descrizione, importo, tipo, categoria, ricorrenza, giorno } = req.body;
+    const { descrizione, importo, tipo, categoria, ricorrenza, giorno, sottocategoria } = req.body;
     const inserito_da = req.body.inserito_da || req.session.user.username;
     const per_conto_di = req.body.per_conto_di || req.session.user.username;
-    // I mesi arrivano come checkbox multipli: mesi=3&mesi=10
     let mesi = req.body.mesi || [];
     if (!Array.isArray(mesi)) mesi = [mesi];
 
@@ -53,7 +53,9 @@ router.post('/recurring', requireAuth, async (req, res) => {
         user: req.session.user,
         voci,
         utenti,
-        categorie: Expenses.CATEGORIE,
+        categorieSpese: Expenses.CATEGORIE_SPESE,
+        categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+        sottocategorieMap: Expenses.CATEGORIE_SPESE,
         error: !meseValido
           ? 'Seleziona almeno un mese per una ricorrenza "Mesi specifici".'
           : 'Inserisci una descrizione e un importo valido maggiore di zero.',
@@ -66,6 +68,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
       importo,
       tipo,
       categoria,
+      sottocategoria: (tipo === 'uscita' && sottocategoria) ? sottocategoria : '',
       ricorrenza,
       mesi,
       giorno,
@@ -73,14 +76,15 @@ router.post('/recurring', requireAuth, async (req, res) => {
       per_conto_di,
     });
 
-    // Ricarica i dati aggiornati
     const vociAggiornate = await Recurring.getAll();
 
     res.render('recurring', {
       user: req.session.user,
       voci: vociAggiornate,
       utenti,
-      categorie: Expenses.CATEGORIE,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
       error: null,
       success: 'Spesa ricorrente salvata correttamente!',
     });
@@ -94,7 +98,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
 });
 
 // ---------------------------------------------------------------
-// POST /recurring/:id/toggle - Attiva/disattiva una voce ricorrente
+// POST /recurring/:id/toggle - Attiva/disattiva
 // ---------------------------------------------------------------
 router.post('/recurring/:id/toggle', requireAuth, async (req, res) => {
   try {
@@ -110,7 +114,7 @@ router.post('/recurring/:id/toggle', requireAuth, async (req, res) => {
 });
 
 // ---------------------------------------------------------------
-// POST /recurring/:id/delete - Elimina una voce ricorrente
+// POST /recurring/:id/delete - Elimina
 // ---------------------------------------------------------------
 router.post('/recurring/:id/delete', requireAuth, async (req, res) => {
   try {

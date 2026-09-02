@@ -19,6 +19,7 @@ const expensesRoutes = require('./routes/expenses');
 const adminRoutes = require('./routes/admin');
 const exportRoutes = require('./routes/export');
 const recurringRoutes = require('./routes/recurring');
+const budgetRoutes = require('./routes/budget'); // <-- NUOVO IMPORT
 const { attachUser } = require('./middleware/auth');
 
 const app = express();
@@ -106,6 +107,7 @@ app.use('/', expensesRoutes);
 app.use('/', adminRoutes);
 app.use('/', exportRoutes);
 app.use('/', recurringRoutes);
+app.use('/budget', budgetRoutes); // <-- NUOVA ROTTA PER IL BUDGET
 
 // --- Gestione 404 ---
 app.use((req, res) => {

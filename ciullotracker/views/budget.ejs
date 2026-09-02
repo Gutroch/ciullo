@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Budget · CiulloTracker' }) %>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'budget' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Budget Annuale</div>
+      <div class="page-subtitle">Confronta il previsto (modificabile) con il reale (calcolato automaticamente)</div>
+
+      <% if (locals.error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (locals.success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+      <!-- Filtro anno -->
+      <form method="GET" action="/budget" class="card squircle filters-bar" style="margin-bottom:20px;">
+        <div class="field">
+          <label for="year">Anno</label>
+          <select class="input" name="year" id="year">
+            <% anniDisponibili.forEach(function(y) { %>
+              <option value="<%= y %>" <%= y === year ? 'selected' : '' %>><%= y %></option>
+            <% }); %>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Visualizza</button>
+      </form>
+
+      <!-- Tabella budget -->
+      <div class="card squircle" style="overflow-x:auto;">
+        <form action="/budget/update" method="POST" id="budgetForm">
+          <input type="hidden" name="year" value="<%= year %>" />
+
+          <table class="data-table budget-table">
+            <thead>
+              <tr>
+                <th>Mese</th>
+                <th>Previsto (€)</th>
+                <th>Reale (€)</th>
+                <th>Differenza (€)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% months.forEach(function(m) { %>
+                <tr>
+                  <td><strong><%= m.label %></strong></td>
+                  <td>
+                    <input type="number" step="0.01" class="input input-budget" name="previsto_<%= m.month %>" value="<%= m.previsto.toFixed(2) %>" />
+                  </td>
+                  <td style="color: <%= m.reale >= 0 ? '#148c50' : 'var(--danger)' %>;">
+                    <%= m.reale >= 0 ? '+' : '' %><%= m.reale.toFixed(2) %>
+                  </td>
+                  <td style="color: <%= m.differenza >= 0 ? '#148c50' : 'var(--danger)' %>;">
+                    <%= m.differenza >= 0 ? '+' : '' %><%= m.differenza.toFixed(2) %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+            <tfoot>
+              <tr style="font-weight:700; border-top:2px solid var(--border);">
+                <td>ANNO <%= year %></td>
+                <td><%= totalPrevisto.toFixed(2) %></td>
+                <td style="color: <%= totalReale >= 0 ? '#148c50' : 'var(--danger)' %>;"><%= totalReale.toFixed(2) %></td>
+                <td style="color: <%= totalDifferenza >= 0 ? '#148c50' : 'var(--danger)' %>;"><%= totalDifferenza.toFixed(2) %></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div style="margin-top:16px; display:flex; gap:12px; justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary">Salva budget</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Legenda -->
+      <div style="margin-top:12px; font-size:0.9rem; color:var(--muted);">
+        <p><span style="color:#148c50;">●</span> Valori positivi = avanzo, <span style="color:var(--danger);">●</span> negativi = disavanzo.</p>
+        <p>Il campo <strong>Previsto</strong> è modificabile: inserisci il saldo netto che prevedi per ogni mese (entrate − uscite).</p>
+        <p><strong>Reale</strong> viene calcolato automaticamente dai movimenti registrati.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <style>
+    .budget-table td {
+      padding: 8px 12px;
+      vertical-align: middle;
+    }
+    .budget-table input.input-budget {
+      width: 120px;
+      padding: 6px 8px;
+      font-size: 0.95rem;
+      text-align: right;
+    }
+    .budget-table tfoot td {
+      font-size: 1.1rem;
+      padding-top: 12px;
+    }
+    .filters-bar .field {
+      margin-bottom: 0;
+    }
+  </style>
+</body>
+</html>

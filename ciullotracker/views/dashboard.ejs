@@ -51,7 +51,7 @@
           <% prossimeScadenze.forEach(function(r) { %>
             <div class="expense-item squircle-sm">
               <div class="expense-meta">
-                <span class="expense-cat"><%= r.categoria %></span>
+                <span class="expense-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %></span>
                 <span class="expense-name"><%= r.descrizione %></span>
                 <span class="expense-sub">Scade il <%= r.prossimaData.toLocaleDateString('it-IT') %></span>
               </div>
@@ -70,7 +70,7 @@
           <% ultimeSpese.forEach(function(e) { %>
             <div class="expense-item squircle-sm">
               <div class="expense-meta">
-                <span class="expense-cat"><%= e.categoria %></span>
+                <span class="expense-cat"><%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
                 <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
                 <span class="expense-sub"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · <%= e.inserito_da %> → <%= e.per_conto_di %></span>
               </div>
@@ -167,14 +167,12 @@
   function openChartModal(type) {
     modal.style.display = 'flex';
     
-    // Distruggi istanza precedente per evitare memory leaks
     if (modalChartInstance) modalChartInstance.destroy();
 
     if (type === 'categorie') {
       modalTitle.textContent = 'Dettaglio: Spese per categoria';
       modalDetails.textContent = `Totale categorie monitorate: ${catData.labels.length} | Clicca fuori o premi ESC per chiudere`;
       
-      // Grafico ottimizzato per il popup (Legenda a destra, font più grandi)
       modalChartInstance = new Chart(modalCanvas, {
         type: 'doughnut',
         data: {
@@ -227,16 +225,14 @@
     }
   }
 
-  // Eventi di chiusura
   modalCloseBtn.addEventListener('click', closeChartModal);
   modal.addEventListener('click', function(e) {
-    if (e.target === modal) closeChartModal(); // Chiude cliccando sullo sfondo
+    if (e.target === modal) closeChartModal();
   });
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && modal.style.display === 'flex') closeChartModal();
   });
 
-  // 3. BINDING BOTTONI ⤢
   var buttons = document.querySelectorAll('.chart-fullscreen');
   buttons.forEach(function(b){
     b.addEventListener('click', function(ev){

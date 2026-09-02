@@ -20,13 +20,11 @@ router.get('/', requireAuth, async (req, res) => {
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
-    // Applica eventuali spese ricorrenti scadute prima di calcolare i dati
     await Recurring.processDueRecurring();
 
     const all = await Expenses.getAllExpenses();
     const monthly = all.filter((e) => isInMonth(e.data_spesa, month, year));
 
-    // Separiamo le uscite (spese) dagli ingressi (entrate)
     const uscite = monthly.filter((e) => e.tipo !== 'ingresso');
     const ingressi = monthly.filter((e) => e.tipo === 'ingresso');
 
@@ -48,7 +46,6 @@ router.get('/', requireAuth, async (req, res) => {
       }
     });
 
-    // Utente che ha speso di più (per conto di chi, solo uscite)
     const perUtente = {};
     uscite.forEach((e) => {
       perUtente[e.per_conto_di] = (perUtente[e.per_conto_di] || 0) + e.importo;
@@ -62,16 +59,13 @@ router.get('/', requireAuth, async (req, res) => {
       }
     });
 
-    // Ultimi 10 movimenti del mese (già ordinati per data decrescente dal model)
     const ultimeSpese = monthly.slice(0, 10);
 
-    // Dati per il grafico a torta (per categoria, solo uscite)
     const chartCategorie = {
       labels: Object.keys(perCategoria),
       data: Object.values(perCategoria).map((v) => parseFloat(v.toFixed(2))),
     };
 
-    // Dati per il grafico giornaliero (andamento nel mese): entrate vs uscite
     const giorniNelMese = new Date(year, month, 0).getDate();
     const perGiornoUscite = Array(giorniNelMese).fill(0);
     const perGiornoIngressi = Array(giorniNelMese).fill(0);
@@ -89,7 +83,6 @@ router.get('/', requireAuth, async (req, res) => {
       dataIngressi: perGiornoIngressi.map((v) => parseFloat(v.toFixed(2))),
     };
 
-    // Spese ricorrenti in scadenza nei prossimi 7 giorni (per il promemoria)
     const prossimeScadenze = await Recurring.getUpcoming(7);
 
     res.render('dashboard', {
@@ -123,10 +116,14 @@ router.get('/expenses/new', requireAuth, async (req, res) => {
     res.render('new-expense', {
       user: req.session.user,
       utenti,
-      categorie: Expenses.CATEGORIE,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      // per comodità, una mappa piatta per i dropdown
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
       oggi: new Date().toISOString().slice(0, 10),
       error: null,
       success: null,
+      expense: null, // per eventuale modifica
     });
   } catch (error) {
     console.error('❌ Errore form nuova spesa:', error);
@@ -142,9 +139,8 @@ router.get('/expenses/new', requireAuth, async (req, res) => {
 // ---------------------------------------------------------------
 router.post('/expenses', requireAuth, async (req, res) => {
   try {
-    const { importo, data_spesa, categoria, note } = req.body;
-    const tipo = req.body.tipo === 'ingresso' ? 'ingresso' : 'uscita';
-    // Se la sezione avanzate non è stata toccata, usiamo l'utente loggato
+    const { importo, data_spesa, categoria, note, tipo, sottocategoria } = req.body;
+    const tipoFinale = tipo === 'ingresso' ? 'ingresso' : 'uscita';
     const inserito_da = req.body.inserito_da || req.session.user.username;
     const per_conto_di = req.body.per_conto_di || req.session.user.username;
 
@@ -154,18 +150,22 @@ router.post('/expenses', requireAuth, async (req, res) => {
       return res.status(400).render('new-expense', {
         user: req.session.user,
         utenti,
-        categorie: Expenses.CATEGORIE,
+        categorieSpese: Expenses.CATEGORIE_SPESE,
+        categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+        sottocategorieMap: Expenses.CATEGORIE_SPESE,
         oggi: new Date().toISOString().slice(0, 10),
         error: "Inserisci un importo valido maggiore di zero.",
         success: null,
+        expense: null,
       });
     }
 
     await Expenses.addExpense({
       data_spesa: data_spesa || new Date().toISOString().slice(0, 10),
       importo,
-      tipo,
+      tipo: tipoFinale,
       categoria,
+      sottocategoria: (tipoFinale === 'uscita' && sottocategoria) ? sottocategoria : '',
       inserito_da,
       per_conto_di,
       note,
@@ -174,10 +174,13 @@ router.post('/expenses', requireAuth, async (req, res) => {
     res.render('new-expense', {
       user: req.session.user,
       utenti,
-      categorie: Expenses.CATEGORIE,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
       oggi: new Date().toISOString().slice(0, 10),
       error: null,
       success: 'Spesa registrata correttamente!',
+      expense: null,
     });
   } catch (error) {
     console.error('❌ Errore salvataggio spesa:', error);
@@ -189,29 +192,120 @@ router.post('/expenses', requireAuth, async (req, res) => {
 });
 
 // ---------------------------------------------------------------
-// GET /history - Storico dati con filtri per mese/anno/categoria
+// GET /expenses/:id/edit - Form di modifica
+// ---------------------------------------------------------------
+router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
+  try {
+    const all = await Expenses.getAllExpenses();
+    const expense = all.find(e => e.id === req.params.id);
+    if (!expense) {
+      return res.status(404).render('error', {
+        user: req.session.user,
+        message: 'Spesa non trovata.'
+      });
+    }
+    const utenti = await Users.getAllUsers();
+    res.render('new-expense', {
+      user: req.session.user,
+      utenti,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
+      oggi: new Date().toISOString().slice(0, 10),
+      error: null,
+      success: null,
+      expense: expense, // precompila il form
+      editMode: true,
+    });
+  } catch (error) {
+    console.error('❌ Errore form modifica:', error);
+    res.status(500).render('error', {
+      user: req.session.user,
+      message: 'Si è verificato un errore nel caricamento del form di modifica.'
+    });
+  }
+});
+
+// ---------------------------------------------------------------
+// POST /expenses/:id/update - Aggiorna una spesa
+// ---------------------------------------------------------------
+router.post('/expenses/:id/update', requireAuth, async (req, res) => {
+  try {
+    const { importo, data_spesa, categoria, note, tipo, sottocategoria } = req.body;
+    const tipoFinale = tipo === 'ingresso' ? 'ingresso' : 'uscita';
+    const inserito_da = req.body.inserito_da || req.session.user.username;
+    const per_conto_di = req.body.per_conto_di || req.session.user.username;
+
+    if (!importo || isNaN(parseFloat(importo)) || parseFloat(importo) <= 0) {
+      // Se errore, mostriamo di nuovo il form di modifica con i dati vecchi
+      const all = await Expenses.getAllExpenses();
+      const expense = all.find(e => e.id === req.params.id);
+      const utenti = await Users.getAllUsers();
+      return res.status(400).render('new-expense', {
+        user: req.session.user,
+        utenti,
+        categorieSpese: Expenses.CATEGORIE_SPESE,
+        categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+        sottocategorieMap: Expenses.CATEGORIE_SPESE,
+        oggi: new Date().toISOString().slice(0, 10),
+        error: "Inserisci un importo valido maggiore di zero.",
+        success: null,
+        expense: expense,
+        editMode: true,
+      });
+    }
+
+    await Expenses.updateExpense(req.params.id, {
+      data_spesa: data_spesa || new Date().toISOString().slice(0, 10),
+      importo,
+      tipo: tipoFinale,
+      categoria,
+      sottocategoria: (tipoFinale === 'uscita' && sottocategoria) ? sottocategoria : '',
+      inserito_da,
+      per_conto_di,
+      note,
+    });
+
+    // Reindirizza alla pagina da cui si proveniva (history o dashboard)
+    const referer = req.headers.referer || '/history';
+    res.redirect(referer);
+  } catch (error) {
+    console.error('❌ Errore aggiornamento spesa:', error);
+    res.status(500).render('error', {
+      user: req.session.user,
+      message: 'Si è verificato un errore nell\'aggiornamento della spesa.'
+    });
+  }
+});
+
+// ---------------------------------------------------------------
+// GET /history - Storico con filtri (incluso sottocategoria)
 // ---------------------------------------------------------------
 router.get('/history', requireAuth, async (req, res) => {
   try {
     const all = await Expenses.getAllExpenses();
-    const { mese, anno, categoria } = req.query;
+    const { mese, anno, categoria, sottocategoria } = req.query;
 
     let filtered = all;
     if (mese) filtered = filtered.filter((e) => new Date(e.data_spesa).getMonth() + 1 === parseInt(mese, 10));
     if (anno) filtered = filtered.filter((e) => new Date(e.data_spesa).getFullYear() === parseInt(anno, 10));
     if (categoria) filtered = filtered.filter((e) => e.categoria === categoria);
+    if (sottocategoria) filtered = filtered.filter((e) => e.sottocategoria === sottocategoria);
 
-    // Elenco anni disponibili per il filtro (derivati dai dati esistenti)
-    const anniDisponibili = [...new Set(all.map((e) => new Date(e.data_spesa).getFullYear()))].sort(
-      (a, b) => b - a
-    );
+    // Elenco anni e categorie per i filtri
+    const anniDisponibili = [...new Set(all.map((e) => new Date(e.data_spesa).getFullYear()))].sort((a, b) => b - a);
+    const categorieDisponibili = [...new Set(all.map((e) => e.categoria))].sort();
+    // Tutte le sottocategorie disponibili (non vuote)
+    const sottocategorieDisponibili = [...new Set(all.map((e) => e.sottocategoria).filter(s => s))].sort();
 
     res.render('history', {
       user: req.session.user,
       expenses: filtered,
-      categorie: Expenses.CATEGORIE,
+      categorie: Expenses.CATEGORIE_SPESE, // per eventuale dropdown
       anniDisponibili,
-      filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '' },
+      categorieDisponibili,
+      sottocategorieDisponibili,
+      filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '', sottocategoria: sottocategoria || '' },
     });
   } catch (error) {
     console.error('❌ Errore storico:', error);
@@ -223,7 +317,7 @@ router.get('/history', requireAuth, async (req, res) => {
 });
 
 // ---------------------------------------------------------------
-// POST /expenses/:id/delete - Elimina una spesa dallo storico
+// POST /expenses/:id/delete - Elimina una spesa
 // ---------------------------------------------------------------
 router.post('/expenses/:id/delete', requireAuth, async (req, res) => {
   try {

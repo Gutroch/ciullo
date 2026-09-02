@@ -48,9 +48,14 @@
             <div class="field">
               <label for="categoria">Categoria</label>
               <select class="input" id="categoria" name="categoria">
-                <% categorie.forEach(function(c) { %>
-                  <option value="<%= c %>"><%= c %></option>
-                <% }); %>
+                <!-- Popolato via JS -->
+              </select>
+            </div>
+
+            <div class="field" id="sottocategoriaGroup">
+              <label for="sottocategoria">Sottocategoria</label>
+              <select class="input" id="sottocategoria" name="sottocategoria">
+                <option value="">— Nessuna —</option>
               </select>
             </div>
 
@@ -114,7 +119,7 @@
             <% voci.forEach(function(r) { %>
               <div class="expense-item squircle-sm">
                 <div class="expense-meta">
-                  <span class="expense-cat"><%= r.categoria %><%= r.attivo ? '' : ' · disattivata' %></span>
+                  <span class="expense-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %><%= r.attivo ? '' : ' · disattivata' %></span>
                   <span class="expense-name"><%= r.descrizione %></span>
                   <span class="expense-sub">
                     Giorno <%= r.giorno %> ·
@@ -141,6 +146,60 @@
   </div>
 
   <script>
+    const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
+    const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;
+
+    // Gestione tipo e categorie
+    (function() {
+      const tipoRadios = document.querySelectorAll('input[name="tipo"]');
+      const categoriaSelect = document.getElementById('categoria');
+      const sottocategoriaSelect = document.getElementById('sottocategoria');
+      const sottocategoriaGroup = document.getElementById('sottocategoriaGroup');
+
+      function populateCategorie(tipo) {
+        const options = tipo === 'ingresso' ? categorieEntrate : Object.keys(categorieSpese);
+        categoriaSelect.innerHTML = '';
+        options.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          categoriaSelect.appendChild(opt);
+        });
+        // Dopo popolamento, aggiorna sottocategorie
+        updateSottocategorie();
+      }
+
+      function updateSottocategorie() {
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        if (tipo === 'ingresso') {
+          sottocategoriaGroup.style.display = 'none';
+          return;
+        }
+        sottocategoriaGroup.style.display = 'block';
+        const cat = categoriaSelect.value;
+        const sottos = categorieSpese[cat] || [];
+        sottocategoriaSelect.innerHTML = '<option value="">— Nessuna —</option>';
+        sottos.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          sottocategoriaSelect.appendChild(opt);
+        });
+      }
+
+      tipoRadios.forEach(r => {
+        r.addEventListener('change', function() {
+          populateCategorie(this.value);
+        });
+      });
+
+      categoriaSelect.addEventListener('change', updateSottocategorie);
+
+      // Inizializza
+      const initialTipo = document.querySelector('input[name="tipo"]:checked').value;
+      populateCategorie(initialTipo);
+    })();
+
     // Accordion opzioni avanzate
     (function () {
       var header = document.getElementById('advToggle');
@@ -150,7 +209,8 @@
         body.classList.toggle('open');
       });
     })();
-    // Mostra/nasconde la selezione mesi in base alla ricorrenza scelta
+
+    // Mostra/nasconde la selezione mesi
     (function () {
       var mensile = document.getElementById('ricMensile');
       var mesiRadio = document.getElementById('ricMesi');

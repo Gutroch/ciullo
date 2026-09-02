@@ -5,16 +5,17 @@ const Expenses = require('../models/expenses');
 const { requireAuth } = require('../middleware/auth');
 const { toCsv } = require('../utils/csv');
 
-const EXPORT_COLUMNS = ['data_spesa', 'tipo', 'importo', 'categoria', 'inserito_da', 'per_conto_di', 'note'];
-const EXPORT_LABELS = ['Data', 'Tipo', 'Importo', 'Categoria', 'Autore Inserimento', 'Beneficiario', 'Note'];
+// Aggiunta della colonna "Sottocategoria"
+const EXPORT_COLUMNS = ['data_spesa', 'tipo', 'importo', 'categoria', 'sottocategoria', 'inserito_da', 'per_conto_di', 'note'];
+const EXPORT_LABELS = ['Data', 'Tipo', 'Importo', 'Categoria', 'Sottocategoria', 'Autore Inserimento', 'Beneficiario', 'Note'];
 
-// Applica gli stessi filtri usati nello storico (mese/anno/categoria)
 function filtraSpese(all, query) {
-  const { mese, anno, categoria } = query;
+  const { mese, anno, categoria, sottocategoria } = query;
   let filtered = all;
   if (mese) filtered = filtered.filter((e) => new Date(e.data_spesa).getMonth() + 1 === parseInt(mese, 10));
   if (anno) filtered = filtered.filter((e) => new Date(e.data_spesa).getFullYear() === parseInt(anno, 10));
   if (categoria) filtered = filtered.filter((e) => e.categoria === categoria);
+  if (sottocategoria) filtered = filtered.filter((e) => e.sottocategoria === sottocategoria);
   return filtered;
 }
 
