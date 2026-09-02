@@ -118,12 +118,12 @@ router.get('/expenses/new', requireAuth, async (req, res) => {
       utenti,
       categorieSpese: Expenses.CATEGORIE_SPESE,
       categorieEntrate: Expenses.CATEGORIE_ENTRATE,
-      // per comodità, una mappa piatta per i dropdown
       sottocategorieMap: Expenses.CATEGORIE_SPESE,
       oggi: new Date().toISOString().slice(0, 10),
       error: null,
       success: null,
-      expense: null, // per eventuale modifica
+      expense: null,
+      editMode: false, // 👈 AGGIUNGI QUESTA RIGA
     });
   } catch (error) {
     console.error('❌ Errore form nuova spesa:', error);
@@ -292,16 +292,14 @@ router.get('/history', requireAuth, async (req, res) => {
     if (categoria) filtered = filtered.filter((e) => e.categoria === categoria);
     if (sottocategoria) filtered = filtered.filter((e) => e.sottocategoria === sottocategoria);
 
-    // Elenco anni e categorie per i filtri
     const anniDisponibili = [...new Set(all.map((e) => new Date(e.data_spesa).getFullYear()))].sort((a, b) => b - a);
     const categorieDisponibili = [...new Set(all.map((e) => e.categoria))].sort();
-    // Tutte le sottocategorie disponibili (non vuote)
     const sottocategorieDisponibili = [...new Set(all.map((e) => e.sottocategoria).filter(s => s))].sort();
 
     res.render('history', {
       user: req.session.user,
       expenses: filtered,
-      categorie: Expenses.CATEGORIE_SPESE, // per eventuale dropdown
+      categorie: Object.keys(Expenses.CATEGORIE_SPESE), // 👈 MODIFICA QUESTA RIGA
       anniDisponibili,
       categorieDisponibili,
       sottocategorieDisponibili,

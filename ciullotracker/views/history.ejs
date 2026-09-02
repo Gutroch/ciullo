@@ -37,19 +37,33 @@
           <label for="categoria">Categoria</label>
           <select class="input" name="categoria" id="categoria">
             <option value="">Tutte</option>
-            <% categorie.forEach(function(c) { %>
-              <option value="<%= c %>" <%= filtri.categoria === c ? 'selected' : '' %>><%= c %></option>
-            <% }); %>
+            <% if (categorie && Array.isArray(categorie)) { %>
+              <% categorie.forEach(function(c) { %>
+                <option value="<%= c %>" <%= filtri.categoria === c ? 'selected' : '' %>><%= c %></option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sottocategoria">Sottocategoria</label>
+          <select class="input" name="sottocategoria" id="sottocategoria">
+            <option value="">Tutte</option>
+            <% if (sottocategorieDisponibili && Array.isArray(sottocategorieDisponibili)) { %>
+              <% sottocategorieDisponibili.forEach(function(s) { %>
+                <option value="<%= s %>" <%= filtri.sottocategoria === s ? 'selected' : '' %>><%= s %></option>
+              <% }); %>
+            <% } %>
           </select>
         </div>
         <button type="submit" class="btn btn-primary">Filtra</button>
+        <a href="/history" class="btn btn-secondary">Reset</a>
       </form>
 
       <!-- Export -->
       <div class="export-bar">
-        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>">⬇ CSV</a>
-        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>">⬇ Excel</a>
-        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>">⬇ JSON</a>
+        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">⬇ CSV</a>
+        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">⬇ Excel</a>
+        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">⬇ JSON</a>
       </div>
 
       <!-- Tabella -->
@@ -61,33 +75,57 @@
               <th>Tipo</th>
               <th>Importo</th>
               <th>Categoria</th>
-              <th>Autore Inserimento</th>
-              <th>Beneficiario</th>
+              <th>Sottocategoria</th>
+              <th>Inserito da</th>
+              <th>Per conto di</th>
               <th>Note</th>
-              <th></th>
+              <th>Azioni</th>
             </tr>
           </thead>
           <tbody>
-            <% if (expenses.length === 0) { %>
-              <tr><td colspan="8" class="empty-state">Nessuna spesa trovata con i filtri selezionati.</td></tr>
+            <% if (!expenses || expenses.length === 0) { %>
+              <tr><td colspan="9" class="empty-state">Nessuna spesa trovata con i filtri selezionati.</td></tr>
+            <% } else { %>
+              <% expenses.forEach(function(e) { %>
+                <tr>
+                  <td><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
+                  <td><span class="badge <%= e.tipo === 'ingresso' ? 'badge-success' : 'badge-danger' %>">
+                    <%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %>
+                  </span></td>
+                  <td style="color: <%= e.tipo === 'ingresso' ? '#148c50' : 'var(--danger)' %>; font-weight: 600;">
+                    € <%= parseFloat(e.importo).toFixed(2) %>
+                  </td>
+                  <td><%= e.categoria || '—' %></td>
+                  <td><%= e.sottocategoria || '—' %></td>
+                  <td><%= e.inserito_da || '—' %></td>
+                  <td><%= e.per_conto_di || '—' %></td>
+                  <td><%= e.note || '—' %></td>
+                  <td>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                      <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm">Modifica</a>
+                      <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
             <% } %>
-            <% expenses.forEach(function(e) { %>
-              <tr>
-                <td><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
-                <td><%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %></td>
-                <td style="color: <%= e.tipo === 'ingresso' ? '#148c50' : 'var(--danger)' %>;">€ <%= e.importo.toFixed(2) %></td>
-                <td><%= e.categoria %></td>
-                <td><%= e.inserito_da %></td>
-                <td><%= e.per_conto_di %></td>
-                <td><%= e.note %></td>
-                <td>
-                  <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');">
-                    <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
-                  </form>
-                </td>
-              </tr>
-            <% }); %>
           </tbody>
+          <tfoot>
+            <tr style="font-weight: 600; background: var(--bg-secondary);">
+              <td colspan="2">Totali:</td>
+              <td style="color: var(--danger);">
+                Uscite: € <%= expenses && expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
+              </td>
+              <td style="color: #148c50;">
+                Entrate: € <%= expenses && expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
+              </td>
+              <td colspan="5" style="color: var(--text-primary);">
+                Saldo: € <%= expenses && (expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0) - expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0)).toFixed(2) %>
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </main>
