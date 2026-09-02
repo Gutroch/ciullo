@@ -39,7 +39,7 @@ async function migrateDataFromCsv() {
       const dataDir = path.join(__dirname, 'data');
       
       if (fs.existsSync(path.join(dataDir, 'expenses.csv'))) {
-        const expensesData = readCsv('expenses.csv', ['data_spesa', 'importo', 'tipo', 'categoria', 'inserito_da', 'per_conto_di', 'note']);
+        const expensesData = readCsv('expenses.csv', ['data_spesa', 'importo', 'tipo', 'categoria', 'sottocategoria', 'inserito_da', 'per_conto_di', 'note']);
         if (expensesData.rows.length > 0) {
           const imported = await Expenses.importFromCsv(expensesData.rows);
           console.log(`✅ Importate ${imported} spese da CSV`);

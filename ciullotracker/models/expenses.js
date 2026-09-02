@@ -32,12 +32,35 @@ class Expenses {
     return this.CATEGORIE_SPESE[categoria] || [];
   }
 
+  // Normalizza i dati legacy che salvavano la sottocategoria in `categoria`.
+  static normalizeExpense(expense) {
+    if (!expense || expense.tipo === 'ingresso' || expense.sottocategoria) {
+      return expense;
+    }
+
+    const categorieCandidate = Object.entries(this.CATEGORIE_SPESE)
+      .filter(([, sottocategorie]) => sottocategorie.includes(expense.categoria));
+
+    if (categorieCandidate.length === 1) {
+      const [categoria, sottocategorie] = categorieCandidate[0];
+      return {
+        ...expense,
+        categoria,
+        sottocategoria: sottocategorie.includes(expense.categoria)
+          ? expense.categoria
+          : ''
+      };
+    }
+
+    return expense;
+  }
+
   // Ottiene tutte le spese
   static async getAllExpenses() {
     try {
       const redis = getRedisClient();
       const data = await redis.get(REDIS_KEYS.EXPENSES);
-      return data ? JSON.parse(data) : [];
+      return data ? JSON.parse(data).map(expense => this.normalizeExpense(expense)) : [];
     } catch (error) {
       console.error('❌ Errore lettura spese da Redis:', error.message);
       return [];
@@ -120,17 +143,17 @@ class Expenses {
   static async importFromCsv(csvData) {
     try {
       const redis = getRedisClient();
-      const expenses = csvData.map(row => ({
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-        data_spesa: row.data_spesa,
-        importo: parseFloat(row.importo),
-        tipo: row.tipo || 'uscita',
-        categoria: row.categoria || 'Altro',
-        sottocategoria: row.sottocategoria || '',
-        inserito_da: row.inserito_da || 'system',
-        per_conto_di: row.per_conto_di || 'system',
-        note: row.note || ''
-      }));
+      const expenses = csvData.map(row => this.normalizeExpense({
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          data_spesa: row.data_spesa,
+          importo: parseFloat(row.importo),
+          tipo: row.tipo || 'uscita',
+          categoria: row.categoria || 'Altro',
+          sottocategoria: row.sottocategoria || '',
+          inserito_da: row.inserito_da || 'system',
+          per_conto_di: row.per_conto_di || 'system',
+          note: row.note || ''
+        }));
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(expenses));
       return expenses.length;
     } catch (error) {
