@@ -651,17 +651,8 @@
           <div class="kpi-value neutral"><%= topCategoria %></div>
         </div>
         <div class="card squircle kpi-card">
-          <div class="kpi-label">
-            <%= typeof totaleMovimenti !== 'undefined'
-              ? 'Totale Movimenti'
-              : 'Movimenti Mostrati' %>
-          </div>
-
-          <div class="kpi-value neutral">
-            <%= typeof totaleMovimenti !== 'undefined'
-              ? totaleMovimenti
-              : ultimeSpese.length %>
-          </div>
+          <div class="kpi-label">Totale Movimenti</div>
+          <div class="kpi-value neutral"><%= typeof numeroMovimenti !== 'undefined' ? numeroMovimenti : 0 %></div>
         </div>
       </div>
 
@@ -939,87 +930,6 @@ var dashboardChartData = {
             dataIngressi: [],
             dataUscite: []
         };
-
-
-    // ============================================================
-    // RICOSTRUZIONE MACRO CATEGORIE
-    // ============================================================
-
-    function rebuildMacroFromSubcategories(tipo) {
-
-        var groups =
-            subData[tipo] || {};
-
-        var labels =
-            Object.keys(groups);
-
-        if (!labels.length) {
-            return null;
-        }
-
-        var data = labels.map(function(category) {
-
-            var row =
-                groups[category] || {};
-
-            return (row.data || []).reduce(
-                function(sum, value) {
-
-                    var n = Number(value);
-
-                    return sum +
-                        (
-                            Number.isFinite(n)
-                                ? n
-                                : 0
-                        );
-                },
-                0
-            );
-        });
-
-
-        var compact = labels
-            .map(function(label, i) {
-
-                return {
-                    label: label,
-                    value: data[i]
-                };
-            })
-
-            .filter(function(item) {
-                return item.value > 0;
-            })
-
-            .sort(function(a, b) {
-                return b.value - a.value;
-            });
-
-
-        return {
-            labels: compact.map(function(item) {
-                return item.label;
-            }),
-
-            data: compact.map(function(item) {
-                return item.value;
-            })
-        };
-    }
-
-
-    var rebuiltUscite =
-        rebuildMacroFromSubcategories('uscite');
-
-
-    if (
-        rebuiltUscite &&
-        rebuiltUscite.labels.length
-    ) {
-        catData.uscite =
-            rebuiltUscite;
-    }
 
 
     // ============================================================
