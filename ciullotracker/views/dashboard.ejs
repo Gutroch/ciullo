@@ -517,6 +517,46 @@
       transition: color 0.2s;
     }
 
+        .chart-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chart-download {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: var(--text-secondary, #6c757d);
+        }
+
+        .chart-download:hover { color: var(--text-primary, #0a0a0a); }
+
+        .chart-period-hint {
+            margin: -8px 0 18px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .chart-period-form {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .chart-period-form .input {
+            width: auto;
+            min-width: 120px;
+            padding: 7px 10px;
+            font-size: 0.82rem;
+        }
+
+        .chart-period-form .input:last-child { min-width: 88px; }
+
     .chart-fullscreen:hover {
       color: var(--text-primary, #0a0a0a);
     }
@@ -559,6 +599,10 @@
         flex-direction: column;
         align-items: stretch;
       }
+
+    .chart-actions { gap: 0; }
+    .chart-modal-header { align-items: flex-start; gap: 8px; }
+    .chart-period-form { flex-wrap: wrap; }
 
       .chart-controls .input {
         width: 100%;
@@ -630,7 +674,8 @@
 
     <main class="main-content">
       <div class="page-title">Dashboard</div>
-      <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
+    <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
+    <div class="chart-period-hint">Per cambiare periodo, allarga un grafico e scegli mese e anno.</div>
 
       <!-- KPI Cards -->
       <div class="grid-4">
@@ -662,7 +707,10 @@
 <div class="card squircle chart-card" data-chart="categorie">
     <div class="chart-title">
         <span>Spese per Categoria</span>
-        <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+        <span class="chart-actions">
+            <button class="chart-download" data-chart="categorie" title="Scarica grafico" aria-label="Scarica grafico">↓</button>
+            <button class="chart-fullscreen" data-chart="categorie" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
+        </span>
     </div>
     <div class="chart-controls">
         <label for="chartTipoSelect">Tipo:</label>
@@ -686,7 +734,10 @@
         <div class="card squircle chart-card" data-chart="giornaliero">
           <div class="chart-title">
             <span>Andamento Giornaliero</span>
-            <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+                        <span class="chart-actions">
+                            <button class="chart-download" data-chart="giornaliero" title="Scarica grafico" aria-label="Scarica grafico">↓</button>
+                            <button class="chart-fullscreen" data-chart="giornaliero" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
+                        </span>
           </div>
           <canvas id="chartGiornaliero"></canvas>
         </div>
@@ -696,7 +747,10 @@
       <div class="card squircle chart-card" data-chart="trend" style="margin-bottom: 24px;">
         <div class="chart-title">
           <span>Trend Mensile (Ultimi 6 mesi)</span>
-          <button class="chart-fullscreen" title="Apri a tutto schermo" aria-label="Fullscreen">⤢</button>
+                    <span class="chart-actions">
+                        <button class="chart-download" data-chart="trend" title="Scarica grafico" aria-label="Scarica grafico">↓</button>
+                        <button class="chart-fullscreen" data-chart="trend" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
+                    </span>
         </div>
         <canvas id="chartTrend"></canvas>
       </div>
@@ -762,13 +816,27 @@
     <div class="chart-modal-content">
       <div class="chart-modal-header">
         <h3 id="chart-modal-title">Dettagli Grafico</h3>
-        <button id="chart-modal-close" class="chart-modal-close-btn">&times;</button>
+                <form class="chart-period-form" method="GET" action="/">
+                    <label for="chartModalMonth">Periodo</label>
+                    <select id="chartModalMonth" name="mese" class="input" aria-label="Mese">
+                        <% ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'].forEach(function(nome, indice) { %>
+                            <option value="<%= indice + 1 %>" <%= selectedMonth === indice + 1 ? 'selected' : '' %>><%= nome %></option>
+                        <% }); %>
+                    </select>
+                    <select id="chartModalYear" name="anno" class="input" aria-label="Anno">
+                        <% years.forEach(function(availableYear) { %>
+                            <option value="<%= availableYear %>" <%= selectedYear === availableYear ? 'selected' : '' %>><%= availableYear %></option>
+                        <% }); %>
+                    </select>
+                    <button id="chart-modal-close" class="chart-modal-close-btn" type="button" aria-label="Chiudi">&times;</button>
+                </form>
       </div>
       <div class="chart-modal-body">
         <canvas id="chart-modal-canvas"></canvas>
       </div>
       <div class="chart-modal-footer" id="chart-modal-details">
-        <!-- I dettagli verranno inseriti qui via JS -->
+                <button id="chart-modal-download" class="btn btn-secondary btn-sm" type="button">↓ Scarica PNG</button>
+                <span id="chart-modal-note">Scegli mese e anno qui sopra per aggiornare la dashboard.</span>
       </div>
     </div>
   </div>
@@ -1966,6 +2034,81 @@ var dashboardChartData = {
             }
         );
     }
+
+    // ============================================================
+    // POPUP, DOWNLOAD E PERIODO GRAFICI
+    // ============================================================
+
+    var chartModal = document.getElementById('chart-modal');
+    var chartModalBody = chartModal && chartModal.querySelector('.chart-modal-body');
+    var chartModalTitle = document.getElementById('chart-modal-title');
+    var chartModalDownload = document.getElementById('chart-modal-download');
+    var modalChart = null;
+    var modalCanvas = null;
+    var modalPlaceholder = null;
+
+    function closeChartModal() {
+        if (!chartModal || !modalCanvas || !modalPlaceholder) return;
+
+        modalPlaceholder.parentNode.insertBefore(modalCanvas, modalPlaceholder);
+        modalPlaceholder.remove();
+        if (modalChart) modalChart.resize();
+        modalCanvas = null;
+        modalPlaceholder = null;
+        modalChart = null;
+        chartModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function openChartModal(button) {
+        if (!chartModal || !chartModalBody) return;
+
+        var sourceCanvas = document.getElementById('chart' + button.dataset.chart.charAt(0).toUpperCase() + button.dataset.chart.slice(1));
+        var sourceChart = sourceCanvas && Chart.getChart(sourceCanvas);
+        if (!sourceChart) return;
+
+        modalChart = sourceChart;
+        modalCanvas = sourceCanvas;
+        modalPlaceholder = document.createElement('span');
+        modalPlaceholder.setAttribute('aria-hidden', 'true');
+        sourceCanvas.parentNode.insertBefore(modalPlaceholder, sourceCanvas);
+        chartModalBody.appendChild(sourceCanvas);
+        chartModalTitle.textContent = button.closest('.chart-card').querySelector('.chart-title > span').textContent;
+        chartModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        window.requestAnimationFrame(function() { modalChart.resize(); });
+    }
+
+    document.querySelectorAll('.chart-fullscreen').forEach(function(button) {
+        button.addEventListener('click', function() { openChartModal(button); });
+    });
+
+    document.querySelectorAll('.chart-download').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var canvas = document.getElementById('chart' + button.dataset.chart.charAt(0).toUpperCase() + button.dataset.chart.slice(1));
+            var chart = canvas && Chart.getChart(canvas);
+            if (!chart) return;
+            var link = document.createElement('a');
+            link.download = 'ciullotracker-' + button.dataset.chart + '-<%= selectedYear %>-<%= selectedMonth %>.png';
+            link.href = chart.toBase64Image('image/png', 1);
+            link.click();
+        });
+    });
+
+    if (document.getElementById('chart-modal-close')) {
+        document.getElementById('chart-modal-close').addEventListener('click', closeChartModal);
+    }
+    if (chartModal) {
+        chartModal.addEventListener('click', function(event) {
+            if (event.target === chartModal) closeChartModal();
+        });
+    }
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeChartModal();
+    });
+    document.querySelector('.chart-period-form')?.addEventListener('change', function() {
+        this.submit();
+    });
 
 })();
 

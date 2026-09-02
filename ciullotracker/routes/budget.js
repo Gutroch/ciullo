@@ -39,7 +39,7 @@ router.get('/', requireAuth, async (req, res) => {
     for (let m = 0; m < 12; m++) {
       const previsto = budgetData[m] !== undefined ? budgetData[m] : 0;
       const reale = realNet[m] || 0;
-      const differenza = previsto - reale; // differenza del mese
+      const differenza = reale - previsto; // differenza del mese
       totalPrevisto += previsto;
       totalReale += reale;
       monthsData.push({

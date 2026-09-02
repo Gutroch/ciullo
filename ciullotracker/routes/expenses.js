@@ -16,14 +16,28 @@ function isInMonth(dateStr, month, year) {
 // ---------------------------------------------------------------
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
+    const today = new Date();
+    const requestedMonth = Number.parseInt(req.query.mese, 10);
+    const requestedYear = Number.parseInt(req.query.anno, 10);
+    const month = requestedMonth >= 1 && requestedMonth <= 12
+      ? requestedMonth
+      : today.getMonth() + 1;
+    const year = requestedYear >= 2000 && requestedYear <= 2100
+      ? requestedYear
+      : today.getFullYear();
+    const now = new Date(year, month - 1, 1);
 
     // Processa le spese ricorrenti scadute
     await Recurring.processDueRecurring();
 
     const all = await Expenses.getAllExpenses();
+    const years = [...new Set([
+      today.getFullYear(),
+      year,
+      ...all.map((expense) => new Date(expense.data_spesa).getFullYear()),
+    ])]
+      .filter((availableYear) => Number.isFinite(availableYear))
+      .sort((a, b) => b - a);
     const monthly = all.filter((e) => isInMonth(e.data_spesa, month, year));
 
     // Filtra uscite e ingressi del mese corrente
@@ -225,6 +239,9 @@ const chartTrend = {
       spesaMediaGiornaliera: spesaMediaGiornaliera.toFixed(2),
       entrataMediaGiornaliera: entrataMediaGiornaliera.toFixed(2),
       meseLabel,
+      selectedMonth: month,
+      selectedYear: year,
+      years,
     });
   } catch (error) {
     console.error('❌ Errore dashboard:', error);
