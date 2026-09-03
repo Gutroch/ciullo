@@ -199,9 +199,39 @@ router.post('/recurring/:id/update', requireAuth, async (req, res) => {
       throw new Error('Ricorrenza non trovata per update');
     }
 
+    // --- Gestione retroattività anche in modifica ---
+    if (req.body.retroattiva === 'on' || req.body.retroattiva === 'true') {
+      const oggi = new Date();
+      const giornoNum = parseInt(giorno);
+      const meseCorrente = oggi.getMonth() + 1;
+      
+      // Verifica se il giorno è già passato
+      if (giornoNum <= oggi.getDate()) {
+        let shouldRun = false;
+        
+        if (ricorrenza === 'mensile') {
+          shouldRun = true;
+        } else if (ricorrenza === 'mesi') {
+          const mesiArr = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
+          shouldRun = mesiArr.map(Number).includes(meseCorrente);
+        }
+        // Per altri tipi di ricorrenza si potrebbe estendere
+        
+        if (shouldRun) {
+          // Recupera la voce appena aggiornata per eseguirla
+          const itemToExecute = await Recurring.getById(req.params.id);
+          if (itemToExecute) {
+            const dataSpesa = new Date(oggi.getFullYear(), oggi.getMonth(), giornoNum);
+            await Recurring.execute(itemToExecute, dataSpesa);
+            console.log(`Esecuzione retroattiva per: ${itemToExecute.descrizione}`);
+          }
+        }
+      }
+    }
+
     res.redirect('/recurring?success=Modifica effettuata');
   } catch (error) {
-    console.error(' Errore update ricorrenza:', error);
+    console.error('Errore update ricorrenza:', error);
     res.status(500).render('error', { 
       user: req.session.user, 
       message: 'Errore durante la modifica.' 

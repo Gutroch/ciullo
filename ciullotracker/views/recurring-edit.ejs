@@ -50,6 +50,17 @@
               </div>
             </div>
 
+            <!-- Checkbox retroattiva -->
+            <div class="field">
+              <label>
+                <input type="checkbox" name="retroattiva" value="true">
+                Esegui anche per il mese corrente (se il giorno è già passato)
+              </label>
+              <span class="field-hint" style="display:block; font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">
+                ⚠️ Verrà creata una spesa per il mese in corso con la data del giorno selezionato
+              </span>
+            </div>
+
             <div class="field">
               <label for="categoria">Categoria</label>
               <select class="input" id="categoria" name="categoria">
@@ -144,6 +155,12 @@
             <%= voce.sottocategoria ? 'Sottocategoria: ' + voce.sottocategoria + '<br>' : '' %>
             Giorno: <%= voce.giorno %><br>
             Ricorrenza: <%= voce.ricorrenza === 'mensile' ? 'Ogni mese' : 'Mesi specifici' %>
+          </div>
+          <div style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
+            <div style="color: var(--text-secondary); font-size:0.85rem;">
+              <strong>💡 Suggerimento:</strong> Se modifichi il giorno della ricorrenza dopo che è già stata eseguita questo mese, 
+              la prossima esecuzione avverrà il giorno selezionato del mese successivo.
+            </div>
           </div>
         </div>
       </div>
