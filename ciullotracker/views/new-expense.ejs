@@ -4,6 +4,7 @@
   <%- include('partials/head', { title: (editMode ? 'Modifica' : 'Nuovo') + ' · CiulloTracker' }) %>
 </head>
 <body>
+<div class="blob-field" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'new' }) %>
@@ -32,8 +33,8 @@
           </div>
 
           <div class="field">
-            <label for="importo">Importo (€)</label>
-            <input class="input input-amount" type="number" step="0.01" min="0.01" inputmode="decimal" id="importo" name="importo" placeholder="0.00" required value="<%= editMode ? expense.importo : '' %>" />
+            <label for="importo">Importo (€) <span class="field-hint">— puoi anche scrivere un calcolo, es. 90+10</span></label>
+            <input class="input input-amount" type="text" inputmode="decimal" id="importo" name="importo" placeholder="0.00 oppure 90+10" required autocomplete="off" data-calc data-calc-min="0.01" value="<%= editMode ? expense.importo : '' %>" />
           </div>
 
           <div class="form-row">

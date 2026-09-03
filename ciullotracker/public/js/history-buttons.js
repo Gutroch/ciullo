@@ -126,8 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span style="font-weight:600; color:#0a0a0a;">€${currentAmount.toFixed(2)}</span>
                 </div>
                 <div style="margin-top:16px;">
-                    <label style="display:block;color:#6c757d;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€)</label>
-                    <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" autofocus>
+                    <label style="display:block;color:#6c757d;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€) <span style="font-weight:400;color:#9a9aa0;">— anche un calcolo, es. 15+5</span></label>
+                    <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" inputmode="decimal" autocomplete="off" autofocus>
                     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
                         <button class="quick-amount-btn" data-value="0.50">0,50</button>
                         <button class="quick-amount-btn" data-value="1.00">1,00</button>
@@ -160,9 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var cancelBtn = popup.querySelector('.popup-cancel');
 
         function updatePreview() {
-            var val = inputField.value.replace(',', '.').trim();
-            var parsed = parseFloat(val);
-            if (isNaN(parsed) || parsed < 0) parsed = 0;
+            var parsed = (window.CalcInput ? window.CalcInput.evaluate(inputField.value) : parseFloat(inputField.value.replace(',', '.')));
+            if (parsed === null || isNaN(parsed) || parsed < 0) parsed = 0;
             var newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
             newAmountDisplay.textContent = '€' + newAmount.toFixed(2);
             newAmountDisplay.style.color = isIncrement ? '#4ECDC4' : '#FF6B6B';
@@ -200,9 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelBtn.addEventListener('click', closePopup);
 
         confirmBtn.addEventListener('click', function() {
-            var val = inputField.value.replace(',', '.').trim();
-            var parsed = parseFloat(val);
-            if (isNaN(parsed) || parsed <= 0) {
+            var parsed = (window.CalcInput ? window.CalcInput.evaluate(inputField.value) : parseFloat(inputField.value.replace(',', '.')));
+            if (parsed === null || isNaN(parsed) || parsed <= 0) {
                 showNotification('Attenzione: inserisci un importo valido maggiore di zero', 'error');
                 return;
             }

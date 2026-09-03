@@ -4,6 +4,7 @@
   <%- include('partials/head', { title: 'Ricorrenti · CiulloTracker' }) %>
 </head>
 <body>
+<div class="blob-field" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'recurring' }) %>
@@ -36,8 +37,8 @@
 
             <div class="form-row">
               <div class="field">
-                <label for="importo">Importo (€)</label>
-                <input class="input input-amount" type="number" step="0.01" min="0.01" inputmode="decimal" id="importo" name="importo" placeholder="0.00" required />
+                <label for="importo">Importo (€) <span class="field-hint">— o un calcolo, es. 120-20</span></label>
+                <input class="input input-amount" type="text" inputmode="decimal" id="importo" name="importo" placeholder="0.00 oppure 120-20" required autocomplete="off" data-calc data-calc-min="0.01" />
               </div>
               <div class="field">
                 <label for="giorno">Giorno del mese</label>

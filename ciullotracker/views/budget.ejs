@@ -4,6 +4,7 @@
   <%- include('partials/head', { title: 'Budget · CiulloTracker' }) %>
 </head>
 <body>
+<div class="blob-field" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'budget' }) %>
@@ -47,7 +48,7 @@
                 <tr>
                   <td><strong><%= m.label %></strong></td>
                   <td>
-                    <input type="number" step="0.01" class="input input-budget" name="previsto_<%= m.month %>" value="<%= m.previsto.toFixed(2) %>" />
+                    <input type="text" inputmode="decimal" autocomplete="off" class="input input-budget" name="previsto_<%= m.month %>" value="<%= m.previsto.toFixed(2) %>" data-calc />
                   </td>
                   <td style="color: <%= m.reale >= 0 ? '#148c50' : 'var(--danger)' %>;">
                     <%= m.reale >= 0 ? '+' : '' %><%= m.reale.toFixed(2) %>
