@@ -172,9 +172,8 @@ class Recurring {
         
         const shouldRun = await this.shouldRunToday(item);
         
-        if (shouldRun) {
+        if (shouldRun && await this.execute(item)) {
           console.log(`Eseguo ricorrente: ${item.descrizione}`);
-          await this.execute(item);
           executed++;
         }
       }
@@ -199,8 +198,10 @@ class Recurring {
     if (day !== item.giorno) return false;
     
     switch (item.ricorrenza) {
+      case 'mensile':
+        return true;
       case 'mesi':
-        return item.mesi.includes(month);
+        return (item.mesi || []).map(Number).includes(month);
       case 'settimanale':
         return true;
       case 'bimestrale':
@@ -229,6 +230,7 @@ class Recurring {
         importo: item.importo,
         tipo: item.tipo,
         categoria: item.categoria,
+        sottocategoria: item.sottocategoria,
         inserito_da: item.inserito_da,
         per_conto_di: item.per_conto_di,
         note: `[Ricorrente] ${item.descrizione}`
@@ -244,7 +246,7 @@ class Recurring {
       return true;
     } catch (error) {
       console.error(' Errore esecuzione ricorrenza:', error.message);
-      return false;
+      throw error;
     }
   }
 }

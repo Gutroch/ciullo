@@ -1,5 +1,5 @@
-// models/promemoriaModel.js
-const redis = require('../config/redis');
+const { getRedisClient } = require('../config/redis');
+const redis = getRedisClient();
 const crypto = require('crypto');
 
 const KEY_PREFIX = 'promemoria:';

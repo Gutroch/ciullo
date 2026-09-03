@@ -5,6 +5,20 @@ const Expenses = require('../models/expenses');
 const Users = require('../models/users');
 const { requireAuth } = require('../middleware/auth');
 
+function shouldRunRetroactively(ricorrenza, mesi, giorno, oggi) {
+  if (!Number.isInteger(giorno) || giorno > oggi.getDate()) return false;
+  if (ricorrenza === 'mensile') return true;
+  return ricorrenza === 'mesi' && (mesi || []).map(Number).includes(oggi.getMonth() + 1);
+}
+
+async function executeRetroactively(item, mesi, giorno) {
+  const oggi = new Date();
+  if (!shouldRunRetroactively(item.ricorrenza, mesi, giorno, oggi)) return false;
+
+  const dataSpesa = new Date(oggi.getFullYear(), oggi.getMonth(), giorno);
+  return Recurring.execute(item, dataSpesa);
+}
+
 router.get('/recurring', requireAuth, async (req, res) => {
   try {
     await Recurring.processDueRecurring();
@@ -81,23 +95,11 @@ router.post('/recurring', requireAuth, async (req, res) => {
 
     // Gestione retroattività
     if (req.body.retroattiva === 'on' || req.body.retroattiva === 'true') {
-      const oggi = new Date();
       const giornoNum = parseInt(giorno);
-      const meseCorrente = oggi.getMonth() + 1;
-      
-      if (giornoNum <= oggi.getDate()) {
-        let shouldRun = false;
-        if (ricorrenza === 'mensile') {
-          shouldRun = true;
-        } else if (ricorrenza === 'mesi') {
-          const mesiArr = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
-          shouldRun = mesiArr.map(Number).includes(meseCorrente);
-        }
-        // Per altri tipi di ricorrenza si potrebbe estendere
-        if (shouldRun) {
-          const dataSpesa = new Date(oggi.getFullYear(), oggi.getMonth(), giornoNum);
-          await Recurring.execute(newItem, dataSpesa);
-        }
+      const mesiRetroattivi = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
+
+      if (shouldRunRetroactively(ricorrenza, mesiRetroattivi, giornoNum, new Date())) {
+        await executeRetroactively(newItem, mesiRetroattivi, giornoNum);
       }
     }
 
@@ -201,31 +203,12 @@ router.post('/recurring/:id/update', requireAuth, async (req, res) => {
 
     // --- Gestione retroattività anche in modifica ---
     if (req.body.retroattiva === 'on' || req.body.retroattiva === 'true') {
-      const oggi = new Date();
       const giornoNum = parseInt(giorno);
-      const meseCorrente = oggi.getMonth() + 1;
-      
-      // Verifica se il giorno è già passato
-      if (giornoNum <= oggi.getDate()) {
-        let shouldRun = false;
-        
-        if (ricorrenza === 'mensile') {
-          shouldRun = true;
-        } else if (ricorrenza === 'mesi') {
-          const mesiArr = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
-          shouldRun = mesiArr.map(Number).includes(meseCorrente);
-        }
-        // Per altri tipi di ricorrenza si potrebbe estendere
-        
-        if (shouldRun) {
-          // Recupera la voce appena aggiornata per eseguirla
-          const itemToExecute = await Recurring.getById(req.params.id);
-          if (itemToExecute) {
-            const dataSpesa = new Date(oggi.getFullYear(), oggi.getMonth(), giornoNum);
-            await Recurring.execute(itemToExecute, dataSpesa);
-            console.log(`Esecuzione retroattiva per: ${itemToExecute.descrizione}`);
-          }
-        }
+      const mesiRetroattivi = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
+      const itemToExecute = await Recurring.getById(req.params.id);
+      if (itemToExecute && shouldRunRetroactively(ricorrenza, mesiRetroattivi, giornoNum, new Date())) {
+        const executed = await executeRetroactively(itemToExecute, mesiRetroattivi, giornoNum);
+        if (executed) console.log(`Esecuzione retroattiva per: ${itemToExecute.descrizione}`);
       }
     }
 
