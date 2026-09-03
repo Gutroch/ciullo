@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             'rgba(255, 107, 107, 0.7)',
 
                         borderColor:
-                            '#FF6B6B',
+                            '#B5714B',
 
                         borderWidth: 2,
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             'rgba(78, 205, 196, 0.7)',
 
                         borderColor:
-                            '#4ECDC4',
+                            '#7C9473',
 
                         borderWidth: 2,
 
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataUscite || [],
 
                         borderColor:
-                            '#FF6B6B',
+                            '#B5714B',
 
                         backgroundColor:
                             'rgba(255, 107, 107, 0.1)',
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#FF6B6B'
+                            '#B5714B'
                     },
 
                     {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataIngressi || [],
 
                         borderColor:
-                            '#4ECDC4',
+                            '#7C9473',
 
                         backgroundColor:
                             'rgba(78, 205, 196, 0.1)',
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#4ECDC4'
+                            '#7C9473'
                     }
                 ]
             },
@@ -290,14 +290,14 @@ document.addEventListener('DOMContentLoaded', function() {
         window.chartUtentiData
     ) {
         const colors = [
-            '#FF6B6B',
-            '#4ECDC4',
-            '#45B7D1',
-            '#96CEB4',
-            '#FFEAA7',
-            '#DDA0DD',
-            '#FF8A5C',
-            '#A29BFE'
+            '#B5714B',
+            '#7C9473',
+            '#4C6B8A',
+            '#9AB68C',
+            '#C9A227',
+            '#8A7B9E',
+            '#C97B4A',
+            '#6E88A6'
         ];
 
         const labels =

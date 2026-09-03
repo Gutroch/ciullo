@@ -50,10 +50,10 @@
                   <td>
                     <input type="text" inputmode="decimal" autocomplete="off" class="input input-budget" name="previsto_<%= m.month %>" value="<%= m.previsto.toFixed(2) %>" data-calc />
                   </td>
-                  <td style="color: <%= m.reale >= 0 ? '#148c50' : 'var(--danger)' %>;">
+                  <td style="color: <%= m.reale >= 0 ? 'var(--positive)' : 'var(--danger)' %>;">
                     <%= m.reale >= 0 ? '+' : '' %><%= m.reale.toFixed(2) %>
                   </td>
-                  <td style="color: <%= m.differenza >= 0 ? '#148c50' : 'var(--danger)' %>;">
+                  <td style="color: <%= m.differenza >= 0 ? 'var(--positive)' : 'var(--danger)' %>;">
                     <%= m.differenza >= 0 ? '+' : '' %><%= m.differenza.toFixed(2) %>
                   </td>
                 </tr>
@@ -63,8 +63,8 @@
               <tr style="font-weight:700; border-top:2px solid var(--border);">
                 <td>ANNO <%= year %></td>
                 <td><%= totalPrevisto.toFixed(2) %></td>
-                <td style="color: <%= totalReale >= 0 ? '#148c50' : 'var(--danger)' %>;"><%= totalReale.toFixed(2) %></td>
-                <td style="color: <%= totalDifferenza >= 0 ? '#148c50' : 'var(--danger)' %>;"><%= totalDifferenza.toFixed(2) %></td>
+                <td style="color: <%= totalReale >= 0 ? 'var(--positive)' : 'var(--danger)' %>;"><%= totalReale.toFixed(2) %></td>
+                <td style="color: <%= totalDifferenza >= 0 ? 'var(--positive)' : 'var(--danger)' %>;"><%= totalDifferenza.toFixed(2) %></td>
               </tr>
             </tfoot>
           </table>
@@ -77,7 +77,7 @@
 
       <!-- Legenda -->
       <div style="margin-top:12px; font-size:0.9rem; color:var(--muted);">
-        <p><span style="color:#148c50;">●</span> Valori positivi = hai risparmiato (speso meno del previsto), 
+        <p><span style="color:var(--positive);">●</span> Valori positivi = hai risparmiato (speso meno del previsto), 
           <span style="color:var(--danger);">●</span> negativi = hai speso più del previsto.</p>
         <p>Il campo <strong>Previsto</strong> è modificabile: inserisci il saldo netto che prevedi per ogni mese (entrate − uscite).</p>
         <p><strong>Reale</strong> viene calcolato automaticamente dai movimenti registrati.</p>

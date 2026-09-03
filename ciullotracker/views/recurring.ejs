@@ -128,7 +128,7 @@
                   </span>
                 </div>
                 <div style="display:flex; align-items:center; gap:10px;">
-                  <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? '#148c50' : 'var(--danger)' %>;">
+                  <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? 'var(--positive)' : 'var(--danger)' %>;">
                     <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
                   </div>
                   <form action="/recurring/<%= r.id %>/toggle" method="POST">

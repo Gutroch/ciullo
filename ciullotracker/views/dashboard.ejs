@@ -26,7 +26,7 @@
 
     .kpi-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      box-shadow: 6px 6px 0px var(--ink);
     }
 
     .kpi-label {
@@ -43,8 +43,8 @@
       color: var(--text-primary);
     }
 
-    .kpi-value.positive { color: #4ECDC4; }
-    .kpi-value.negative { color: #FF6B6B; }
+    .kpi-value.positive { color: var(--positive); }
+    .kpi-value.negative { color: var(--negative); }
     .kpi-value.neutral { color: var(--text-primary); }
 
     .chart-card {
@@ -55,7 +55,7 @@
 
     .chart-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      box-shadow: 6px 6px 0px var(--ink);
     }
 
     .chart-title {
@@ -160,7 +160,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 1px solid var(--border-color);
+      border: var(--border-w) solid var(--border);
       background: var(--bg-secondary);
       color: var(--text-primary);
       cursor: pointer;
@@ -180,8 +180,8 @@
       transform: scale(0.9);
     }
 
-    .qty-btn.inc { color: #4ECDC4; }
-    .qty-btn.dec { color: #FF6B6B; }
+    .qty-btn.inc { color: var(--positive); }
+    .qty-btn.dec { color: var(--negative); }
 
     .dashboard-qty-btn {
       display: flex;
@@ -193,7 +193,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 1px solid var(--border-color);
+      border: var(--border-w) solid var(--border);
       background: var(--bg-secondary);
       color: var(--text-primary);
       cursor: pointer;
@@ -213,8 +213,8 @@
       transform: scale(0.9);
     }
 
-    .dashboard-qty-btn .qty-btn.inc { color: #4ECDC4; }
-    .dashboard-qty-btn .qty-btn.dec { color: #FF6B6B; }
+    .dashboard-qty-btn .qty-btn.inc { color: var(--positive); }
+    .dashboard-qty-btn .qty-btn.dec { color: var(--negative); }
 
     .toast-notification {
       position: fixed;
@@ -223,8 +223,8 @@
       padding: 12px 24px;
       border-radius: 12px;
       background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border: var(--border-w) solid var(--border);
+      box-shadow: 8px 8px 0px var(--ink);
       font-weight: 500;
       z-index: 9999;
       animation: slideIn 0.3s ease;
@@ -232,13 +232,13 @@
     }
 
     .toast-notification.success {
-      border-left: 4px solid #4ECDC4;
-      color: #4ECDC4;
+      border-left: 4px solid var(--positive);
+      color: var(--positive);
     }
 
     .toast-notification.error {
-      border-left: 4px solid #FF6B6B;
-      color: #FF6B6B;
+      border-left: 4px solid var(--negative);
+      color: var(--negative);
     }
 
     .toast-notification.fade-out {
@@ -271,20 +271,20 @@
     }
 
     .increment-popup {
-      background: #ffffff;
+      background: var(--surface);
       border-radius: 20px;
       padding: 32px;
       max-width: 420px;
       width: 90%;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      box-shadow: 10px 10px 0px var(--ink);
       animation: modalIn 0.3s ease;
-      border: 1px solid #dee2e6;
-      color: #0a0a0a;
+      border: var(--border-w) solid var(--border);
+      color: var(--text);
     }
 
     .increment-popup h3 {
       margin: 0 0 20px 0;
-      color: #0a0a0a;
+      color: var(--text);
       font-size: 1.3rem;
       text-align: center;
     }
@@ -298,7 +298,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid #dee2e6;
+      border-bottom: 1px solid var(--border);
     }
 
     .increment-popup .popup-row:last-child {
@@ -306,18 +306,18 @@
     }
 
     .increment-popup .popup-label {
-      color: #6c757d;
+      color: var(--text-muted);
       font-size: 0.9rem;
     }
 
     .increment-popup .popup-value {
       font-weight: 600;
       font-size: 1.1rem;
-      color: #0a0a0a;
+      color: var(--text);
     }
 
     .increment-popup .popup-value.old {
-      color: #6c757d;
+      color: var(--text-muted);
     }
 
     .increment-popup .popup-value.new {
@@ -326,11 +326,11 @@
     }
 
     .increment-popup .popup-value.new.positive {
-      color: #4ECDC4;
+      color: var(--positive);
     }
 
     .increment-popup .popup-value.new.negative {
-      color: #FF6B6B;
+      color: var(--negative);
     }
 
     .increment-popup .popup-actions {
@@ -343,9 +343,9 @@
     .increment-popup .popup-cancel {
       padding: 10px 24px;
       border-radius: 10px;
-      border: 1px solid #dee2e6;
+      border: var(--border-w) solid var(--border);
       background: transparent;
-      color: #6c757d;
+      color: var(--text-muted);
       cursor: pointer;
       transition: all 0.2s;
       font-weight: 500;
@@ -353,7 +353,7 @@
     }
 
     .increment-popup .popup-cancel:hover {
-      background: #f0f0f0;
+      background: var(--surface-alt);
     }
 
     .increment-popup .popup-confirm {
@@ -368,20 +368,20 @@
     }
 
     .increment-popup .popup-confirm.positive {
-      background: #4ECDC4;
+      background: var(--positive);
     }
 
     .increment-popup .popup-confirm.positive:hover {
-      background: #3dbdb5;
+      background: #4A6B42;
       transform: scale(1.02);
     }
 
     .increment-popup .popup-confirm.negative {
-      background: #FF6B6B;
+      background: var(--negative);
     }
 
     .increment-popup .popup-confirm.negative:hover {
-      background: #e85a5a;
+      background: #8F3A2C;
       transform: scale(1.02);
     }
 
@@ -392,26 +392,26 @@
     .quick-amount-btn {
       padding: 4px 12px;
       border-radius: 6px;
-      border: 1px solid #dee2e6;
-      background: #f8f9fa;
-      color: #6c757d;
+      border: var(--border-w) solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text-muted);
       cursor: pointer;
       font-size: 0.8rem;
       transition: all 0.2s;
     }
 
     .quick-amount-btn:hover {
-      background: #f0f0f0;
-      border-color: #4ECDC4;
+      background: var(--surface-alt);
+      border-color: var(--positive);
     }
 
     .popup-input {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid #dee2e6;
+      border: var(--border-w) solid var(--border);
       border-radius: 8px;
-      background: #f8f9fa;
-      color: #0a0a0a;
+      background: var(--surface-alt);
+      color: var(--text);
       font-size: 1.1rem;
       box-sizing: border-box;
       transition: border-color 0.2s;
@@ -419,8 +419,8 @@
 
     .popup-input:focus {
       outline: none;
-      border-color: #4ECDC4;
-      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+      border-color: var(--positive);
+      box-shadow: 4px 4px 0px var(--ink);
     }
 
     @keyframes fadeIn {
@@ -449,13 +449,13 @@
     }
 
     .chart-modal-content {
-      background: var(--bg-primary, #ffffff);
+      background: var(--bg-primary, var(--surface));
       border-radius: 16px;
       max-width: 90vw;
       max-height: 90vh;
       width: 800px;
       padding: 30px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      box-shadow: 10px 10px 0px var(--ink);
       position: relative;
       animation: modalIn 0.3s ease;
     }
@@ -466,13 +466,13 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color, #dee2e6);
+      border-bottom: 1px solid var(--border-color, var(--border));
     }
 
     .chart-modal-header h3 {
       margin: 0;
       font-size: 1.2rem;
-      color: var(--text-primary, #0a0a0a);
+      color: var(--text-primary, var(--text));
     }
 
     .chart-modal-close-btn {
@@ -480,13 +480,13 @@
       border: none;
       font-size: 2rem;
       cursor: pointer;
-      color: var(--text-secondary, #6c757d);
+      color: var(--text-secondary, var(--text-muted));
       padding: 0 8px;
       transition: color 0.2s;
     }
 
     .chart-modal-close-btn:hover {
-      color: var(--text-primary, #0a0a0a);
+      color: var(--text-primary, var(--text));
     }
 
     .chart-modal-body {
@@ -515,8 +515,8 @@
 
     .chart-modal-footer {
       padding-top: 12px;
-      border-top: 1px solid var(--border-color, #dee2e6);
-      color: var(--text-secondary, #6c757d);
+      border-top: 1px solid var(--border-color, var(--border));
+      color: var(--text-secondary, var(--text-muted));
       font-size: 0.9rem;
       text-align: center;
     }
@@ -527,7 +527,7 @@
       padding: 4px 8px;
       font-size: 1.2rem;
       cursor: pointer;
-      color: var(--text-secondary, #6c757d);
+      color: var(--text-secondary, var(--text-muted));
       transition: color 0.2s;
     }
 
@@ -543,10 +543,10 @@
             padding: 4px 8px;
             font-size: 0.95rem;
             cursor: pointer;
-            color: var(--text-secondary, #6c757d);
+            color: var(--text-secondary, var(--text-muted));
         }
 
-        .chart-download:hover { color: var(--text-primary, #0a0a0a); }
+        .chart-download:hover { color: var(--text-primary, var(--text)); }
 
         .chart-period-hint {
             margin: -8px 0 18px;
@@ -572,7 +572,7 @@
         .chart-period-form .input:last-child { min-width: 88px; }
 
     .chart-fullscreen:hover {
-      color: var(--text-primary, #0a0a0a);
+      color: var(--text-primary, var(--text));
     }
 
     .btn-sm {
@@ -629,14 +629,14 @@
     }
 
     :root {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8f9fa;
-      --bg-hover: #f0f0f0;
-      --text-primary: #0a0a0a;
-      --text-secondary: #6c757d;
-      --border-color: #dee2e6;
-      --accent: #0a0a0a;
-      --danger: #FF6B6B;
+      --bg-primary: var(--surface);
+      --bg-secondary: var(--surface-alt);
+      --bg-hover: var(--surface-alt);
+      --text-primary: var(--text);
+      --text-secondary: var(--text-muted);
+      --border-color: var(--border);
+      --accent: var(--text);
+      --danger: var(--negative);
     }
 
     [data-theme="dark"] {
@@ -656,7 +656,7 @@
 }
 .breadcrumb-btn {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    border: var(--border-w) solid var(--border);
     color: var(--text-primary);
     padding: 4px 12px;
     border-radius: 8px;
@@ -666,8 +666,8 @@
 }
 .breadcrumb-btn:hover {
     background: var(--bg-hover);
-    border-color: #4ECDC4;
-    color: #4ECDC4;
+    border-color: var(--positive);
+    color: var(--positive);
 }
 .breadcrumb-sep {
     color: var(--text-secondary);
@@ -808,7 +808,7 @@
                 <span class="expense-name"><%= r.descrizione %></span>
                 <span class="expense-sub">Scade il <%= new Date(r.prossimaData).toLocaleDateString('it-IT') %></span>
               </div>
-              <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
+              <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
                 <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
               </div>
             </div>
@@ -838,7 +838,7 @@
                   <%= e.inserito_da %> → <%= e.per_conto_di %>
                 </span>
               </div>
-              <div class="expense-amount" style="color: <%= e.tipo === 'ingresso' ? '#4ECDC4' : '#FF6B6B' %>;">
+              <div class="expense-amount" style="color: <%= e.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
                 <%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= e.importo.toFixed(2) %>
               </div>
             </div>
@@ -911,18 +911,18 @@ var dashboardChartData = {
             document.documentElement.getAttribute('data-theme') === 'dark';
 
         return {
-            text: dark ? '#f5f5f5' : '#0a0a0a',
+            text: dark ? '#f5f5f5' : 'var(--text)',
 
             grid: dark
                 ? 'rgba(255,255,255,0.08)'
                 : 'rgba(0,0,0,0.08)',
 
             bgPrimary:
-                dark ? '#1e1e1e' : '#ffffff',
+                dark ? '#1e1e1e' : 'var(--surface)',
 
             palette: [
-                '#FF6B6B',
-                '#4ECDC4',
+                'var(--negative)',
+                'var(--positive)',
                 '#45B7D1',
                 '#96CEB4',
                 '#FFEAA7',
@@ -1791,10 +1791,10 @@ var dashboardChartData = {
                                 [],
 
                             backgroundColor:
-                                'rgba(78, 205, 196, 0.7)',
+                                'rgba(124, 148, 115, 0.7)',
 
                             borderColor:
-                                '#4ECDC4',
+                                'var(--positive)',
 
                             borderWidth: 2,
 
@@ -1813,7 +1813,7 @@ var dashboardChartData = {
                                 'rgba(255, 107, 107, 0.7)',
 
                             borderColor:
-                                '#FF6B6B',
+                                'var(--negative)',
 
                             borderWidth: 2,
 
@@ -1940,7 +1940,7 @@ var dashboardChartData = {
                                 [],
 
                             borderColor:
-                                '#FF6B6B',
+                                'var(--negative)',
 
                             backgroundColor:
                                 'rgba(255, 107, 107, 0.1)',
@@ -1952,7 +1952,7 @@ var dashboardChartData = {
                                 0.4,
 
                             pointBackgroundColor:
-                                '#FF6B6B'
+                                'var(--negative)'
                         },
 
                         {
@@ -1964,10 +1964,10 @@ var dashboardChartData = {
                                 [],
 
                             borderColor:
-                                '#4ECDC4',
+                                'var(--positive)',
 
                             backgroundColor:
-                                'rgba(78, 205, 196, 0.1)',
+                                'rgba(124, 148, 115, 0.1)',
 
                             fill:
                                 true,
@@ -1976,7 +1976,7 @@ var dashboardChartData = {
                                 0.4,
 
                             pointBackgroundColor:
-                                '#4ECDC4'
+                                'var(--positive)'
                         }
                     ]
                 },
