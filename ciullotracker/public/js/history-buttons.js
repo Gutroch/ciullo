@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div style="margin-top:16px;">
                     <label style="display:block;color:#6c757d;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€) <span style="font-weight:400;color:#9a9aa0;">— anche un calcolo, es. 15+5</span></label>
-                    <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" inputmode="decimal" autocomplete="off" autofocus>
+                    <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" inputmode="text" autocomplete="off" autofocus>
                     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
                         <button class="quick-amount-btn" data-value="0.50">0,50</button>
                         <button class="quick-amount-btn" data-value="1.00">1,00</button>

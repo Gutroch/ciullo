@@ -34,7 +34,7 @@
 
           <div class="field">
             <label for="importo">Importo (€) <span class="field-hint">— puoi anche scrivere un calcolo, es. 90+10</span></label>
-            <input class="input input-amount" type="text" inputmode="decimal" id="importo" name="importo" placeholder="0.00 oppure 90+10" required autocomplete="off" data-calc data-calc-min="0.01" value="<%= editMode ? expense.importo : '' %>" />
+            <input class="input input-amount" type="text" inputmode="text" id="importo" name="importo" placeholder="0.00 oppure 90+10" required autocomplete="off" data-calc data-calc-min="0.01" value="<%= editMode ? expense.importo : '' %>" />
           </div>
 
           <div class="form-row">

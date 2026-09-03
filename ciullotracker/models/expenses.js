@@ -15,7 +15,9 @@ class Expenses {
     'INVESTIMENTI': ['Prestito', 'Prestito 2', 'Massaggiatore', 'Amazon', 'Riparazioni Casa', 'Luca', 'Diego', 'Telefono', 'Altro'],
     'SALUTE': ['Visite Mediche', 'Farmacia', 'Rocky'],
     'ABITI': ['Primark', 'Vestiti Luca/Diego', 'Vestiti Mamma/Papà', 'Parrucchiera', 'Estetista'],
-    'AUTO': ['Problemi', 'Benzina', 'Bollo', 'Assicurazione', 'Revisione', 'Tagliando']
+    'AUTO': ['Problemi', 'Benzina', 'Bollo', 'Assicurazione', 'Revisione', 'Tagliando'],
+    'CONGUAGLIO':['Conguaglio'],
+    'ALTRO':['Altro'],
   };
 
   // Categorie per le entrate (senza sottocategorie)
@@ -23,8 +25,11 @@ class Expenses {
     'Stipendio Papà',
     'Stipendio Mamma',
     'Luca / Diego',
+    'Portafogli Mamma',
+    'Portafogli Papà',
     'Vinted',
-    'Assegno Familiare'
+    'Assegno Familiare',
+    'Conguaglio'
   ];
 
   // Restituisce tutte le sottocategorie per una data categoria (solo per uscite)

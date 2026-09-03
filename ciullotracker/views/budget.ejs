@@ -48,7 +48,7 @@
                 <tr>
                   <td><strong><%= m.label %></strong></td>
                   <td>
-                    <input type="text" inputmode="decimal" autocomplete="off" class="input input-budget" name="previsto_<%= m.month %>" value="<%= m.previsto.toFixed(2) %>" data-calc />
+                    <input type="text" inputmode="text" autocomplete="off" class="input input-budget" name="previsto_<%= m.month %>" value="<%= m.previsto.toFixed(2) %>" data-calc />
                   </td>
                   <td style="color: <%= m.reale >= 0 ? 'var(--positive)' : 'var(--danger)' %>;">
                     <%= m.reale >= 0 ? '+' : '' %><%= m.reale.toFixed(2) %>

@@ -310,6 +310,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
         error: "Inserisci un importo valido maggiore di zero.",
         success: null,
         expense: null,
+        editMode: false,
         ultimeSpese,
       });
     }
@@ -336,6 +337,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
       error: null,
       success: 'Spesa registrata correttamente!',
       expense: null,
+      editMode: false,
       ultimeSpese,
     });
   } catch (error) {
