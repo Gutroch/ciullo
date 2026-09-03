@@ -162,17 +162,18 @@ class Recurring {
     try {
       const recurring = await this.getAll();
       const today = new Date();
-      const todayStr = today.toISOString().slice(0, 10);
       
       let executed = 0;
       
       for (const item of recurring) {
         if (!item.attivo) continue;
-        if (item.ultima_esecuzione === todayStr) continue;
-        
-        const shouldRun = await this.shouldRunToday(item);
-        
-        if (shouldRun && await this.execute(item)) {
+        const scheduledDate = this.getScheduledDate(item, today);
+        if (!scheduledDate) continue;
+
+        const scheduledStr = scheduledDate.toISOString().slice(0, 10);
+        if (item.ultima_esecuzione >= scheduledStr) continue;
+
+        if (await this.execute(item, scheduledDate)) {
           console.log(`Eseguo ricorrente: ${item.descrizione}`);
           executed++;
         }
@@ -187,6 +188,42 @@ class Recurring {
       console.error(' Errore processDueRecurring:', error.message);
       return 0;
     }
+  }
+
+  static getScheduledDate(item, today = new Date()) {
+    const day = Number(item.giorno);
+    if (!Number.isInteger(day)) return null;
+
+    const month = today.getMonth() + 1;
+    let shouldRun = day <= today.getDate();
+
+    switch (item.ricorrenza) {
+      case 'mensile':
+        break;
+      case 'mesi':
+        shouldRun = shouldRun && (item.mesi || []).map(Number).includes(month);
+        break;
+      case 'settimanale':
+        break;
+      case 'bimestrale':
+        shouldRun = shouldRun && month % 2 === 0;
+        break;
+      case 'trimestrale':
+        shouldRun = shouldRun && month % 3 === 0;
+        break;
+      case 'semestrale':
+        shouldRun = shouldRun && month % 6 === 0;
+        break;
+      case 'annuale':
+        shouldRun = shouldRun && month === 1;
+        break;
+      default:
+        shouldRun = false;
+    }
+
+    if (!shouldRun) return null;
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    return new Date(today.getFullYear(), today.getMonth(), Math.min(day, lastDay));
   }
 
   // Verifica se deve essere eseguita oggi
@@ -223,7 +260,11 @@ class Recurring {
       const redis = getRedisClient();
       const today = new Date();
       const data = dataSpesa ? new Date(dataSpesa) : today;
-      const dataStr = data.toISOString().slice(0, 10);
+      const dataStr = [
+        data.getFullYear(),
+        String(data.getMonth() + 1).padStart(2, '0'),
+        String(data.getDate()).padStart(2, '0'),
+      ].join('-');
 
       await Expenses.addExpense({
         data_spesa: dataStr,

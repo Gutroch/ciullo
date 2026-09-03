@@ -443,6 +443,7 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
 
 router.get('/history', requireAuth, async (req, res) => {
   try {
+    await Recurring.processDueRecurring();
     const all = await Expenses.getAllExpenses();
     const { mese, anno, categoria, sottocategoria } = req.query;
 
