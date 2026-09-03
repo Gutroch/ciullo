@@ -10,7 +10,7 @@ function getRedisClient() {
     redisClient = new Redis(REDIS_URL, {
       retryStrategy: (times) => {
         if (times > 10) {
-          console.error('❌ Impossibile connettersi a Redis dopo 10 tentativi');
+          console.error(' Impossibile connettersi a Redis dopo 10 tentativi');
           return null;
         }
         return Math.min(times * 100, 3000);
@@ -18,12 +18,12 @@ function getRedisClient() {
     });
 
     redisClient.on('connect', () => {
-      console.log('✅ Connesso a Redis!');
+      console.log(' Connesso a Redis!');
       isConnected = true;
     });
 
     redisClient.on('error', (err) => {
-      console.error('❌ Errore Redis:', err.message);
+      console.error(' Errore Redis:', err.message);
       isConnected = false;
     });
   }

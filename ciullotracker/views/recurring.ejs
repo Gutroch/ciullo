@@ -47,6 +47,13 @@
             </div>
 
             <div class="field">
+              <label>
+                <input type="checkbox" name="retroattiva" value="true">
+                Esegui anche per il mese corrente (se il giorno è già passato)
+              </label>
+            </div>
+
+            <div class="field">
               <label for="categoria">Categoria</label>
               <select class="input" id="categoria" name="categoria">
                 <!-- Popolato via JS -->
@@ -131,6 +138,7 @@
                   <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? 'var(--positive)' : 'var(--danger)' %>;">
                     <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
                   </div>
+                  <a href="/recurring/<%= r.id %>/edit" class="btn btn-secondary btn-sm">Modifica</a>
                   <form action="/recurring/<%= r.id %>/toggle" method="POST">
                     <button type="submit" class="btn btn-secondary btn-sm"><%= r.attivo ? 'Disattiva' : 'Attiva' %></button>
                   </form>
@@ -168,7 +176,6 @@
           opt.textContent = c;
           categoriaSelect.appendChild(opt);
         });
-        // Dopo popolamento, aggiorna sottocategorie
         updateSottocategorie();
       }
 
@@ -198,7 +205,6 @@
 
       categoriaSelect.addEventListener('change', updateSottocategorie);
 
-      // Inizializza
       const initialTipo = document.querySelector('input[name="tipo"]:checked').value;
       populateCategorie(initialTipo);
     })();

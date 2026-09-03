@@ -15,6 +15,7 @@ const { readCsv } = require('./utils/csv');
 
 // Importa route
 const authRoutes = require('./routes/auth');
+const promemoriaRoutes = require('./routes/promemoria');
 const expensesRoutes = require('./routes/expenses');
 const adminRoutes = require('./routes/admin');
 const exportRoutes = require('./routes/export');
@@ -42,7 +43,7 @@ async function migrateDataFromCsv() {
         const expensesData = readCsv('expenses.csv', ['data_spesa', 'importo', 'tipo', 'categoria', 'sottocategoria', 'inserito_da', 'per_conto_di', 'note']);
         if (expensesData.rows.length > 0) {
           const imported = await Expenses.importFromCsv(expensesData.rows);
-          console.log(`✅ Importate ${imported} spese da CSV`);
+          console.log(` Importate ${imported} spese da CSV`);
         }
       }
       
@@ -50,7 +51,7 @@ async function migrateDataFromCsv() {
         const usersData = readCsv('users.csv', ['username', 'password', 'ruolo']);
         if (usersData.rows.length > 0) {
           const imported = await Users.importFromCsv(usersData.rows);
-          console.log(`✅ Importati ${imported} utenti da CSV`);
+          console.log(` Importati ${imported} utenti da CSV`);
         }
       }
       
@@ -60,10 +61,10 @@ async function migrateDataFromCsv() {
       // Avvia le ricorrenze
       await Recurring.processDueRecurring();
     } else {
-      console.log(`✅ Dati già presenti in Redis (${existingExpenses.length} spese)`);
+      console.log(` Dati già presenti in Redis (${existingExpenses.length} spese)`);
     }
   } catch (error) {
-    console.error('❌ Errore migrazione dati:', error.message);
+    console.error(' Errore migrazione dati:', error.message);
   }
 }
 
@@ -107,7 +108,9 @@ app.use('/', expensesRoutes);
 app.use('/', adminRoutes);
 app.use('/', exportRoutes);
 app.use('/', recurringRoutes);
-app.use('/budget', budgetRoutes); // <-- NUOVA ROTTA PER IL BUDGET
+app.use('/budget', budgetRoutes); 
+app.use('/promemoria', promemoriaRoutes);
+
 
 // --- Gestione 404 ---
 app.use((req, res) => {
@@ -119,7 +122,7 @@ app.use((req, res) => {
 
 // --- Gestione errori ---
 app.use((err, req, res, next) => {
-  console.error('❌ Errore:', err);
+  console.error(' Errore:', err);
   res.status(500).render('error', {
     user: req.session?.user,
     message: 'Si è verificato un errore interno del server.',
@@ -134,7 +137,7 @@ migrateDataFromCsv().then(() => {
   setInterval(() => Recurring.processDueRecurring(), 1000 * 60 * 60 * 6);
 
   app.listen(PORT, () => {
-    console.log(`✅ CiulloTracker in ascolto sulla porta ${PORT}`);
+    console.log(` CiulloTracker in ascolto sulla porta ${PORT}`);
   });
 });
 

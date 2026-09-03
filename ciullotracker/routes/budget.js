@@ -70,7 +70,7 @@ router.get('/', requireAuth, async (req, res) => {
       success: null
     });
   } catch (error) {
-    console.error('❌ Errore caricamento budget:', error);
+    console.error(' Errore caricamento budget:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nel caricamento del budget.'
@@ -94,7 +94,7 @@ router.post('/update', requireAuth, async (req, res) => {
     await Budget.setAllBudget(year, data);
     res.redirect(`/budget?year=${year}&success=1`);
   } catch (error) {
-    console.error('❌ Errore aggiornamento budget:', error);
+    console.error(' Errore aggiornamento budget:', error);
     res.redirect(`/budget?year=${req.body.year}&error=1`);
   }
 });

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Modifica Ricorrente · CiulloTracker' }) %>
+</head>
+<body>
+<div class="blob-field" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'recurring' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Modifica voce ricorrente</div>
+      <div class="page-subtitle">Aggiorna i dettagli della spesa ricorrente</div>
+
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+      <div class="grid grid-2" style="align-items:start; margin-bottom: 20px;">
+        <!-- Form modifica -->
+        <div class="card squircle">
+          <div class="chart-title">Modifica voce</div>
+          <form action="/recurring/<%= voce.id %>/update" method="POST" id="recurringForm">
+
+            <div class="field">
+              <label>Tipo</label>
+              <div class="segmented">
+                <label class="segmented-item">
+                  <input type="radio" name="tipo" value="uscita" <%= voce.tipo === 'uscita' ? 'checked' : '' %>> Spesa
+                </label>
+                <label class="segmented-item">
+                  <input type="radio" name="tipo" value="ingresso" <%= voce.tipo === 'ingresso' ? 'checked' : '' %>> Entrata
+                </label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="descrizione">Descrizione</label>
+              <input class="input" type="text" id="descrizione" name="descrizione" value="<%= voce.descrizione %>" required />
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="importo">Importo (€)</label>
+                <input class="input input-amount" type="text" inputmode="text" id="importo" name="importo" value="<%= voce.importo %>" required autocomplete="off" />
+              </div>
+              <div class="field">
+                <label for="giorno">Giorno del mese</label>
+                <input class="input" type="number" min="1" max="31" id="giorno" name="giorno" value="<%= voce.giorno %>" required />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="categoria">Categoria</label>
+              <select class="input" id="categoria" name="categoria">
+                <!-- Popolato via JS -->
+              </select>
+            </div>
+
+            <div class="field" id="sottocategoriaGroup" style="<%= voce.tipo === 'ingresso' ? 'display:none;' : 'display:block;' %>">
+              <label for="sottocategoria">Sottocategoria</label>
+              <select class="input" id="sottocategoria" name="sottocategoria">
+                <option value="">— Nessuna —</option>
+                <!-- Popolato via JS -->
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Ricorrenza</label>
+              <div class="segmented">
+                <label class="segmented-item">
+                  <input type="radio" name="ricorrenza" value="mensile" id="ricMensile" <%= voce.ricorrenza === 'mensile' ? 'checked' : '' %>> Ogni mese
+                </label>
+                <label class="segmented-item">
+                  <input type="radio" name="ricorrenza" value="mesi" id="ricMesi" <%= voce.ricorrenza === 'mesi' ? 'checked' : '' %>> Mesi specifici
+                </label>
+              </div>
+            </div>
+
+            <div class="field" id="mesiBox" style="<%= voce.ricorrenza === 'mesi' ? 'display:block;' : 'display:none;' %>">
+              <label>Seleziona i mesi</label>
+              <div class="months-grid">
+                <% var mesiNomi = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic']; %>
+                <% mesiNomi.forEach(function(m, i) { %>
+                  <label class="segmented-item month-check">
+                    <input type="checkbox" name="mesi" value="<%= i+1 %>" <%= (voce.mesi || []).includes(i+1) ? 'checked' : '' %>> <%= m %>
+                  </label>
+                <% }); %>
+              </div>
+            </div>
+
+            <!-- Sezione Avanzate -->
+            <div class="accordion">
+              <div class="accordion-header" id="advToggle">
+                <span>Opzioni avanzate</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="accordion-body" id="advBody">
+                <div class="field">
+                  <label for="inserito_da">Inserito da</label>
+                  <select class="input" id="inserito_da" name="inserito_da">
+                    <option value="">— Io stesso (<%= user.username %>) —</option>
+                    <% utenti.forEach(function(u) { %>
+                      <option value="<%= u.username %>" <%= voce.inserito_da === u.username ? 'selected' : '' %>><%= u.username %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                  <label for="per_conto_di">Per conto di</label>
+                  <select class="input" id="per_conto_di" name="per_conto_di">
+                    <option value="">— Me stesso (<%= user.username %>) —</option>
+                    <% utenti.forEach(function(u) { %>
+                      <option value="<%= u.username %>" <%= voce.per_conto_di === u.username ? 'selected' : '' %>><%= u.username %></option>
+                    <% }); %>
+                    <option value="Tutta la famiglia" <%= voce.per_conto_di === 'Tutta la famiglia' ? 'selected' : '' %>>Tutta la famiglia</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+              <button type="submit" class="btn btn-primary btn-block">Aggiorna</button>
+              <a href="/recurring" class="btn btn-secondary btn-block">Annulla</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- Info e stato -->
+        <div class="card squircle">
+          <div class="chart-title">Stato attuale</div>
+          <div style="margin-bottom:10px;">
+            <strong>Stato:</strong> <%= voce.attivo ? 'Attiva' : 'Disattivata' %>
+          </div>
+          <div style="margin-bottom:10px;">
+            <strong>Ultima esecuzione:</strong> <%= voce.ultima_esecuzione ? voce.ultima_esecuzione : 'Mai eseguita' %>
+          </div>
+          <div style="margin-bottom:10px;">
+            <strong>ID:</strong> <%= voce.id %>
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">
+            <strong>Info:</strong><br>
+            Tipo: <%= voce.tipo === 'ingresso' ? 'Entrata' : 'Spesa' %><br>
+            Categoria: <%= voce.categoria %><br>
+            <%= voce.sottocategoria ? 'Sottocategoria: ' + voce.sottocategoria + '<br>' : '' %>
+            Giorno: <%= voce.giorno %><br>
+            Ricorrenza: <%= voce.ricorrenza === 'mensile' ? 'Ogni mese' : 'Mesi specifici' %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer', { user: user }) %>
+
+  <script>
+    const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
+    const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;
+    const voceTipo = '<%= voce.tipo %>';
+    const voceCategoria = '<%= voce.categoria %>';
+    const voceSottocategoria = '<%= voce.sottocategoria || "" %>';
+
+    // Gestione tipo e categorie
+    (function() {
+      const tipoRadios = document.querySelectorAll('input[name="tipo"]');
+      const categoriaSelect = document.getElementById('categoria');
+      const sottocategoriaSelect = document.getElementById('sottocategoria');
+      const sottocategoriaGroup = document.getElementById('sottocategoriaGroup');
+
+      function populateCategorie(tipo) {
+        const options = tipo === 'ingresso' ? categorieEntrate : Object.keys(categorieSpese);
+        categoriaSelect.innerHTML = '';
+        options.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          if (c === voceCategoria) opt.selected = true;
+          categoriaSelect.appendChild(opt);
+        });
+        updateSottocategorie();
+      }
+
+      function updateSottocategorie() {
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        if (tipo === 'ingresso') {
+          sottocategoriaGroup.style.display = 'none';
+          return;
+        }
+        sottocategoriaGroup.style.display = 'block';
+        const cat = categoriaSelect.value;
+        const sottos = categorieSpese[cat] || [];
+        sottocategoriaSelect.innerHTML = '<option value="">— Nessuna —</option>';
+        sottos.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          if (s === voceSottocategoria) opt.selected = true;
+          sottocategoriaSelect.appendChild(opt);
+        });
+      }
+
+      tipoRadios.forEach(r => {
+        r.addEventListener('change', function() {
+          populateCategorie(this.value);
+        });
+      });
+
+      categoriaSelect.addEventListener('change', updateSottocategorie);
+
+      // Inizializza con il tipo corrente
+      const currentTipo = document.querySelector('input[name="tipo"]:checked').value;
+      populateCategorie(currentTipo);
+    })();
+
+    // Accordion opzioni avanzate (aperto di default se ci sono valori)
+    (function () {
+      var header = document.getElementById('advToggle');
+      var body = document.getElementById('advBody');
+      // Apri se ci sono valori non default
+      var hasCustom = document.getElementById('inserito_da').value || document.getElementById('per_conto_di').value;
+      if (hasCustom) {
+        header.classList.add('open');
+        body.classList.add('open');
+      }
+      header.addEventListener('click', function () {
+        header.classList.toggle('open');
+        body.classList.toggle('open');
+      });
+    })();
+
+    // Mostra/nasconde la selezione mesi
+    (function () {
+      var mensile = document.getElementById('ricMensile');
+      var mesiRadio = document.getElementById('ricMesi');
+      var mesiBox = document.getElementById('mesiBox');
+      function update() {
+        mesiBox.style.display = mesiRadio.checked ? 'block' : 'none';
+      }
+      mensile.addEventListener('change', update);
+      mesiRadio.addEventListener('change', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

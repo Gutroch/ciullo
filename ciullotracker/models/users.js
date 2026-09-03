@@ -14,7 +14,7 @@ class Users {
       const data = await redis.get(REDIS_KEYS.USERS);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('❌ Errore lettura utenti:', error.message);
+      console.error(' Errore lettura utenti:', error.message);
       return [];
     }
   }
@@ -25,7 +25,7 @@ class Users {
       const users = await this.getAllUsers();
       return users.find(u => u.username === username) || null;
     } catch (error) {
-      console.error('❌ Errore ricerca utente:', error.message);
+      console.error(' Errore ricerca utente:', error.message);
       return null;
     }
   }
@@ -36,7 +36,7 @@ class Users {
       const users = await this.getAllUsers();
       return users.find(u => u.id === id) || null;
     } catch (error) {
-      console.error('❌ Errore ricerca utente:', error.message);
+      console.error(' Errore ricerca utente:', error.message);
       return null;
     }
   }
@@ -74,7 +74,7 @@ class Users {
         user: { id: newUser.id, username: newUser.username, ruolo: newUser.ruolo } 
       };
     } catch (error) {
-      console.error('❌ Errore creazione utente:', error.message);
+      console.error(' Errore creazione utente:', error.message);
       return { ok: false, error: 'Errore del server' };
     }
   }
@@ -93,7 +93,7 @@ class Users {
       await this._saveUsers(users);
       return { ok: true };
     } catch (error) {
-      console.error('❌ Errore reset password:', error.message);
+      console.error(' Errore reset password:', error.message);
       return { ok: false, error: 'Errore del server' };
     }
   }
@@ -111,7 +111,7 @@ class Users {
       await this._saveUsers(filtered);
       return { ok: true };
     } catch (error) {
-      console.error('❌ Errore eliminazione utente:', error.message);
+      console.error(' Errore eliminazione utente:', error.message);
       return { ok: false, error: 'Errore del server' };
     }
   }
@@ -124,7 +124,7 @@ class Users {
     if (!adminExists) {
       console.log('⚠️ Nessun admin trovato, creo admin predefinito...');
       await this.createUser('admin', 'admin123', 'admin');
-      console.log('✅ Admin creato: username=admin, password=admin123');
+      console.log(' Admin creato: username=admin, password=admin123');
     }
   }
 
@@ -158,7 +158,7 @@ class Users {
 
       return imported;
     } catch (error) {
-      console.error('❌ Errore import utenti:', error.message);
+      console.error(' Errore import utenti:', error.message);
       return 0;
     }
   }

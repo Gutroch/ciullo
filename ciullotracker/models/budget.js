@@ -11,7 +11,7 @@ class Budget {
       const data = await redis.get(REDIS_KEY_BUDGET(year));
       return data ? JSON.parse(data) : {};
     } catch (error) {
-      console.error('❌ Errore lettura budget:', error.message);
+      console.error(' Errore lettura budget:', error.message);
       return {};
     }
   }
@@ -25,7 +25,7 @@ class Budget {
       await redis.set(REDIS_KEY_BUDGET(year), JSON.stringify(budget));
       return true;
     } catch (error) {
-      console.error('❌ Errore scrittura budget:', error.message);
+      console.error(' Errore scrittura budget:', error.message);
       return false;
     }
   }
@@ -41,7 +41,7 @@ class Budget {
       await redis.set(REDIS_KEY_BUDGET(year), JSON.stringify(budget));
       return true;
     } catch (error) {
-      console.error('❌ Errore scrittura budget multiplo:', error.message);
+      console.error(' Errore scrittura budget multiplo:', error.message);
       return false;
     }
   }

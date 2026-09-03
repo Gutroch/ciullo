@@ -16,8 +16,19 @@ class Recurring {
       const data = await redis.get(REDIS_KEYS.RECURRING);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('❌ Errore lettura ricorrenze:', error.message);
+      console.error(' Errore lettura ricorrenze:', error.message);
       return [];
+    }
+  }
+
+  // Ottiene una ricorrenza per ID
+  static async getById(id) {
+    try {
+      const all = await this.getAll();
+      return all.find(r => r.id === id) || null;
+    } catch (error) {
+      console.error(' Errore getById ricorrenza:', error.message);
+      return null;
     }
   }
 
@@ -33,6 +44,7 @@ class Recurring {
         importo: parseFloat(data.importo),
         tipo: data.tipo || 'uscita',
         categoria: data.categoria || 'Altro',
+        sottocategoria: data.sottocategoria || '',
         ricorrenza: data.ricorrenza || 'mesi',
         mesi: data.mesi || [],
         giorno: parseInt(data.giorno) || 1,
@@ -47,8 +59,39 @@ class Recurring {
       
       return newItem;
     } catch (error) {
-      console.error('❌ Errore aggiunta ricorrenza:', error.message);
+      console.error(' Errore aggiunta ricorrenza:', error.message);
       throw error;
+    }
+  }
+
+  // Aggiorna una ricorrenza
+  static async update(id, data) {
+    try {
+      const redis = getRedisClient();
+      const all = await this.getAll();
+      const index = all.findIndex(r => r.id === id);
+      if (index === -1) return null;
+
+      const item = all[index];
+      // Aggiorna solo i campi consentiti
+      item.descrizione = data.descrizione || item.descrizione;
+      item.importo = parseFloat(data.importo) || item.importo;
+      item.tipo = data.tipo || item.tipo;
+      item.categoria = data.categoria || item.categoria;
+      item.sottocategoria = (data.tipo === 'uscita' && data.sottocategoria) ? data.sottocategoria : '';
+      item.ricorrenza = data.ricorrenza || item.ricorrenza;
+      item.mesi = data.mesi || item.mesi;
+      item.giorno = parseInt(data.giorno) || item.giorno;
+      item.inserito_da = data.inserito_da || item.inserito_da;
+      item.per_conto_di = data.per_conto_di || item.per_conto_di;
+      // attivo e ultima_esecuzione restano invariati
+
+      all[index] = item;
+      await redis.set(REDIS_KEYS.RECURRING, JSON.stringify(all));
+      return item;
+    } catch (error) {
+      console.error(' Errore update ricorrenza:', error.message);
+      return null;
     }
   }
 
@@ -66,7 +109,7 @@ class Recurring {
       
       return item;
     } catch (error) {
-      console.error('❌ Errore toggle ricorrenza:', error.message);
+      console.error(' Errore toggle ricorrenza:', error.message);
       return null;
     }
   }
@@ -83,7 +126,7 @@ class Recurring {
       await redis.set(REDIS_KEYS.RECURRING, JSON.stringify(filtered));
       return true;
     } catch (error) {
-      console.error('❌ Errore eliminazione ricorrenza:', error.message);
+      console.error(' Errore eliminazione ricorrenza:', error.message);
       return false;
     }
   }
@@ -98,7 +141,6 @@ class Recurring {
       
       return recurring.filter(r => {
         if (!r.attivo) return false;
-        // Logica semplificata: controlla se il giorno è nei prossimi X giorni
         const giorno = r.giorno;
         const todayDay = today.getDate();
         const futureDay = future.getDate();
@@ -109,14 +151,13 @@ class Recurring {
         return false;
       });
     } catch (error) {
-      console.error('❌ Errore getUpcoming:', error.message);
+      console.error(' Errore getUpcoming:', error.message);
       return [];
     }
   }
 
   // Processa le ricorrenze scadute
   static async processDueRecurring() {
-    console.log('🔄 Controllo spese ricorrenti scadute...');
     
     try {
       const recurring = await this.getAll();
@@ -129,23 +170,22 @@ class Recurring {
         if (!item.attivo) continue;
         if (item.ultima_esecuzione === todayStr) continue;
         
-        // Controlla se deve essere eseguita oggi
         const shouldRun = await this.shouldRunToday(item);
         
         if (shouldRun) {
-          console.log(`📝 Eseguo ricorrente: ${item.descrizione}`);
+          console.log(`Eseguo ricorrente: ${item.descrizione}`);
           await this.execute(item);
           executed++;
         }
       }
       
       if (executed > 0) {
-        console.log(`✅ Eseguite ${executed} ricorrenze`);
+        console.log(`Eseguite ${executed} ricorrenze`);
       }
       
       return executed;
     } catch (error) {
-      console.error('❌ Errore processDueRecurring:', error.message);
+      console.error(' Errore processDueRecurring:', error.message);
       return 0;
     }
   }
@@ -156,10 +196,8 @@ class Recurring {
     const day = today.getDate();
     const month = today.getMonth() + 1;
     
-    // Controlla il giorno
     if (day !== item.giorno) return false;
     
-    // Controlla la ricorrenza
     switch (item.ricorrenza) {
       case 'mesi':
         return item.mesi.includes(month);
@@ -179,13 +217,15 @@ class Recurring {
   }
 
   // Esegue la ricorrenza
-  static async execute(item) {
+  static async execute(item, dataSpesa) {
     try {
       const redis = getRedisClient();
-      
-      // Crea la spesa
+      const today = new Date();
+      const data = dataSpesa ? new Date(dataSpesa) : today;
+      const dataStr = data.toISOString().slice(0, 10);
+
       await Expenses.addExpense({
-        data_spesa: new Date().toISOString().slice(0, 10),
+        data_spesa: dataStr,
         importo: item.importo,
         tipo: item.tipo,
         categoria: item.categoria,
@@ -194,17 +234,16 @@ class Recurring {
         note: `[Ricorrente] ${item.descrizione}`
       });
       
-      // Aggiorna ultima esecuzione
       const recurring = await this.getAll();
       const found = recurring.find(r => r.id === item.id);
       if (found) {
-        found.ultima_esecuzione = new Date().toISOString().slice(0, 10);
+        found.ultima_esecuzione = dataStr;
         await redis.set(REDIS_KEYS.RECURRING, JSON.stringify(recurring));
       }
       
       return true;
     } catch (error) {
-      console.error('❌ Errore esecuzione ricorrenza:', error.message);
+      console.error(' Errore esecuzione ricorrenza:', error.message);
       return false;
     }
   }

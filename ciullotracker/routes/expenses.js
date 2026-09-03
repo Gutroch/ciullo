@@ -16,9 +16,9 @@ async function getRecentExpenses() {
   return all.slice(0, 10);
 }
 
-// ---------------------------------------------------------------
+
 // GET / - Dashboard principale (mese corrente)
-// ---------------------------------------------------------------
+
 router.get('/', requireAuth, async (req, res) => {
   try {
     const today = new Date();
@@ -249,7 +249,7 @@ const chartTrend = {
       years,
     });
   } catch (error) {
-    console.error('❌ Errore dashboard:', error);
+    console.error(' Errore dashboard:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nel caricamento della dashboard.'
@@ -257,9 +257,9 @@ const chartTrend = {
   }
 });
 
-// ---------------------------------------------------------------
+
 // GET /expenses/new - Form di inserimento nuova spesa
-// ---------------------------------------------------------------
+
 router.get('/expenses/new', requireAuth, async (req, res) => {
   try {
     const utenti = await Users.getAllUsers();
@@ -278,7 +278,7 @@ router.get('/expenses/new', requireAuth, async (req, res) => {
       ultimeSpese,
     });
   } catch (error) {
-    console.error('❌ Errore form nuova spesa:', error);
+    console.error(' Errore form nuova spesa:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nel caricamento del form.'
@@ -286,9 +286,9 @@ router.get('/expenses/new', requireAuth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------
+
 // POST /expenses - Salvataggio nuova spesa
-// ---------------------------------------------------------------
+
 router.post('/expenses', requireAuth, async (req, res) => {
   try {
     const { importo, data_spesa, categoria, note, tipo, sottocategoria } = req.body;
@@ -341,7 +341,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
       ultimeSpese,
     });
   } catch (error) {
-    console.error('❌ Errore salvataggio spesa:', error);
+    console.error(' Errore salvataggio spesa:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nel salvataggio della spesa.'
@@ -349,9 +349,9 @@ router.post('/expenses', requireAuth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------
+
 // GET /expenses/:id/edit - Form di modifica
-// ---------------------------------------------------------------
+
 router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
   try {
     const all = await Expenses.getAllExpenses();
@@ -378,7 +378,7 @@ router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
       ultimeSpese,
     });
   } catch (error) {
-    console.error('❌ Errore form modifica:', error);
+    console.error(' Errore form modifica:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nel caricamento del form di modifica.'
@@ -386,9 +386,9 @@ router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------
+
 // POST /expenses/:id/update - Aggiorna una spesa
-// ---------------------------------------------------------------
+
 router.post('/expenses/:id/update', requireAuth, async (req, res) => {
   try {
     const { importo, data_spesa, categoria, note, tipo, sottocategoria } = req.body;
@@ -430,7 +430,7 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
     const referer = req.headers.referer || '/history';
     res.redirect(referer);
   } catch (error) {
-    console.error('❌ Errore aggiornamento spesa:', error);
+    console.error(' Errore aggiornamento spesa:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nell\'aggiornamento della spesa.'
@@ -438,9 +438,9 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------
+
 // GET /history - Storico con filtri (incluso sottocategoria)
-// ---------------------------------------------------------------
+
 router.get('/history', requireAuth, async (req, res) => {
   try {
     const all = await Expenses.getAllExpenses();
@@ -466,7 +466,7 @@ router.get('/history', requireAuth, async (req, res) => {
       filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '', sottocategoria: sottocategoria || '' },
     });
   } catch (error) {
-    console.error('❌ Errore storico:', error);
+    console.error(' Errore storico:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nel caricamento dello storico.'
@@ -474,15 +474,15 @@ router.get('/history', requireAuth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------
+
 // POST /expenses/:id/delete - Elimina una spesa
-// ---------------------------------------------------------------
+
 router.post('/expenses/:id/delete', requireAuth, async (req, res) => {
   try {
     await Expenses.deleteExpense(req.params.id);
     res.redirect('back');
   } catch (error) {
-    console.error('❌ Errore eliminazione spesa:', error);
+    console.error(' Errore eliminazione spesa:', error);
     res.status(500).render('error', {
       user: req.session.user,
       message: 'Si è verificato un errore nell\'eliminazione della spesa.'
@@ -517,7 +517,7 @@ router.post('/expenses/:id/update-amount', requireAuth, async (req, res) => {
       newAmount: parseFloat(importo)
     });
   } catch (error) {
-    console.error('❌ Errore aggiornamento rapido:', error);
+    console.error(' Errore aggiornamento rapido:', error);
     res.status(500).json({ success: false, error: 'Errore del server' });
   }
 });

@@ -30,7 +30,7 @@ router.get('/export/csv', requireAuth, async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="storico_spese.csv"');
     res.send(csv);
   } catch (error) {
-    console.error('❌ Errore esportazione CSV:', error);
+    console.error(' Errore esportazione CSV:', error);
     res.status(500).json({ error: 'Errore durante l\'esportazione CSV' });
   }
 });
@@ -57,7 +57,7 @@ router.get('/export/xlsx', requireAuth, async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="storico_spese.xlsx"');
     res.send(buffer);
   } catch (error) {
-    console.error('❌ Errore esportazione Excel:', error);
+    console.error(' Errore esportazione Excel:', error);
     res.status(500).json({ error: 'Errore durante l\'esportazione Excel' });
   }
 });
@@ -77,7 +77,7 @@ router.get('/export/json', requireAuth, async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="storico_spese.json"');
     res.send(JSON.stringify(clean, null, 2));
   } catch (error) {
-    console.error('❌ Errore esportazione JSON:', error);
+    console.error(' Errore esportazione JSON:', error);
     res.status(500).json({ error: 'Errore durante l\'esportazione JSON' });
   }
 });

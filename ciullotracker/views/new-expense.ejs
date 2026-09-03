@@ -97,7 +97,7 @@
                   <% utenti.forEach(function(u) { %>
                     <option value="<%= u.username %>" <%= (editMode && expense.per_conto_di === u.username) ? 'selected' : '' %>><%= u.username %></option>
                   <% }); %>
-                  <option value="Tutta la famiglia" <%= (editMode && expense.per_conto_di === 'Tutta la famiglia') ? 'selected' : '' %>>Tutta la famiglia</option>
+                  <option value="Tutta la famiglia" selected>Tutta la famiglia</option>
                 </select>
               </div>
             </div>

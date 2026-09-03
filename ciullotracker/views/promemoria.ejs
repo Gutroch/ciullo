@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Promemoria Pagamenti · CiulloTracker' }) %>
+  <style>
+    /* Stili specifici per promemoria */
+    .page-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .page-actions .btn {
+      height: 40px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .promemoria-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .promemoria-table th {
+      text-align: left;
+      padding: 12px 12px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .promemoria-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .promemoria-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .promemoria-table .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    .promemoria-table .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+
+    .promemoria-table .badge-importo {
+      font-weight: 600;
+      color: #FF6B6B;
+    }
+
+    .promemoria-table .badge-ingresso {
+      color: #4ECDC4;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+    }
+
+    /* Modal per aggiungere/modificare */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 540px;
+      width: 90%;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      animation: modalIn 0.3s ease;
+      border: 1px solid #dee2e6;
+      color: #0a0a0a;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h3 {
+      margin: 0 0 20px 0;
+      color: #0a0a0a;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    .modal-content .field {
+      margin-bottom: 16px;
+    }
+
+    .modal-content .field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .modal-content .field .input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      background: #f8f9fa;
+      color: #0a0a0a;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .modal-content .field .input:focus {
+      outline: none;
+      border-color: #4ECDC4;
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    }
+
+    .modal-content .field .input-sm {
+      width: auto;
+      flex: 0 0 120px;
+    }
+
+    .modal-content .field-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .modal-content .field-row .field {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .modal-actions .btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .modal-actions .btn-secondary {
+      background: transparent;
+      border: 1px solid #dee2e6;
+      color: #6c757d;
+    }
+
+    .modal-actions .btn-secondary:hover {
+      background: #f0f0f0;
+    }
+
+    .modal-actions .btn-primary {
+      background: #4ECDC4;
+      color: white;
+    }
+
+    .modal-actions .btn-primary:hover {
+      background: #3dbdb5;
+      transform: scale(1.02);
+    }
+
+    .modal-actions .btn-danger {
+      background: #FF6B6B;
+      color: white;
+    }
+
+    .modal-actions .btn-danger:hover {
+      background: #e85a5a;
+    }
+
+    /* Toast notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      font-weight: 500;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 90%;
+    }
+
+    .toast-notification.success {
+      border-left: 4px solid #4ECDC4;
+      color: #4ECDC4;
+    }
+
+    .toast-notification.error {
+      border-left: 4px solid #FF6B6B;
+      color: #FF6B6B;
+    }
+
+    .toast-notification.fade-out {
+      animation: slideOut 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.9) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+      .modal-content {
+        padding: 20px;
+      }
+
+      .modal-content .field-row {
+        flex-direction: column;
+      }
+
+      .modal-content .field-row .field {
+        min-width: unset;
+      }
+    }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-hover: #f0f0f0;
+      --text-primary: #0a0a0a;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+      --accent: #4ECDC4;
+      --danger: #FF6B6B;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #2d2d2d;
+      --bg-hover: #3a3a3a;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --border-color: #444444;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'promemoria' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Promemoria Pagamenti</div>
+      <div class="page-subtitle">Tieni traccia di scadenze, bollette e pagamenti ricorrenti</div>
+
+      <!-- Actions -->
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-add">+ Aggiungi</button>
+        <button class="btn btn-danger" id="btn-delete-all" style="background: #dc3545; color: white; border: none;">Elimina tutti</button>
+      </div>
+
+      <!-- Tabella -->
+      <div class="table-wrap">
+        <table class="promemoria-table">
+          <thead>
+            <tr>
+              <th>Periodo</th>
+              <th>Descrizione</th>
+              <th>Importo</th>
+              <th>Scadenza</th>
+              <th>Note</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <% if (!promemoria || promemoria.length === 0) { %>
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <span style="font-size: 2rem;">📋</span>
+                    <span>Nessun promemoria registrato.</span>
+                    <button class="btn btn-primary" id="btn-add-empty">Aggiungi il primo</button>
+                  </div>
+                </td>
+              </tr>
+            <% } else { %>
+              <% promemoria.forEach(function(p) { %>
+                <tr data-id="<%= p.id %>">
+                  <td><strong><%= p.periodo %></strong></td>
+                  <td><%= p.descrizione %></td>
+                  <td class="badge-importo">€ <%= parseFloat(p.importo).toFixed(2) %></td>
+                  <td><%= p.scadenza ? new Date(p.scadenza).toLocaleDateString('it-IT') : '—' %></td>
+                  <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= p.note || '' %>">
+                    <%= p.note || '—' %>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="btn btn-primary btn-sm btn-edit" data-id="<%= p.id %>">Mod</button>
+                      <button class="btn btn-danger btn-sm btn-delete" data-id="<%= p.id %>" style="background: #dc3545; color: white; border: none;">Elim</button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL per aggiungere/modificare -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modal-title">Aggiungi Promemoria</h3>
+      <form id="modal-form">
+        <input type="hidden" id="edit-id" name="id" value="">
+
+        <div class="field">
+          <label for="periodo">Periodo *</label>
+          <input type="text" id="periodo" name="periodo" class="input" 
+                 placeholder="es. Gennaio-Marzo, 2024, Q1" required>
+        </div>
+
+        <div class="field">
+          <label for="descrizione">Descrizione *</label>
+          <input type="text" id="descrizione" name="descrizione" class="input" 
+                 placeholder="es. Tari, Bolletta luce, Assicurazione" required>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="importo">Importo (€)</label>
+            <input type="number" id="importo" name="importo" class="input" 
+                   placeholder="0.00" step="0.01" min="0">
+          </div>
+          <div class="field">
+            <label for="scadenza">Scadenza</label>
+            <input type="date" id="scadenza" name="scadenza" class="input">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="note">Note</label>
+          <input type="text" id="note" name="note" class="input" 
+                 placeholder="Eventuali note aggiuntive">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="modal-cancel">Annulla</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit">Salva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    //  PROMEMORIA - CRUD COMPLETO
+    // ============================================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // ---------- REFERENZE ----------
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalForm = document.getElementById('modal-form');
+      const editId = document.getElementById('edit-id');
+      const periodo = document.getElementById('periodo');
+      const descrizione = document.getElementById('descrizione');
+      const importo = document.getElementById('importo');
+      const scadenza = document.getElementById('scadenza');
+      const note = document.getElementById('note');
+      const modalCancel = document.getElementById('modal-cancel');
+      const modalSubmit = document.getElementById('modal-submit');
+      const tableBody = document.getElementById('table-body');
+
+      // ---------- TOAST ----------
+      function showToast(message, type) {
+        const existing = document.querySelector('.toast-notification');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification ' + type;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add('fade-out');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      // ---------- MODAL ----------
+      function openModal(data) {
+        if (data) {
+          modalTitle.textContent = 'Modifica Promemoria';
+          editId.value = data.id || '';
+          periodo.value = data.periodo || '';
+          descrizione.value = data.descrizione || '';
+          importo.value = data.importo || '';
+          scadenza.value = data.scadenza ? data.scadenza.split('T')[0] : '';
+          note.value = data.note || '';
+          modalSubmit.textContent = 'Aggiorna';
+        } else {
+          modalTitle.textContent = 'Aggiungi Promemoria';
+          editId.value = '';
+          periodo.value = '';
+          descrizione.value = '';
+          importo.value = '';
+          scadenza.value = '';
+          note.value = '';
+          modalSubmit.textContent = 'Salva';
+        }
+        modal.classList.add('active');
+        descrizione.focus();
+      }
+
+      function closeModal() {
+        modal.classList.remove('active');
+      }
+
+      // Apri modale per nuovo
+      document.getElementById('btn-add').addEventListener('click', () => openModal(null));
+      document.getElementById('btn-add-empty').addEventListener('click', () => openModal(null));
+
+      // Annulla
+      modalCancel.addEventListener('click', closeModal);
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+      });
+
+      // ---------- SALVA (CREATE / UPDATE) ----------
+      modalForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const data = {
+          id: editId.value,
+          periodo: periodo.value.trim(),
+          descrizione: descrizione.value.trim(),
+          importo: importo.value,
+          scadenza: scadenza.value || null,
+          note: note.value.trim()
+        };
+
+        if (!data.descrizione || !data.periodo) {
+          showToast('Descrizione e periodo sono obbligatori', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch('/promemoria/api/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+
+          if (!result.success) {
+            showToast('Errore: ' + (result.error || 'Salvataggio fallito'), 'error');
+            return;
+          }
+
+          showToast('Promemoria salvato con successo', 'success');
+          closeModal();
+          // Ricarica la pagina per aggiornare la tabella
+          window.location.reload();
+
+        } catch (error) {
+          console.error('Errore:', error);
+          showToast('Errore: ' + error.message, 'error');
+        }
+      });
+
+      // ---------- CARICA PER MODIFICA ----------
+      document.querySelectorAll('.btn-edit').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          const id = this.dataset.id;
+          try {
+            const response = await fetch('/promemoria/api/get/' + id);
+            const result = await response.json();
+            if (result.success) {
+              openModal(result.promemoria);
+            } else {
+              showToast('Errore: ' + result.error, 'error');
+            }
+          } catch (error) {
+            showToast('Errore: ' + error.message, 'error');
+          }
+        });
+      });
+
+      // ---------- ELIMINA SINGOLO ----------
+      document.querySelectorAll('.btn-delete').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          const id = this.dataset.id;
+          if (!confirm('Eliminare questo promemoria?')) return;
+
+          try {
+            const response = await fetch('/promemoria/api/delete/' + id, {
+              method: 'DELETE'
+            });
+            const result = await response.json();
+            if (result.success) {
+              showToast('Promemoria eliminato', 'success');
+              window.location.reload();
+            } else {
+              showToast('Errore: ' + result.error, 'error');
+            }
+          } catch (error) {
+            showToast('Errore: ' + error.message, 'error');
+          }
+        });
+      });
+
+      // ---------- ELIMINA TUTTI ----------
+      document.getElementById('btn-delete-all').addEventListener('click', async function() {
+        if (!confirm('Eliminare TUTTI i promemoria? Questa operazione non è reversibile.')) return;
+
+        try {
+          const response = await fetch('/promemoria/api/delete-all', {
+            method: 'DELETE'
+          });
+          const result = await response.json();
+          if (result.success) {
+            showToast('Tutti i promemoria eliminati', 'success');
+            window.location.reload();
+          } else {
+            showToast('Errore: ' + result.error, 'error');
+          }
+        } catch (error) {
+          showToast('Errore: ' + error.message, 'error');
+        }
+      });
+
+    });
+  </script>
+
+</body>
+</html>

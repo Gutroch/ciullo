@@ -29,7 +29,9 @@ class Expenses {
     'Portafogli Papà',
     'Vinted',
     'Assegno Familiare',
-    'Conguaglio'
+    'Conguaglio',
+    'Conto Corrente',
+    'Altro'
   ];
 
   // Restituisce tutte le sottocategorie per una data categoria (solo per uscite)
@@ -67,7 +69,7 @@ class Expenses {
       const data = await redis.get(REDIS_KEYS.EXPENSES);
       return data ? JSON.parse(data).map(expense => this.normalizeExpense(expense)) : [];
     } catch (error) {
-      console.error('❌ Errore lettura spese da Redis:', error.message);
+      console.error(' Errore lettura spese da Redis:', error.message);
       return [];
     }
   }
@@ -94,7 +96,7 @@ class Expenses {
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(expenses));
       return newExpense;
     } catch (error) {
-      console.error('❌ Errore aggiunta spesa:', error.message);
+      console.error(' Errore aggiunta spesa:', error.message);
       throw error;
     }
   }
@@ -124,7 +126,7 @@ class Expenses {
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(expenses));
       return updated;
     } catch (error) {
-      console.error('❌ Errore aggiornamento spesa:', error.message);
+      console.error(' Errore aggiornamento spesa:', error.message);
       throw error;
     }
   }
@@ -139,7 +141,7 @@ class Expenses {
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(filtered));
       return true;
     } catch (error) {
-      console.error('❌ Errore eliminazione spesa:', error.message);
+      console.error(' Errore eliminazione spesa:', error.message);
       return false;
     }
   }
@@ -162,7 +164,7 @@ class Expenses {
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(expenses));
       return expenses.length;
     } catch (error) {
-      console.error('❌ Errore import CSV:', error.message);
+      console.error(' Errore import CSV:', error.message);
       return 0;
     }
   }
@@ -174,7 +176,7 @@ class Expenses {
       await redis.del(REDIS_KEYS.EXPENSES);
       return true;
     } catch (error) {
-      console.error('❌ Errore clear:', error.message);
+      console.error(' Errore clear:', error.message);
       return false;
     }
   }
