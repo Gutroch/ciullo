@@ -824,10 +824,14 @@ table.data-table tr:last-child td { border-bottom: none; }
   align-items: center;
   justify-content: center;
   min-height: 400px;
+  position: relative;
 }
 .chart-modal-body canvas {
-  max-width: 100%;
-  max-height: 65vh;
+  max-width: 100% !important;
+  max-height: 65vh !important;
+  width: auto !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
 }
 .chart-modal-footer {
   padding: 14px 24px;

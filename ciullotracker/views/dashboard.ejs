@@ -905,37 +905,21 @@ var dashboardChartData = {
 
     window.__ciulloDashboardChartsInitialized = true;
 
-    function getThemeColors() {
-
-        var dark =
-            document.documentElement.getAttribute('data-theme') === 'dark';
-
+        function getThemeColors() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
-            text: dark ? '#f5f5f5' : 'var(--text)',
-
-            grid: dark
-                ? 'rgba(255,255,255,0.08)'
-                : 'rgba(0,0,0,0.08)',
-
-            bgPrimary:
-                dark ? '#1e1e1e' : 'var(--surface)',
-
+            // 1. COLORI ESPLICITI (Il Canvas NON legge le variabili CSS "var(--...)")
+            text: dark ? '#F2EFE7' : '#1C1B18',          // Corrisponde a --text nel tuo style.css
+            grid: dark ? 'rgba(242, 239, 231, 0.1)' : 'rgba(28, 27, 24, 0.1)',
+            bgPrimary: dark ? '#201E19' : '#FAF9F5',     // Corrisponde a --surface nel tuo style.css
+            positive: dark ? '#8FB782' : '#5B7F52',
+            negative: dark ? '#D08573' : '#B34A3A',
+            
+            // 2. PALETTE DI COLORI DIVERSI E DISTINTI (HEX fissi, Chart.js li legge perfettamente)
             palette: [
-                'var(--negative)',
-                'var(--positive)',
-                '#45B7D1',
-                '#96CEB4',
-                '#FFEAA7',
-                '#DDA0DD',
-                '#FF8A5C',
-                '#A29BFE',
-                '#FD79A8',
-                '#00CEC9',
-                '#F8B500',
-                '#6C5CE7',
-                '#00B894',
-                '#E17055',
-                '#74B9FF'
+                '#B5714B', '#7C9473', '#4C6B8A', '#9AB68C',
+                '#C9A227', '#8A7B9E', '#C97B4A', '#6E88A6',
+                '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'
             ]
         };
     }
@@ -1753,327 +1737,141 @@ var dashboardChartData = {
     renderCategorieChart();
 
 
-    // ============================================================
+        // ============================================================
     // GRAFICO GIORNALIERO
     // ============================================================
 
-    var ctxGiornaliero =
-        document.getElementById(
-            'chartGiornaliero'
-        );
+    var ctxGiornaliero = document.getElementById('chartGiornaliero');
 
-
-    if (
-        ctxGiornaliero &&
-        giornoData.labels &&
-        giornoData.labels.length > 0
-    ) {
-
-        new Chart(
-            ctxGiornaliero,
-            {
-
-                type: 'bar',
-
-                data: {
-
-                    labels:
-                        giornoData.labels,
-
-                    datasets: [
-
-                        {
-                            label:
-                                'Entrate (€)',
-
-                            data:
-                                giornoData.dataIngressi ||
-                                [],
-
-                            backgroundColor:
-                                'rgba(124, 148, 115, 0.7)',
-
-                            borderColor:
-                                'var(--positive)',
-
-                            borderWidth: 2,
-
-                            borderRadius: 6
-                        },
-
-                        {
-                            label:
-                                'Uscite (€)',
-
-                            data:
-                                giornoData.dataUscite ||
-                                [],
-
-                            backgroundColor:
-                                'rgba(255, 107, 107, 0.7)',
-
-                            borderColor:
-                                'var(--negative)',
-
-                            borderWidth: 2,
-
-                            borderRadius: 6
-                        }
-                    ]
-                },
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio:
-                        true,
-
-                    plugins: {
-
-                        legend: {
-
-                            display: true,
-
-                            labels: {
-
-                                color:
-                                    colors.text,
-
-                                boxWidth: 16,
-
-                                font: {
-                                    size: 14
-                                },
-
-                                usePointStyle:
-                                    true,
-
-                                pointStyle:
-                                    'circle'
-                            }
-                        }
+    if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
+        new Chart(ctxGiornaliero, {
+            type: 'bar',
+            data: {
+                labels: giornoData.labels,
+                datasets: [
+                    {
+                        label: 'Entrate (€)',
+                        data: giornoData.dataIngressi || [],
+                        backgroundColor: 'rgba(124, 148, 115, 0.7)',
+                        borderColor: colors.positive, : usa la variabile JS, non 'var(--positive)'
+                        borderWidth: 2,
+                        borderRadius: 6
                     },
-
-                    scales: {
-
-                        x: {
-
-                            ticks: {
-                                color:
-                                    colors.text
-                            },
-
-                            grid: {
-                                display: false
+                    {
+                        label: 'Uscite (€)',
+                        data: giornoData.dataUscite || [],
+                        backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                        borderColor: colors.negative, : usa la variabile JS, non 'var(--negative)'
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: colors.text, 
+                            boxWidth: 16,
+                            font: { size: 14 },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: colors.text }, 
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: {
+                            color: colors.text, 
+                            callback: function(v) {
+                                return '€' + Number(v).toFixed(0);
                             }
                         },
-
-                        y: {
-
-                            ticks: {
-
-                                color:
-                                    colors.text,
-
-                                callback:
-                                    function(v) {
-
-                                        return (
-                                            '€' +
-                                            Number(v)
-                                                .toFixed(0)
-                                        );
-                                    }
-                            },
-
-                            grid: {
-                                color:
-                                    colors.grid
-                            },
-
-                            beginAtZero:
-                                true
-                        }
+                        grid: { color: colors.grid }, 
+                        beginAtZero: true
                     }
                 }
             }
-        );
+        });
     }
 
-
-    // ============================================================
+      // ============================================================
     // TREND MENSILE
     // ============================================================
 
-    var ctxTrend =
-        document.getElementById(
-            'chartTrend'
-        );
+    var ctxTrend = document.getElementById('chartTrend');
 
-
-    if (
-        ctxTrend &&
-        trendData.labels &&
-        trendData.labels.length > 0
-    ) {
-
-        new Chart(
-            ctxTrend,
-            {
-
-                type: 'line',
-
-                data: {
-
-                    labels:
-                        trendData.labels,
-
-                    datasets: [
-
-                        {
-                            label:
-                                'Uscite mensili',
-
-                            data:
-                                trendData.dataUscite ||
-                                [],
-
-                            borderColor:
-                                'var(--negative)',
-
-                            backgroundColor:
-                                'rgba(255, 107, 107, 0.1)',
-
-                            fill:
-                                true,
-
-                            tension:
-                                0.4,
-
-                            pointBackgroundColor:
-                                'var(--negative)'
-                        },
-
-                        {
-                            label:
-                                'Entrate mensili',
-
-                            data:
-                                trendData.dataIngressi ||
-                                [],
-
-                            borderColor:
-                                'var(--positive)',
-
-                            backgroundColor:
-                                'rgba(124, 148, 115, 0.1)',
-
-                            fill:
-                                true,
-
-                            tension:
-                                0.4,
-
-                            pointBackgroundColor:
-                                'var(--positive)'
-                        }
-                    ]
-                },
-
-                options: {
-
-                    responsive: true,
-
-                    plugins: {
-
-                        legend: {
-
-                            position:
-                                'top',
-
-                            labels: {
-
-                                color:
-                                    colors.text,
-
-                                usePointStyle:
-                                    true
-                            }
-                        },
-
-                        tooltip: {
-
-                            callbacks: {
-
-                                label:
-                                    function(context) {
-
-                                        var value =
-                                            Number(
-                                                context.parsed.y
-                                            ) || 0;
-
-                                        return (
-                                            context.dataset.label +
-                                            ': €' +
-                                            value.toFixed(2)
-                                        );
-                                    }
-                            }
+    if (ctxTrend && trendData.labels && trendData.labels.length > 0) {
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: trendData.labels,
+                datasets: [
+                    {
+                        label: 'Uscite mensili',
+                        data: trendData.dataUscite || [],
+                        borderColor: colors.negative, 
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: colors.negative 
+                    },
+                    {
+                        label: 'Entrate mensili',
+                        data: trendData.dataIngressi || [],
+                        borderColor: colors.positive, 
+                        backgroundColor: 'rgba(124, 148, 115, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: colors.positive 
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: colors.text, 
+                            usePointStyle: true
                         }
                     },
-
-                    scales: {
-
-                        x: {
-
-                            grid: {
-
-                                color:
-                                    colors.grid
-                            },
-
-                            ticks: {
-
-                                color:
-                                    colors.text
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var value = Number(context.parsed.y) || 0;
+                                return context.dataset.label + ': €' + value.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: colors.grid }, 
+                        ticks: { color: colors.text } 
+                    },
+                    y: {
+                        grid: { color: colors.grid }, 
+                        ticks: {
+                            color: colors.text, 
+                            callback: function(value) {
+                                return '€' + Number(value).toFixed(0);
                             }
                         },
-
-                        y: {
-
-                            grid: {
-
-                                color:
-                                    colors.grid
-                            },
-
-                            ticks: {
-
-                                color:
-                                    colors.text,
-
-                                callback:
-                                    function(value) {
-
-                                        return (
-                                            '€' +
-                                            Number(value)
-                                                .toFixed(0)
-                                        );
-                                    }
-                            },
-
-                            beginAtZero:
-                                true
-                        }
+                        beginAtZero: true
                     }
                 }
             }
-        );
+        });
     }
-
     // ============================================================
     // POPUP, DOWNLOAD E PERIODO GRAFICI
     // ============================================================
@@ -2161,6 +1959,11 @@ var dashboardChartData = {
     document.querySelector('.chart-period-form')?.addEventListener('change', function() {
         this.submit();
     });
+
+    // 4. FORZA L'AGGIORNAMENTO DEI GRAFICI QUANDO CAMBI TEMA
+    new MutationObserver(function() {
+        location.reload(); // Ricarica la pagina per applicare i nuovi colori HEX a tutti i canvas
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 })();
 
