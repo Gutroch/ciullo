@@ -177,7 +177,12 @@ body > .app-shell,
 .login-screen {
   position: relative;
   z-index: 1;
-  animation: page-enter 480ms cubic-bezier(.2,.8,.3,1) both;
+  /* Niente "fill-mode: both": lasciarlo attivo teneva un transform residuo
+     su .app-shell anche a animazione conclusa, e questo trasforma .app-shell
+     nel "containing block" di tutti i figli position:fixed (la sidebar!).
+     Risultato: la sidebar/drawer non restava ancorata alla finestra ma
+     diventava alta quanto l'intera pagina. */
+  animation: page-enter 480ms cubic-bezier(.2,.8,.3,1);
 }
 
 @keyframes page-enter {
@@ -212,7 +217,9 @@ body > .app-shell,
   flex-direction: column;
   padding: 24px 16px;
   position: fixed;
-  top: 0; left: 0; bottom: 0;
+  top: 0; left: 0;
+  height: 100dvh; /* altezza fissa = viewport, non "bottom:0" che dipende dal containing block */
+  overflow-y: auto;
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 100;
@@ -718,7 +725,16 @@ table.data-table tr:last-child td { border-bottom: none; }
    RESPONSIVE: DESKTOP
    ============================================================ */
 @media (min-width: 900px) {
-  .sidebar { position: sticky; transform: none; }
+  .sidebar {
+    position: sticky;
+    top: 0;
+    left: auto;
+    bottom: auto;
+    align-self: flex-start;
+    height: 100dvh;
+    overflow-y: auto;
+    transform: none;
+  }
   .sidebar-overlay { display: none !important; }
   .topbar { display: none; }
   .main-content { padding: 32px 40px 48px; }

@@ -1,5 +1,5 @@
 // sw.js - Service Worker per PWA
-const CACHE_NAME = 'ciullotracker-v2';
+const CACHE_NAME = 'ciullotracker-v3';
 const STATIC_ASSETS = [
   '/css/style.css',
   '/js/history-buttons.js',
