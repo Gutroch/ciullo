@@ -1,14 +1,10 @@
 // sw.js - Service Worker per PWA
-
-const CACHE_NAME = 'ciullotracker-v1';
-const urlsToCache = [
-  '/',
-  '/history',
-  '/recurring',
-  '/promemoria',
+const CACHE_NAME = 'ciullotracker-v2';
+const STATIC_ASSETS = [
   '/css/style.css',
   '/js/history-buttons.js',
   '/js/dashboard-charts.js',
+  '/js/pwa.js',
   '/manifest.json'
 ];
 
@@ -16,10 +12,8 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Cache aperta');
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -35,22 +29,51 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
 // Intercettazione delle richieste
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - restituisci la risposta dalla cache
-        if (response) {
+  const req = event.request;
+
+  if (req.method !== 'GET') return; // niente cache su POST/PUT/DELETE
+
+  const url = new URL(req.url);
+
+  // Le pagine (navigazioni HTML: /, /history, /recurring, ecc.) contengono
+  // dati dinamici (spese, saldi...): vanno SEMPRE prese dalla rete.
+  // Solo se la rete non è disponibile si usa la cache come fallback offline.
+  const isNavigation = req.mode === 'navigate' ||
+    (req.headers.get('accept') || '').includes('text/html');
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(req)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           return response;
-        }
-        return fetch(event.request);
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Asset statici (css/js/manifest/icone): cache-first, con aggiornamento
+  // della cache in background per le prossime visite.
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        const networkFetch = fetch(req).then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          return response;
+        }).catch(() => cached);
+        return cached || networkFetch;
       })
-  );
+    );
+  }
 });
 
 // Gestione delle notifiche push (opzionale)

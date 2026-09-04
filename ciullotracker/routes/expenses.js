@@ -54,6 +54,12 @@ router.get('/', requireAuth, async (req, res) => {
     const totaleIngressi = ingressi.reduce((sum, e) => sum + e.importo, 0);
     const saldo = totaleIngressi - totale;
 
+    // Saldo globale: somma di TUTTI gli ingressi meno TUTTE le uscite,
+    // di ogni mese e anno registrati (non solo il periodo selezionato).
+    const saldoGlobale = all.reduce((sum, e) => {
+      return sum + (e.tipo === 'ingresso' ? e.importo : -e.importo);
+    }, 0);
+
     // Categoria con la spesa più alta (solo uscite)
     const perCategoria = {};
     uscite.forEach((e) => {
@@ -224,6 +230,7 @@ const chartTrend = {
       totale: totale.toFixed(2),
       totaleIngressi: totaleIngressi.toFixed(2),
       saldo: saldo.toFixed(2),
+      saldoGlobale: saldoGlobale.toFixed(2),
       topCategoria,
       topUtente,
       // Liste
@@ -457,6 +464,12 @@ router.get('/history', requireAuth, async (req, res) => {
     const categorieDisponibili = [...new Set(all.map((e) => e.categoria))].sort();
     const sottocategorieDisponibili = [...new Set(all.map((e) => e.sottocategoria).filter(s => s))].sort();
 
+    // Saldo globale: somma di TUTTI gli ingressi meno TUTTE le uscite,
+    // di ogni mese e anno registrati (indipendente dai filtri applicati).
+    const saldoGlobale = all.reduce((sum, e) => {
+      return sum + (e.tipo === 'ingresso' ? e.importo : -e.importo);
+    }, 0);
+
     res.render('history', {
       user: req.session.user,
       expenses: filtered,
@@ -464,6 +477,7 @@ router.get('/history', requireAuth, async (req, res) => {
       anniDisponibili,
       categorieDisponibili,
       sottocategorieDisponibili,
+      saldoGlobale: saldoGlobale.toFixed(2),
       filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '', sottocategoria: sottocategoria || '' },
     });
   } catch (error) {

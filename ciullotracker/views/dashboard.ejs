@@ -554,6 +554,22 @@
             font-size: 0.75rem;
         }
 
+        .saldo-globale-badge {
+            font-size: 0.85rem;
+            color: var(--text-secondary, var(--text-muted));
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            margin: -8px 0 18px;
+            background: var(--surface);
+            border: var(--border-w) solid var(--border);
+            border-radius: 999px;
+        }
+
+        .saldo-globale-badge strong.positive { color: var(--positive); }
+        .saldo-globale-badge strong.negative { color: var(--danger); }
+
         .chart-period-form {
             display: inline-flex;
             align-items: center;
@@ -715,6 +731,10 @@
       <div class="page-title">Dashboard</div>
     <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
     <div class="chart-period-hint">Per cambiare periodo, allarga un grafico e scegli mese e anno.</div>
+    <div class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
+      Saldo totale (tutti i periodi):
+      <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
+    </div>
 
       <!-- KPI Cards -->
       <div class="grid-4">

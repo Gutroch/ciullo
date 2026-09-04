@@ -39,6 +39,21 @@
       margin-right: 8px;
     }
 
+    .saldo-globale-badge {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--surface);
+      border: var(--border-w) solid var(--border);
+      border-radius: 999px;
+    }
+
+    .saldo-globale-badge strong.positive { color: var(--positive); }
+    .saldo-globale-badge strong.negative { color: var(--danger); }
+
     .data-table {
       width: 100%;
       border-collapse: collapse;
@@ -544,6 +559,10 @@
         <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
           JSON
         </a>
+        <span class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
+          Saldo totale:
+          <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
+        </span>
         <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);">
           <strong><%= expenses ? expenses.length : 0 %></strong> movimenti trovati
         </span>
