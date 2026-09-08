@@ -484,7 +484,10 @@
 
       // Apri modale per nuovo
       document.getElementById('btn-add').addEventListener('click', () => openModal(null));
-      document.getElementById('btn-add-empty').addEventListener('click', () => openModal(null));
+      const addEmptyButton = document.getElementById('btn-add-empty');
+      if (addEmptyButton) {
+        addEmptyButton.addEventListener('click', () => openModal(null));
+      }
 
       // Annulla
       modalCancel.addEventListener('click', closeModal);

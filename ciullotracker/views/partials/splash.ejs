@@ -1,132 +1,84 @@
 <div id="splash-screen" class="splash-screen">
-  <div class="splash-noise" aria-hidden="true"></div>
 
-  <!-- Foglie giungla: Bordo Superiore -->
-  <svg class="jungle-layer jungle-top" viewBox="0 0 800 250" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
-    <path d="M0,0 L800,0 L800,100 Q700,150 650,80 Q600,180 500,120 Q450,200 350,140 Q300,220 200,160 Q150,240 50,180 Q20,220 0,170 Z" fill="#588157" opacity="0.5"/>
-    <path d="M0,0 L800,0 L750,120 Q680,60 620,130 Q580,40 500,100 Q460,20 380,90 Q320,30 240,110 Q180,50 100,130 Q40,70 0,120 Z" fill="#344e41"/>
-    <path d="M100,0 Q130,80 90,130 Q140,100 170,150 Q180,80 220,60 Q210,110 250,130 Q270,70 320,80 L360,0 Z" fill="#2b4634"/>
-    <path d="M550,0 Q580,90 540,140 Q590,110 620,160 Q630,90 670,70 Q660,120 700,140 Q720,80 770,90 L800,40 L800,0 Z" fill="#2b4634"/>
-  </svg>
-
-  <!-- Foglie giungla: Bordo Inferiore -->
-  <svg class="jungle-layer jungle-bottom" viewBox="0 0 800 250" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <path d="M0,250 L800,250 L800,150 Q700,100 650,170 Q600,70 500,130 Q450,50 350,110 Q300,30 200,90 Q150,10 50,70 Q20,30 0,80 Z" fill="#588157" opacity="0.5"/>
-    <path d="M0,250 L800,250 L750,130 Q680,190 620,120 Q580,210 500,150 Q460,230 380,160 Q320,220 240,140 Q180,200 100,120 Q40,180 0,130 Z" fill="#344e41"/>
-    <path d="M100,250 Q130,170 90,120 Q140,150 170,100 Q180,170 220,190 Q210,140 250,120 Q270,180 320,170 L360,250 Z" fill="#2b4634"/>
-    <path d="M550,250 Q580,160 540,110 Q590,140 620,90 Q630,160 670,180 Q660,130 700,110 Q720,170 770,160 L800,210 L800,250 Z" fill="#2b4634"/>
-  </svg>
-
-  <!-- Foglie giungla: Bordo Sinistro -->
-  <svg class="jungle-layer jungle-left" viewBox="0 0 250 800" preserveAspectRatio="xMinYMid slice" aria-hidden="true">
-    <path d="M0,0 L0,800 L100,800 Q150,700 90,650 Q180,600 130,500 Q200,450 150,350 Q220,300 160,200 Q230,150 170,50 Q210,20 160,0 Z" fill="#588157" opacity="0.5"/>
-    <path d="M0,0 L0,800 L80,800 Q130,720 70,660 Q160,610 110,510 Q180,460 130,360 Q200,310 140,210 Q210,160 150,60 Q190,30 140,0 Z" fill="#344e41"/>
-    <path d="M0,100 Q80,120 120,80 Q90,130 140,160 Q70,170 50,210 Q100,200 120,240 Q60,260 40,310 L0,350 Z" fill="#2b4634"/>
-    <path d="M0,500 Q80,520 120,480 Q90,530 140,560 Q70,570 50,610 Q100,600 120,640 Q60,660 40,710 L0,750 Z" fill="#2b4634"/>
-  </svg>
-
-  <!-- Foglie giungla: Bordo Destro -->
-  <svg class="jungle-layer jungle-right" viewBox="0 0 250 800" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
-    <path d="M250,0 L250,800 L150,800 Q100,700 160,650 Q70,600 120,500 Q50,450 100,350 Q30,300 90,200 Q20,150 80,50 Q40,20 90,0 Z" fill="#588157" opacity="0.5"/>
-    <path d="M250,0 L250,800 L170,800 Q120,720 180,660 Q90,610 140,510 Q70,460 120,360 Q50,310 110,210 Q40,160 100,60 Q60,30 110,0 Z" fill="#344e41"/>
-    <path d="M250,100 Q170,120 130,80 Q160,130 110,160 Q180,170 200,210 Q150,200 130,240 Q190,260 210,310 L250,350 Z" fill="#2b4634"/>
-    <path d="M250,500 Q170,520 130,480 Q160,530 110,560 Q180,570 200,610 Q150,600 130,640 Q190,660 210,710 L250,750 Z" fill="#2b4634"/>
-  </svg>
-
-  <!-- Contenuto Centrale -->
-  <div class="typing-wrapper">
-    <h1 class="typing-line typing-line-1" aria-label="CIULLO">CIULLO</h1>
-    <h1 class="typing-line typing-line-2" aria-label="TRACKER">TRACKER</h1>
+  <!-- Foglie singole che compaiono -->
+  <div class="leaves" aria-hidden="true">
+    <svg class="leaf leaf-1" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-2" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-3" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-4" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-5" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-6" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-7" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
+    <svg class="leaf leaf-8" viewBox="0 0 40 60"><path d="M20,58 C20,40 5,30 3,10 C22,14 33,28 33,45 C33,52 27,58 20,58 Z"/></svg>
   </div>
 
-  <div class="splash-tagline">Il budget di famiglia, cresce con te</div>
+  <!-- Contenuto Centrale -->
+  <div class="hero">
+    <div class="typing-wrapper">
+      <h1 class="typing-line typing-line-1" aria-label="CIULLO">CIULLO</h1>
+      <h1 class="typing-line typing-line-2" aria-label="TRACKER">TRACKER</h1>
+    </div>
+    <div class="splash-tagline">Il budget di famiglia, cresce con te</div>
+  </div>
 
   <!-- Pulsante Salta -->
   <button class="splash-skip" id="splash-skip" aria-label="Salta introduzione">skip ›</button>
 </div>
 
 <style>
+  :root {
+    --cream: #ccd5ae;
+    --sage: #588157;
+    --forest: #344e41;
+    --deep: #2b4634;
+    --ink: #01472e;
+  }
+
   .splash-screen {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: #ccd5ae;
+    background: var(--cream);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  .splash-noise {
+  /* --- Foglie che compaiono --- */
+  .leaves {
     position: absolute;
     inset: 0;
-    opacity: 0.06;
-    mix-blend-mode: multiply;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* --- Animazioni Foglie Giungla --- */
-  .jungle-layer {
-    position: absolute;
     pointer-events: none;
     z-index: 0;
   }
 
-  .jungle-top {
-    top: 0; left: 0; width: 100%; height: 35vh;
-    transform: translateY(-100%);
-    animation: slide-down 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, sway-top 6s ease-in-out infinite;
-    animation-delay: 0s, 1.2s;
-    transform-origin: top center;
-  }
-  .jungle-bottom {
-    bottom: 0; left: 0; width: 100%; height: 35vh;
-    transform: translateY(100%);
-    animation: slide-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, sway-bottom 6s ease-in-out infinite;
-    animation-delay: 0.1s, 1.3s;
-    transform-origin: bottom center;
-  }
-  .jungle-left {
-    top: 0; left: 0; width: 35vw; height: 100%;
-    transform: translateX(-100%);
-    animation: slide-right 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, sway-left 6s ease-in-out infinite;
-    animation-delay: 0.2s, 1.4s;
-    transform-origin: left center;
-  }
-  .jungle-right {
-    top: 0; right: 0; width: 35vw; height: 100%;
-    transform: translateX(100%);
-    animation: slide-left 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, sway-right 6s ease-in-out infinite;
-    animation-delay: 0.3s, 1.5s;
-    transform-origin: right center;
+  .leaf {
+    position: absolute;
+    width: 48px;
+    height: auto;
+    opacity: 0;
+    transform: translateY(-14px) scale(0.7) rotate(var(--r, 0deg));
+    animation: leaf-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  @keyframes slide-down { to { transform: translateY(0); } }
-  @keyframes slide-up { to { transform: translateY(0); } }
-  @keyframes slide-right { to { transform: translateX(0); } }
-  @keyframes slide-left { to { transform: translateX(0); } }
-
-  @keyframes sway-top {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(0) rotate(1.5deg); }
-  }
-  @keyframes sway-bottom {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(0) rotate(-1.5deg); }
-  }
-  @keyframes sway-left {
-    0%, 100% { transform: translateX(0) rotate(0deg); }
-    50% { transform: translateX(0) rotate(1.5deg); }
-  }
-  @keyframes sway-right {
-    0%, 100% { transform: translateX(0) rotate(0deg); }
-    50% { transform: translateX(0) rotate(-1.5deg); }
+  @keyframes leaf-in {
+    to { opacity: 1; transform: translateY(0) scale(1) rotate(var(--r, 0deg)); }
   }
 
-  /* --- Scrittura Centrale a due righe --- */
-  .typing-wrapper {
+  .leaf-1 { top: 6%;  left: 7%;  width: 44px; --r: -18deg; fill: var(--forest); animation-delay: 0.2s; }
+  .leaf-2 { top: 9%;  left: 16%; width: 30px; --r: 10deg;  fill: var(--sage);   animation-delay: 0.5s; }
+  .leaf-3 { top: 5%;  right: 9%; width: 50px; --r: 22deg;  fill: var(--deep);   animation-delay: 0.35s; }
+  .leaf-4 { top: 12%; right: 18%;width: 28px; --r: -12deg; fill: var(--sage);   animation-delay: 0.65s; }
+  .leaf-5 { bottom: 7%; left: 8%; width: 46px; --r: 16deg;  fill: var(--forest); animation-delay: 0.8s; }
+  .leaf-6 { bottom: 11%;left: 19%;width: 26px; --r: -8deg;  fill: var(--sage);   animation-delay: 1.05s; }
+  .leaf-7 { bottom: 6%; right: 8%; width: 48px; --r: -20deg; fill: var(--deep);  animation-delay: 0.95s; }
+  .leaf-8 { bottom: 13%;right: 19%;width: 28px; --r: 14deg;  fill: var(--sage);  animation-delay: 1.15s; }
+
+  /* --- Hero centrale --- */
+  .hero {
     position: relative;
     z-index: 1;
     display: flex;
@@ -134,62 +86,60 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+    max-width: 92vw;
+  }
+
+  .typing-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .typing-line {
     font-family: 'Anton', 'Arial Black', 'Inter', -apple-system, sans-serif;
-    font-size: clamp(3.5rem, 14vw, 7.5rem);
+    font-size: clamp(2.75rem, 13vw, 7.5rem);
     font-weight: 900;
-    color: #01472e;
+    color: var(--ink);
     line-height: 0.95;
     overflow: hidden;
     white-space: nowrap;
     margin: 0;
-    border-right: 0.12em solid #01472e;
+    max-width: 100%;
+    border-right: 0.1em solid var(--ink);
   }
 
-  /* CIULLO = 6 caratteri */
   .typing-line-1 {
     width: 0;
     animation: type1 0.8s steps(6, end) forwards, blink-caret 0.7s step-end infinite;
-    animation-delay: 0.5s, 0.5s;
+    animation-delay: 1.4s, 1.4s;
   }
 
-  /* TRACKER = 7 caratteri */
   .typing-line-2 {
     width: 0;
     border-right-color: transparent;
     animation: type2 0.9s steps(7, end) forwards, blink-caret 0.7s step-end infinite;
-    animation-delay: 1.4s, 1.4s;
+    animation-delay: 2.3s, 2.3s;
   }
 
-  @keyframes type1 {
-    to { width: 6.5ch; }
-  }
-
-  @keyframes type2 {
-    to { width: 7.5ch; border-right-color: #01472e; }
-  }
+  @keyframes type1 { to { width: 6.5ch; } }
+  @keyframes type2 { to { width: 7.5ch; border-right-color: var(--ink); } }
 
   @keyframes blink-caret {
     from, to { border-right-color: transparent; }
-    50% { border-right-color: #01472e; }
+    50% { border-right-color: var(--ink); }
   }
 
   .splash-tagline {
-    position: relative;
-    z-index: 1;
-    margin-top: 24px;
+    margin-top: 20px;
     font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    color: #344e41;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--forest);
     opacity: 0;
-    transform: translateY(10px);
-    animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 2.5s;
+    transform: translateY(8px);
+    animation: fade-in-up 0.7s ease forwards;
+    animation-delay: 3.1s;
   }
 
   @keyframes fade-in-up {
@@ -199,53 +149,66 @@
   /* --- Pulsante Salta --- */
   .splash-skip {
     position: absolute;
-    bottom: 24px;
-    right: 24px;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    right: calc(20px + env(safe-area-inset-right));
     z-index: 10;
     background: transparent;
     border: 1px solid rgba(1, 71, 46, 0.35);
-    color: #01472e;
+    color: var(--ink);
     font-family: 'Inter', -apple-system, sans-serif;
-    font-size: 0.65rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.08em;
     text-transform: lowercase;
-    padding: 6px 14px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 18px;
     border-radius: 999px;
     cursor: pointer;
     opacity: 0;
     animation: fade-in 0.5s ease forwards;
     animation-delay: 0.5s;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .splash-skip:hover {
-    background: #01472e;
-    color: #ccd5ae;
-    border-color: #01472e;
+  .splash-skip:hover,
+  .splash-skip:active {
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
   }
 
-  @keyframes fade-in {
-    to { opacity: 1; }
-  }
+  @keyframes fade-in { to { opacity: 1; } }
 
-  /* --- Uscita Splash --- */
   @keyframes splash-fadeout {
     0% { opacity: 1; }
     100% { opacity: 0; visibility: hidden; pointer-events: none; }
   }
 
+  /* --- Adattamenti Smartphone --- */
+  @media (max-width: 480px) {
+    .typing-line { font-size: clamp(2.3rem, 15vw, 3.6rem); border-right-width: 0.08em; }
+    .splash-tagline { font-size: 0.72rem; margin-top: 14px; padding: 0 12px; }
+    .splash-skip { bottom: calc(14px + env(safe-area-inset-bottom)); right: calc(14px + env(safe-area-inset-right)); font-size: 0.68rem; padding: 8px 14px; }
+    .leaf-1, .leaf-3, .leaf-5, .leaf-7 { width: 32px; }
+    .leaf-2, .leaf-4, .leaf-6, .leaf-8 { width: 20px; }
+  }
+
+  @media (max-height: 480px) {
+    .typing-line { font-size: clamp(1.9rem, 9vh, 3rem); }
+    .splash-tagline { margin-top: 8px; }
+    .leaves { display: none; }
+  }
+
   /* --- Accessibilità --- */
   @media (prefers-reduced-motion: reduce) {
-    .jungle-layer, .typing-line, .splash-tagline, .splash-skip {
+    .leaf, .typing-line, .splash-tagline, .splash-skip {
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
       width: auto !important;
       border-right-color: transparent !important;
-    }
-    .jungle-top, .jungle-bottom, .jungle-left, .jungle-right {
-      transform: translate(0, 0) !important;
     }
   }
 </style>
@@ -256,6 +219,27 @@
     var skipBtn = document.getElementById('splash-skip');
     if (!splash) return;
 
+    var splashStorageKey = 'ciullo-tracker-splash-shown-at';
+    var splashInterval = 3 * 60 * 60 * 1000;
+    var lastShown = 0;
+
+    try {
+      lastShown = Number(localStorage.getItem(splashStorageKey));
+    } catch (e) {
+      lastShown = 0;
+    }
+
+    if (lastShown && Date.now() - lastShown < splashInterval) {
+      splash.remove();
+      return;
+    }
+
+    try {
+      localStorage.setItem(splashStorageKey, String(Date.now()));
+    } catch (e) {
+      /* ignorato */
+    }
+
     function hideSplash() {
       splash.style.animation = 'splash-fadeout 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
     }
@@ -264,7 +248,6 @@
       skipBtn.addEventListener('click', hideSplash);
     }
 
-    // Fallback di sicurezza: nasconde automaticamente dopo 5 secondi
     setTimeout(hideSplash, 5000);
   })();
 </script>

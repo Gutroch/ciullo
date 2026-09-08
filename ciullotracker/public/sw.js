@@ -1,5 +1,4 @@
-// sw.js - Service Worker per PWA
-const CACHE_NAME = 'ciullotracker-v4';
+const CACHE_NAME = 'ciullotracker-v5';
 const STATIC_ASSETS = [
   '/css/style.css',
   '/js/history-buttons.js',
@@ -8,7 +7,6 @@ const STATIC_ASSETS = [
   '/manifest.json'
 ];
 
-// Installazione del service worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -17,7 +15,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Attivazione del service worker
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -33,17 +30,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Intercettazione delle richieste
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
-  if (req.method !== 'GET') return; // niente cache su POST/PUT/DELETE
+  if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
 
-  // Le pagine (navigazioni HTML: /, /history, /recurring, ecc.) contengono
-  // dati dinamici (spese, saldi...): vanno SEMPRE prese dalla rete.
-  // Solo se la rete non è disponibile si usa la cache come fallback offline.
   const isNavigation = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
 
@@ -60,8 +53,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Asset statici (css/js/manifest/icone): cache-first, con aggiornamento
-  // della cache in background per le prossime visite.
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(req).then((cached) => {
@@ -76,7 +67,6 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Gestione delle notifiche push (opzionale)
 self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
