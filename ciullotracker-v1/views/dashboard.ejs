@@ -9,1270 +9,685 @@
     <%- include('partials/nav', { user: user, active: 'dashboard' }) %>
 
     <main class="main-content">
-      <div class="page-title">Dashboard</div>
-    <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
-    <div class="chart-period-hint">Per cambiare periodo, allarga un grafico e scegli mese e anno.</div>
-    <div class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
-      Saldo totale (tutti i periodi):
-      <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
-    </div>
 
-    <div class="section-kicker">Panoramica</div>
-    <!-- KPI Cards -->
-      <div class="grid-4">
-        <div class="card squircle kpi-card">
-          <div class="kpi-label">Totale Uscite</div>
-          <div class="kpi-value negative">€ <%= totale %></div>
-        </div>
-        <div class="card squircle kpi-card">
-          <div class="kpi-label">Totale Entrate</div>
-          <div class="kpi-value positive">€ <%= totaleIngressi %></div>
-        </div>
-        <div class="card squircle kpi-card">
-          <div class="kpi-label">Saldo</div>
-          <div class="kpi-value <%= parseFloat(saldo) < 0 ? 'negative' : 'positive' %>">€ <%= saldo %></div>
-        </div>
-        <div class="card squircle kpi-card">
-          <div class="kpi-label">Categoria Top</div>
-          <div class="kpi-value neutral"><%= topCategoria %></div>
-        </div>
-        <div class="card squircle kpi-card">
-          <div class="kpi-label">Totale Movimenti</div>
-          <div class="kpi-value neutral"><%= typeof numeroMovimenti !== 'undefined' ? numeroMovimenti : 0 %></div>
-        </div>
-      </div>
-
-    <div class="section-kicker">Dove va il mese</div>
-    <!-- Grafici -->
-      <div class="grid-2">
-        <!-- Grafico Categorie con drill-down -->
-<div class="card squircle chart-card" data-chart="categorie">
-    <div class="chart-title">
-        <span>Spese per Categoria</span>
-        <span class="chart-actions">
-            <button class="chart-download" data-chart="categorie" title="Scarica grafico" aria-label="Scarica grafico">↓</button>
-            <button class="chart-fullscreen" data-chart="categorie" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
-        </span>
-    </div>
-    <div class="chart-controls">
-        <label for="chartTipoSelect">Tipo:</label>
-        <select id="chartTipoSelect" class="input">
-            <option value="uscite">Uscite</option>
-            <option value="ingressi">Entrate</option>
-        </select>
-        <div id="chartBreadcrumb" class="chart-breadcrumb" style="display:none;">
-            <button id="breadcrumbBack" class="breadcrumb-btn" title="Torna alle macrocategorie">
-                ← Macro
-            </button>
-            <span class="breadcrumb-sep">/</span>
-            <span id="breadcrumbCategory" class="breadcrumb-current"></span>
-        </div>
-    </div>
-    <canvas id="chartCategorie"></canvas>
-    <div id="chartNoData" class="empty-state" style="display:none; padding: 20px;">
-        Nessun dato disponibile per questa selezione.
-    </div>
-</div>
-        <div class="card squircle chart-card" data-chart="giornaliero">
-          <div class="chart-title">
-            <span>Andamento Giornaliero</span>
-                        <span class="chart-actions">
-                            <button class="chart-download" data-chart="giornaliero" title="Scarica grafico" aria-label="Scarica grafico">↓</button>
-                            <button class="chart-fullscreen" data-chart="giornaliero" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
-                        </span>
+      <!-- ============================================================
+      HEADER — con periodo e saldo totale
+      ============================================================ -->
+      <header class="dashboard-header">
+        <div class="dashboard-header-primary">
+          <h1 class="page-title">Dashboard</h1>
+          <div class="period-badge">
+            <span class="period-badge-icon">📅</span>
+            <span class="period-badge-label"><%= meseLabel %> <span class="period-badge-year"><%= selectedYear %></span></span>
           </div>
-          <canvas id="chartGiornaliero"></canvas>
         </div>
-      </div>
-
-      <!-- Trend mensile -->
-      <div class="card squircle chart-card" data-chart="trend" style="margin-bottom: 24px;">
-        <div class="chart-title">
-          <span>Trend Mensile (Ultimi 6 mesi)</span>
-                    <span class="chart-actions">
-                        <button class="chart-download" data-chart="trend" title="Scarica grafico" aria-label="Scarica grafico">↓</button>
-                        <button class="chart-fullscreen" data-chart="trend" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
-                    </span>
-        </div>
-        <canvas id="chartTrend"></canvas>
-      </div>
-
-            <!-- Prossime scadenze -->
-      <% if (prossimeScadenze && prossimeScadenze.length > 0) { %>
-                <div class="section-kicker">Da ricordare</div>
-        <div class="card squircle" style="margin-bottom: 24px;">
-          <div class="chart-title">
-            <span>Prossime Scadenze Ricorrenti</span>
-            <a href="/recurring" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Gestisci</a>
+        <div class="dashboard-header-secondary">
+          <div class="total-balance-pill">
+            <span class="total-balance-label">Saldo totale (tutti i periodi)</span>
+            <span class="total-balance-value <%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">
+              € <%= saldoGlobale %>
+            </span>
           </div>
-          <% prossimeScadenze.forEach(function(r) { %>
-            <div class="expense-item">
-              <div class="expense-meta">
-                <span class="expense-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %></span>
-                <span class="expense-name"><%= r.descrizione %></span>
-                <span class="expense-sub">Scade il <%= new Date(r.prossimaData).toLocaleDateString('it-IT') %></span>
-              </div>
-              <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
-                <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
+          <button class="btn btn-sm btn-secondary period-change-hint" type="button" title="Cambia periodo da un grafico">
+            <span>🗓</span> Cambia periodo
+          </button>
+        </div>
+      </header>
+
+      <!-- ============================================================
+      KPI — metriche chiave in una griglia compatta e leggibile
+      ============================================================ -->
+      <section class="kpi-grid" aria-label="Metriche del mese">
+        <div class="kpi-card kpi-card--total-expenses">
+          <div class="kpi-card-icon">📤</div>
+          <div class="kpi-card-content">
+            <span class="kpi-card-label">Uscite</span>
+            <span class="kpi-card-value negative">€ <%= totale %></span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--total-income">
+          <div class="kpi-card-icon">📥</div>
+          <div class="kpi-card-content">
+            <span class="kpi-card-label">Entrate</span>
+            <span class="kpi-card-value positive">€ <%= totaleIngressi %></span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--balance">
+          <div class="kpi-card-icon">⚖️</div>
+          <div class="kpi-card-content">
+            <span class="kpi-card-label">Saldo</span>
+            <span class="kpi-card-value <%= parseFloat(saldo) < 0 ? 'negative' : 'positive' %>">
+              € <%= saldo %>
+            </span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--top-category">
+          <div class="kpi-card-icon">🏷️</div>
+          <div class="kpi-card-content">
+            <span class="kpi-card-label">Categoria Top</span>
+            <span class="kpi-card-value neutral"><%= topCategoria %></span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--transactions">
+          <div class="kpi-card-icon">📋</div>
+          <div class="kpi-card-content">
+            <span class="kpi-card-label">Movimenti</span>
+            <span class="kpi-card-value neutral"><%= typeof numeroMovimenti !== 'undefined' ? numeroMovimenti : 0 %></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+      GRAFICI — sezione con due colonne
+      ============================================================ -->
+      <section class="charts-section">
+        <div class="charts-section-header">
+          <h2 class="charts-section-title">Dove va il mese</h2>
+          <span class="charts-section-hint">Clicca su una fetta per esplorare le sottocategorie</span>
+        </div>
+
+        <div class="charts-grid">
+          <!-- Grafico Categorie (doughnut + drill-down) -->
+          <div class="card chart-card" data-chart="categorie">
+            <div class="chart-card-header">
+              <span class="chart-card-title">Spese per Categoria</span>
+              <div class="chart-card-actions">
+                <button class="chart-download" data-chart="categorie" title="Scarica PNG" aria-label="Scarica grafico">⬇</button>
+                <button class="chart-fullscreen" data-chart="categorie" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
               </div>
             </div>
-          <% }); %>
+            <div class="chart-controls">
+              <div class="chart-type-selector">
+                <label for="chartTipoSelect" class="visually-hidden">Tipo di movimento</label>
+                <select id="chartTipoSelect" class="input input-sm">
+                  <option value="uscite">📤 Uscite</option>
+                  <option value="ingressi">📥 Entrate</option>
+                </select>
+              </div>
+              <div id="chartBreadcrumb" class="chart-breadcrumb" style="display:none;">
+                <button id="breadcrumbBack" class="breadcrumb-btn" title="Torna alle macrocategorie">
+                  ← Macro
+                </button>
+                <span class="breadcrumb-sep">/</span>
+                <span id="breadcrumbCategory" class="breadcrumb-current"></span>
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chartCategorie"></canvas>
+              <div id="chartNoData" class="empty-state" style="display:none;">
+                Nessun dato per questa selezione.
+              </div>
+            </div>
+          </div>
+
+          <!-- Grafico Andamento Giornaliero -->
+          <div class="card chart-card" data-chart="giornaliero">
+            <div class="chart-card-header">
+              <span class="chart-card-title">Andamento Giornaliero</span>
+              <div class="chart-card-actions">
+                <button class="chart-download" data-chart="giornaliero" title="Scarica PNG" aria-label="Scarica grafico">⬇</button>
+                <button class="chart-fullscreen" data-chart="giornaliero" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chartGiornaliero"></canvas>
+            </div>
+          </div>
         </div>
+
+        <!-- Trend mensile (full-width) -->
+        <div class="card chart-card chart-card--trend" data-chart="trend">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Trend Mensile <span class="chart-card-subtitle">(ultimi 6 mesi)</span></span>
+            <div class="chart-card-actions">
+              <button class="chart-download" data-chart="trend" title="Scarica PNG" aria-label="Scarica grafico">⬇</button>
+              <button class="chart-fullscreen" data-chart="trend" title="Apri a tutto schermo" aria-label="Apri a tutto schermo">⤢</button>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chartTrend"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+      SCADENZE RICORRENTI
+      ============================================================ -->
+      <% if (prossimeScadenze && prossimeScadenze.length > 0) { %>
+        <section class="reminders-section">
+          <div class="reminders-header">
+            <h2 class="reminders-title">📌 Da ricordare</h2>
+            <a href="/recurring" class="btn btn-sm btn-secondary">Gestisci scadenze</a>
+          </div>
+          <div class="card reminders-grid">
+            <% prossimeScadenze.forEach(function(r) { %>
+              <div class="reminder-item">
+                <div class="reminder-item-meta">
+                  <span class="reminder-item-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %></span>
+                  <span class="reminder-item-name"><%= r.descrizione %></span>
+                  <span class="reminder-item-date">📅 <%= new Date(r.prossimaData).toLocaleDateString('it-IT') %></span>
+                </div>
+                <div class="reminder-item-amount <%= r.tipo === 'ingresso' ? 'positive' : 'negative' %>">
+                  <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </section>
       <% } %>
 
-    <div class="section-kicker">Movimenti recenti</div>
-    <!-- Ultimi movimenti -->
-      <div class="card squircle">
-        <div class="chart-title">
-          <span>Ultimi Movimenti del Mese</span>
-          <a href="/history" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Vedi tutti</a>
+      <!-- ============================================================
+      MOVIMENTI RECENTI
+      ============================================================ -->
+      <section class="recent-section">
+        <div class="recent-header">
+          <h2 class="recent-title">📋 Movimenti recenti</h2>
+          <a href="/history" class="btn btn-sm btn-secondary">Vedi tutti</a>
         </div>
-        <% if (ultimeSpese.length === 0) { %>
-          <div class="empty-state">
-            Nessun movimento registrato questo mese. 
-            <a href="/expenses/new">Aggiungine uno</a>.
-          </div>
-        <% } else { %>
-          <% ultimeSpese.forEach(function(e) { %>
-            <div class="expense-item" data-id="<%= e.id %>">
-              <div class="expense-meta">
-                <span class="expense-cat"><%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
-                <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
-                <span class="expense-sub">
-                  <%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · 
-                  <%= e.inserito_da %> → <%= e.per_conto_di %>
-                </span>
-              </div>
-              <div class="expense-amount" style="color: <%= e.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
-                <%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= e.importo.toFixed(2) %>
-              </div>
+        <div class="card recent-list">
+          <% if (ultimeSpese.length === 0) { %>
+            <div class="empty-state">
+              <p>Nessun movimento registrato questo mese.</p>
+              <a href="/expenses/new" class="btn btn-primary btn-sm">➕ Aggiungine uno</a>
             </div>
-          <% }); %>
-        <% } %>
-      </div>
+          <% } else { %>
+            <% ultimeSpese.forEach(function(e) { %>
+              <div class="recent-item" data-id="<%= e.id %>">
+                <div class="recent-item-main">
+                  <span class="recent-item-cat"><%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
+                  <span class="recent-item-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
+                  <span class="recent-item-sub">
+                    <span class="recent-item-date"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></span>
+                    <span class="recent-item-actor">· <%= e.inserito_da %> → <%= e.per_conto_di %></span>
+                  </span>
+                </div>
+                <div class="recent-item-amount <%= e.tipo === 'ingresso' ? 'positive' : 'negative' %>">
+                  <%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= e.importo.toFixed(2) %>
+                </div>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </section>
+
     </main>
   </div>
 
-    <%- include('partials/footer', { user: user }) %>
+  <%- include('partials/footer', { user: user }) %>
 
-  <!-- MODAL PER GRAFICI FULLSCREEN -->
+  <!-- ============================================================
+  MODALE GRAFICO FULLSCREEN
+  ============================================================ -->
   <div id="chart-modal" class="chart-modal-overlay" style="display: none;">
     <div class="chart-modal-content">
       <div class="chart-modal-header">
         <h3 id="chart-modal-title">Dettagli Grafico</h3>
-                <form class="chart-period-form" method="GET" action="/">
-                    <label for="chartModalMonth">Periodo</label>
-                    <select id="chartModalMonth" name="mese" class="input" aria-label="Mese">
-                        <% ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'].forEach(function(nome, indice) { %>
-                            <option value="<%= indice + 1 %>" <%= selectedMonth === indice + 1 ? 'selected' : '' %>><%= nome %></option>
-                        <% }); %>
-                    </select>
-                    <select id="chartModalYear" name="anno" class="input" aria-label="Anno">
-                        <% years.forEach(function(availableYear) { %>
-                            <option value="<%= availableYear %>" <%= selectedYear === availableYear ? 'selected' : '' %>><%= availableYear %></option>
-                        <% }); %>
-                    </select>
-                    <button id="chart-modal-close" class="chart-modal-close-btn" type="button" aria-label="Chiudi">&times;</button>
-                </form>
+        <div class="chart-modal-controls">
+          <form class="chart-period-form" method="GET" action="/">
+            <label for="chartModalMonth" class="visually-hidden">Mese</label>
+            <select id="chartModalMonth" name="mese" class="input input-sm">
+              <% ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'].forEach(function(nome, indice) { %>
+                <option value="<%= indice + 1 %>" <%= selectedMonth === indice + 1 ? 'selected' : '' %>><%= nome %></option>
+              <% }); %>
+            </select>
+            <label for="chartModalYear" class="visually-hidden">Anno</label>
+            <select id="chartModalYear" name="anno" class="input input-sm">
+              <% years.forEach(function(availableYear) { %>
+                <option value="<%= availableYear %>" <%= selectedYear === availableYear ? 'selected' : '' %>><%= availableYear %></option>
+              <% }); %>
+            </select>
+            <button id="chart-modal-close" class="chart-modal-close-btn" type="button" aria-label="Chiudi">✕</button>
+          </form>
+        </div>
       </div>
       <div class="chart-modal-body">
         <canvas id="chart-modal-canvas"></canvas>
       </div>
-      <div class="chart-modal-footer" id="chart-modal-details">
-                <button id="chart-modal-download" class="btn btn-secondary btn-sm" type="button">↓ Scarica PNG</button>
-                <span id="chart-modal-note">Scegli mese e anno qui sopra per aggiornare la dashboard.</span>
+      <div class="chart-modal-footer">
+        <button id="chart-modal-download" class="btn btn-sm btn-secondary" type="button">⬇ Scarica PNG</button>
+        <span id="chart-modal-note">Scegli mese e anno per aggiornare la dashboard.</span>
       </div>
     </div>
   </div>
 
+  <!-- ============================================================
+  SCRIPTS
+  ============================================================ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"
           onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';document.head.appendChild(s);">
   </script>
 
   <script>
-var dashboardChartData = {
-    categorie: <%- JSON.stringify(chartCategorie) %>,
-    sottocategorie: <%- JSON.stringify(chartSottocategorie || {}) %>,
-    giornaliero: <%- JSON.stringify(chartGiornaliero) %>,
-    trend: <%- JSON.stringify(chartTrend) %>
-};
+    var dashboardChartData = {
+      categorie: <%- JSON.stringify(chartCategorie) %>,
+      sottocategorie: <%- JSON.stringify(chartSottocategorie || {}) %>,
+      giornaliero: <%- JSON.stringify(chartGiornaliero) %>,
+      trend: <%- JSON.stringify(chartTrend) %>
+    };
 
-(function initDashboard() {
+    (function initDashboard() {
+      if (window.__ciulloDashboardChartsInitialized) return;
+      if (typeof Chart === 'undefined') { setTimeout(initDashboard, 200); return; }
+      window.__ciulloDashboardChartsInitialized = true;
 
-    if (window.__ciulloDashboardChartsInitialized) {
-        return;
-    }
-
-    if (typeof Chart === 'undefined') {
-        setTimeout(initDashboard, 200);
-        return;
-    }
-
-    window.__ciulloDashboardChartsInitialized = true;
-
-        function getThemeColors() {
+      function getThemeColors() {
         var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
-            // 1. COLORI ESPLICITI (Il Canvas NON legge le variabili CSS "var(--...)")
-            text: dark ? '#F1F0EA' : '#1D1E1C',          // Corrisponde a --text nel tuo style.css
-            grid: dark ? 'rgba(241, 240, 234, 0.08)' : 'rgba(29, 30, 28, 0.08)',
-            bgPrimary: dark ? '#202320' : '#FBFAF7',     // Corrisponde a --surface nel tuo style.css
-            positive: dark ? '#8FB197' : '#6F9277',
-            negative: dark ? '#D08F8F' : '#B76E6E',
-
-            // 2. PALETTE — desaturata, coerente col design system
-            palette: [
-                '#4C6655', '#8C829A', '#C99B72', '#708A9B',
-                '#B76E6E', '#C3A45D', '#758C7C', '#6F9277',
-                '#91938D', '#C7C2B8', '#D6AD86', '#A79CB4'
-            ]
+          text: dark ? '#F1F0EA' : '#1D1E1C',
+          grid: dark ? 'rgba(241,240,234,0.08)' : 'rgba(29,30,28,0.08)',
+          bgPrimary: dark ? '#202320' : '#FBFAF7',
+          positive: dark ? '#8FB197' : '#6F9277',
+          negative: dark ? '#D08F8F' : '#B76E6E',
+          palette: [
+            '#4C6655','#8C829A','#C99B72','#708A9B',
+            '#B76E6E','#C3A45D','#758C7C','#6F9277',
+            '#91938D','#C7C2B8','#D6AD86','#A79CB4'
+          ]
         };
-    }
+      }
+      var colors = getThemeColors();
 
-    var colors = getThemeColors();
-
-
-    // ============================================================
-    // NORMALIZZAZIONE DATI
-    // ============================================================
-
-    function normalizeCategorie(raw) {
-
-        if (!raw) {
-            return {
-                uscite: {
-                    labels: [],
-                    data: []
-                },
-
-                ingressi: {
-                    labels: [],
-                    data: []
-                }
-            };
-        }
-
+      // ——— Normalizzazione ———
+      function normalizeCategorie(raw) {
+        if (!raw) return { uscite: { labels: [], data: [] }, ingressi: { labels: [], data: [] } };
         if (raw.uscite || raw.ingressi) {
-
-            return {
-                uscite:
-                    raw.uscite || {
-                        labels: [],
-                        data: []
-                    },
-
-                ingressi:
-                    raw.ingressi || {
-                        labels: [],
-                        data: []
-                    }
-            };
+          return { uscite: raw.uscite || { labels: [], data: [] }, ingressi: raw.ingressi || { labels: [], data: [] } };
         }
-
-        return {
-            uscite: {
-                labels: raw.labels || [],
-                data: raw.data || []
-            },
-
-            ingressi: {
-                labels: [],
-                data: []
-            }
-        };
-    }
-
-
-    function normalizeSottocategorie(raw) {
-
-        if (!raw) {
-            return {
-                uscite: {},
-                ingressi: {}
-            };
-        }
-
+        return { uscite: { labels: raw.labels || [], data: raw.data || [] }, ingressi: { labels: [], data: [] } };
+      }
+      function normalizeSottocategorie(raw) {
+        if (!raw) return { uscite: {}, ingressi: {} };
         if (raw.uscite || raw.ingressi) {
-
-            return {
-                uscite: raw.uscite || {},
-                ingressi: raw.ingressi || {}
-            };
+          return { uscite: raw.uscite || {}, ingressi: raw.ingressi || {} };
         }
+        return { uscite: raw, ingressi: {} };
+      }
 
-        return {
-            uscite: raw,
-            ingressi: {}
-        };
-    }
+      var catData = normalizeCategorie(dashboardChartData.categorie);
+      var subData = normalizeSottocategorie(dashboardChartData.sottocategorie);
+      var giornoData = dashboardChartData.giornaliero || { labels: [], dataIngressi: [], dataUscite: [] };
+      var trendData = dashboardChartData.trend || { labels: [], dataIngressi: [], dataUscite: [] };
 
+      // ——— Grafico Categorie ———
+      var ctxCategorie = document.getElementById('chartCategorie');
+      var chartInstance = null;
+      var currentTipo = 'uscite';
+      var currentView = 'macro';
+      var currentCategory = '';
+      var tipoSelect = document.getElementById('chartTipoSelect');
+      var breadcrumb = document.getElementById('chartBreadcrumb');
+      var breadcrumbBack = document.getElementById('breadcrumbBack');
+      var breadcrumbCategory = document.getElementById('breadcrumbCategory');
+      var noDataMsg = document.getElementById('chartNoData');
 
-    var catData =
-        normalizeCategorie(dashboardChartData.categorie);
-
-    var subData =
-        normalizeSottocategorie(
-            dashboardChartData.sottocategorie
-        );
-
-    var giornoData =
-        dashboardChartData.giornaliero || {
-            labels: [],
-            dataIngressi: [],
-            dataUscite: []
-        };
-
-    var trendData =
-        dashboardChartData.trend || {
-            labels: [],
-            dataIngressi: [],
-            dataUscite: []
-        };
-
-
-    // ============================================================
-    // GRAFICO CATEGORIE
-    // ============================================================
-
-    var ctxCategorie =
-        document.getElementById('chartCategorie');
-
-    var chartInstance =
-        null;
-
-    var currentTipo =
-        'uscite';
-
-    var currentView =
-        'macro';
-
-    var currentCategory =
-        '';
-
-
-    var tipoSelect =
-        document.getElementById(
-            'chartTipoSelect'
-        );
-
-    var breadcrumb =
-        document.getElementById(
-            'chartBreadcrumb'
-        );
-
-    var breadcrumbBack =
-        document.getElementById(
-            'breadcrumbBack'
-        );
-
-    var breadcrumbCategory =
-        document.getElementById(
-            'breadcrumbCategory'
-        );
-
-    var noDataMsg =
-        document.getElementById(
-            'chartNoData'
-        );
-
-
-    function getPalette(n) {
-
+      function getPalette(n) {
         var out = [];
-
-        for (var i = 0; i < n; i++) {
-
-            out.push(
-                colors.palette[
-                    i % colors.palette.length
-                ]
-            );
-        }
-
+        for (var i = 0; i < n; i++) out.push(colors.palette[i % colors.palette.length]);
         return out;
-    }
+      }
 
-
-    function renderCategorieChart() {
-
-        if (!ctxCategorie) {
-            return;
-        }
-
-
-        var labels = [];
-        var data = [];
-        var title = '';
-
-
-        // ========================================================
-        // VISTA MACRO
-        // ========================================================
+      function renderCategorieChart() {
+        if (!ctxCategorie) return;
+        var labels = [], data = [], title = '';
 
         if (currentView === 'macro') {
-
-            var src =
-                catData[currentTipo] || {
-                    labels: [],
-                    data: []
-                };
-
-            labels =
-                src.labels || [];
-
-            data =
-                src.data || [];
-
-            title =
-                (
-                    currentTipo === 'uscite'
-                        ? 'Uscite'
-                        : 'Entrate'
-                ) +
-                ' per Categoria';
-
-            breadcrumb.style.display =
-                'none';
-
-        }
-
-        // ========================================================
-        // VISTA SOTTOCATEGORIE
-        // ========================================================
-
-        else {
-
-            var subs =
-                (
-                    subData[currentTipo] || {}
-                )[currentCategory];
-
-
-            if (
-                subs &&
-                subs.labels &&
-                subs.labels.length > 0
-            ) {
-
-                labels =
-                    subs.labels;
-
-                data =
-                    subs.data;
-
-            } else {
-
-                labels =
-                    ['Nessuna sottocategoria'];
-
-                data =
-                    [0];
-            }
-
-
-            title =
-                currentCategory;
-
-
-            breadcrumb.style.display =
-                'flex';
-
-            breadcrumbCategory.textContent =
-                currentCategory;
-        }
-
-
-        // ========================================================
-        // NESSUN DATO
-        // ========================================================
-
-        if (
-            labels.length === 0 ||
-            (
-                labels.length === 1 &&
-                Number(data[0]) === 0
-            )
-        ) {
-
-            if (chartInstance) {
-
-                chartInstance.destroy();
-
-                chartInstance =
-                    null;
-            }
-
-            ctxCategorie.style.display =
-                'none';
-
-            noDataMsg.style.display =
-                'block';
-
-            return;
-        }
-
-
-        ctxCategorie.style.display =
-            'block';
-
-        noDataMsg.style.display =
-            'none';
-
-
-        if (chartInstance) {
-
-            chartInstance.destroy();
-
-            chartInstance =
-                null;
-        }
-
-
-        var bgColors =
-            getPalette(labels.length);
-
-
-        // ========================================================
-        // MACRO = DOUGHNUT
-        // SOTTOCATEGORIE = BARRE ORIZZONTALI
-        // ========================================================
-
-        if (currentView === 'macro') {
-
-            chartInstance =
-                new Chart(ctxCategorie, {
-
-                    type: 'doughnut',
-
-                    data: {
-                        labels: labels,
-
-                        datasets: [{
-                            data: data,
-
-                            backgroundColor:
-                                bgColors,
-
-                            borderWidth: 2,
-
-                            borderColor:
-                                colors.bgPrimary,
-
-                            hoverOffset: 8
-                        }]
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: true,
-
-                        animation: {
-                            duration: 500,
-                            easing: 'easeOutQuart'
-                        },
-
-                        plugins: {
-
-                            legend: {
-                                position: 'bottom',
-
-                                labels: {
-                                    color:
-                                        colors.text,
-
-                                    boxWidth: 12,
-
-                                    padding: 14,
-
-                                    usePointStyle:
-                                        true,
-
-                                    pointStyle:
-                                        'circle',
-
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            },
-
-                            tooltip: {
-
-                                backgroundColor:
-                                    'rgba(0,0,0,0.85)',
-
-                                titleColor:
-                                    '#fff',
-
-                                bodyColor:
-                                    '#fff',
-
-                                padding: 12,
-
-                                cornerRadius: 8,
-
-                                callbacks: {
-
-                                    title:
-                                        function(items) {
-
-                                            return items[0]
-                                                .label;
-                                        },
-
-                                    label:
-                                        function(context) {
-
-                                            var total =
-                                                context
-                                                    .dataset
-                                                    .data
-                                                    .reduce(
-                                                        function(a, b) {
-                                                            return a +
-                                                                Number(b);
-                                                        },
-                                                        0
-                                                    );
-
-                                            var value =
-                                                Number(
-                                                    context.parsed
-                                                ) || 0;
-
-                                            var perc =
-                                                total > 0
-                                                    ? (
-                                                        value /
-                                                        total *
-                                                        100
-                                                    ).toFixed(1)
-                                                    : '0.0';
-
-                                            var prefix =
-                                                currentTipo === 'uscite'
-                                                    ? '−'
-                                                    : '+';
-
-                                            return (
-                                                prefix +
-                                                ' €' +
-                                                value.toFixed(2) +
-                                                ' (' +
-                                                perc +
-                                                '%)'
-                                            );
-                                        },
-
-                                    afterLabel:
-                                        function(context) {
-
-                                            if (
-                                                currentView ===
-                                                'macro'
-                                            ) {
-
-                                                var subs =
-                                                    (
-                                                        subData[
-                                                            currentTipo
-                                                        ] || {}
-                                                    )[context.label];
-
-                                                if (
-                                                    subs &&
-                                                    subs.labels &&
-                                                    subs.labels.length
-                                                ) {
-                                                    return '🔍 Click per vedere le sottocategorie';
-                                                }
-                                            }
-
-                                            return '';
-                                        }
-                                }
-                            }
-                        },
-
-                        cutout: '60%',
-
-                        onClick:
-                            handleChartClick
-                    }
-                });
-
+          var src = catData[currentTipo] || { labels: [], data: [] };
+          labels = src.labels || [];
+          data = src.data || [];
+          title = (currentTipo === 'uscite' ? 'Uscite' : 'Entrate') + ' per Categoria';
+          breadcrumb.style.display = 'none';
         } else {
-
-            chartInstance =
-                new Chart(ctxCategorie, {
-
-                    type: 'bar',
-
-                    data: {
-
-                        labels: labels,
-
-                        datasets: [{
-                            label:
-                                currentCategory,
-
-                            data: data,
-
-                            backgroundColor:
-                                bgColors,
-
-                            borderColor:
-                                bgColors,
-
-                            borderWidth: 1,
-
-                            borderRadius: 6,
-
-                            barPercentage:
-                                0.7
-                        }]
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio:
-                            true,
-
-                        indexAxis: 'y',
-
-                        animation: {
-                            duration: 400
-                        },
-
-                        plugins: {
-
-                            legend: {
-                                display: false
-                            },
-
-                            tooltip: {
-
-                                backgroundColor:
-                                    'rgba(0,0,0,0.85)',
-
-                                titleColor:
-                                    '#fff',
-
-                                bodyColor:
-                                    '#fff',
-
-                                padding: 12,
-
-                                cornerRadius: 8,
-
-                                callbacks: {
-
-                                    label:
-                                        function(context) {
-
-                                            var value =
-                                                Number(
-                                                    context.parsed.x
-                                                ) || 0;
-
-                                            return (
-                                                '€' +
-                                                value.toFixed(2)
-                                            );
-                                        }
-                                }
-                            }
-                        },
-
-                        scales: {
-
-                            x: {
-
-                                beginAtZero: true,
-
-                                grid: {
-                                    color:
-                                        colors.grid
-                                },
-
-                                ticks: {
-
-                                    color:
-                                        colors.text,
-
-                                    callback:
-                                        function(value) {
-
-                                            return (
-                                                '€' +
-                                                Number(value)
-                                                    .toFixed(0)
-                                            );
-                                        }
-                                }
-                            },
-
-                            y: {
-
-                                grid: {
-                                    display: false
-                                },
-
-                                ticks: {
-                                    color:
-                                        colors.text
-                                }
-                            }
-                        }
-                    }
-                });
-        }
-    }
-
-
-    // ============================================================
-    // CLICK SU MACRO CATEGORIA
-    // ============================================================
-
-    function handleChartClick(
-        event,
-        elements
-    ) {
-
-        if (
-            currentView !== 'macro'
-        ) {
-            return;
+          var subs = (subData[currentTipo] || {})[currentCategory];
+          if (subs && subs.labels && subs.labels.length > 0) {
+            labels = subs.labels; data = subs.data;
+          } else {
+            labels = ['Nessuna sottocategoria']; data = [0];
+          }
+          title = currentCategory;
+          breadcrumb.style.display = 'flex';
+          breadcrumbCategory.textContent = currentCategory;
         }
 
-        if (
-            !elements ||
-            elements.length === 0
-        ) {
-            return;
+        if (labels.length === 0 || (labels.length === 1 && Number(data[0]) === 0)) {
+          if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+          ctxCategorie.style.display = 'none';
+          noDataMsg.style.display = 'block';
+          return;
         }
+        ctxCategorie.style.display = 'block';
+        noDataMsg.style.display = 'none';
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
+        var bgColors = getPalette(labels.length);
 
-        var idx =
-            elements[0].index;
-
-
-        var clickedLabel =
-            chartInstance
-                .data
-                .labels[idx];
-
-
-        var subs =
-            (
-                subData[currentTipo] || {}
-            )[clickedLabel];
-
-
-        if (
-            !subs ||
-            !subs.labels ||
-            subs.labels.length === 0
-        ) {
-            return;
-        }
-
-
-        currentCategory =
-            clickedLabel;
-
-        currentView =
-            'sub';
-
-
-        renderCategorieChart();
-    }
-
-
-    // ============================================================
-    // SELECT ENTRATE / USCITE
-    // ============================================================
-
-    if (tipoSelect) {
-
-        tipoSelect.addEventListener(
-            'change',
-            function() {
-
-                currentTipo =
-                    this.value;
-
-                currentView =
-                    'macro';
-
-                currentCategory =
-                    '';
-
-                renderCategorieChart();
-            }
-        );
-    }
-
-
-    // ============================================================
-    // TORNA ALLE MACRO
-    // ============================================================
-
-    if (breadcrumbBack) {
-
-        breadcrumbBack.addEventListener(
-            'click',
-            function() {
-
-                currentView =
-                    'macro';
-
-                currentCategory =
-                    '';
-
-                renderCategorieChart();
-            }
-        );
-    }
-
-
-    // ============================================================
-    // KPI - CONTROLLO COERENZA
-    // ============================================================
-
-    var renderedKpi = {
-
-        uscite:
-            Number(
-                <%- JSON.stringify(totale) %>
-            ) || 0,
-
-        entrate:
-            Number(
-                <%- JSON.stringify(totaleIngressi) %>
-            ) || 0,
-
-        saldo:
-            Number(
-                <%- JSON.stringify(saldo) %>
-            ) || 0
-    };
-
-
-    function sumValues(values) {
-
-        return (
-            values || []
-        ).reduce(
-            function(sum, value) {
-
-                var n =
-                    Number(value);
-
-                return sum +
-                    (
-                        Number.isFinite(n)
-                            ? n
-                            : 0
-                    );
+        if (currentView === 'macro') {
+          chartInstance = new Chart(ctxCategorie, {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: [{
+                data: data,
+                backgroundColor: bgColors,
+                borderWidth: 2,
+                borderColor: colors.bgPrimary,
+                hoverOffset: 8
+              }]
             },
-            0
-        );
-    }
-
-
-    var chartTotals = {
-
-        uscite:
-            sumValues(
-                (catData.uscite || {})
-                    .data
-            ),
-
-        entrate:
-            sumValues(
-                (catData.ingressi || {})
-                    .data
-            )
-    };
-
-
-    var epsilon =
-        0.01;
-
-
-    if (
-        Math.abs(
-            chartTotals.uscite -
-            renderedKpi.uscite
-        ) > epsilon ||
-
-        Math.abs(
-            chartTotals.entrate -
-            renderedKpi.entrate
-        ) > epsilon ||
-
-        Math.abs(
-            (
-                renderedKpi.entrate -
-                renderedKpi.uscite
-            ) -
-            renderedKpi.saldo
-        ) > epsilon
-    ) {
-
-        console.warn(
-            '[Dashboard] KPI non coerenti con i dati grafici',
-            {
-                kpi: renderedKpi,
-                grafici: chartTotals
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              animation: { duration: 500, easing: 'easeOutQuart' },
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    color: colors.text,
+                    boxWidth: 12,
+                    padding: 14,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    font: { size: 12 }
+                  }
+                },
+                tooltip: {
+                  backgroundColor: 'rgba(0,0,0,0.85)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
+                  padding: 12,
+                  cornerRadius: 8,
+                  callbacks: {
+                    title: function(items) { return items[0].label; },
+                    label: function(context) {
+                      var total = context.dataset.data.reduce(function(a,b){ return a + Number(b); }, 0);
+                      var value = Number(context.parsed) || 0;
+                      var perc = total > 0 ? (value / total * 100).toFixed(1) : '0.0';
+                      var prefix = currentTipo === 'uscite' ? '−' : '+';
+                      return prefix + ' €' + value.toFixed(2) + ' (' + perc + '%)';
+                    },
+                    afterLabel: function(context) {
+                      if (currentView === 'macro') {
+                        var subs = (subData[currentTipo] || {})[context.label];
+                        if (subs && subs.labels && subs.labels.length) return '🔍 Clicca per approfondire';
+                      }
+                      return '';
+                    }
+                  }
+                }
+              },
+              cutout: '60%',
+              onClick: handleChartClick
             }
-        );
-    }
-
-
-    // ============================================================
-    // AVVIO
-    // ============================================================
-
-    renderCategorieChart();
-
-
-        // ============================================================
-    // GRAFICO GIORNALIERO
-    // ============================================================
-
-    var ctxGiornaliero = document.getElementById('chartGiornaliero');
-
-    if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
-        new Chart(ctxGiornaliero, {
+          });
+        } else {
+          chartInstance = new Chart(ctxCategorie, {
             type: 'bar',
             data: {
-                labels: giornoData.labels,
-                datasets: [
-                    {
-                        label: 'Entrate (€)',
-                        data: giornoData.dataIngressi || [],
-                        backgroundColor: 'rgba(124, 148, 115, 0.7)',
-                        borderColor: colors.positive,
-                        borderWidth: 2,
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Uscite (€)',
-                        data: giornoData.dataUscite || [],
-                        backgroundColor: 'rgba(255, 107, 107, 0.7)',
-                        borderColor: colors.negative, 
-                        borderWidth: 2,
-                        borderRadius: 6
-                    }
-                ]
+              labels: labels,
+              datasets: [{
+                label: currentCategory,
+                data: data,
+                backgroundColor: bgColors,
+                borderColor: bgColors,
+                borderWidth: 1,
+                borderRadius: 6,
+                barPercentage: 0.7
+              }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: colors.text, 
-                            boxWidth: 16,
-                            font: { size: 14 },
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
+              responsive: true,
+              maintainAspectRatio: true,
+              indexAxis: 'y',
+              animation: { duration: 400 },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  backgroundColor: 'rgba(0,0,0,0.85)',
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
+                  padding: 12,
+                  cornerRadius: 8,
+                  callbacks: {
+                    label: function(context) {
+                      var value = Number(context.parsed.x) || 0;
+                      return '€' + value.toFixed(2);
                     }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: colors.text }, 
-                        grid: { display: false }
-                    },
-                    y: {
-                        ticks: {
-                            color: colors.text, 
-                            callback: function(v) {
-                                return '€' + Number(v).toFixed(0);
-                            }
-                        },
-                        grid: { color: colors.grid }, 
-                        beginAtZero: true
-                    }
+                  }
                 }
+              },
+              scales: {
+                x: {
+                  beginAtZero: true,
+                  grid: { color: colors.grid },
+                  ticks: { color: colors.text, callback: function(v) { return '€' + Number(v).toFixed(0); } }
+                },
+                y: {
+                  grid: { display: false },
+                  ticks: { color: colors.text }
+                }
+              }
             }
+          });
+        }
+      }
+
+      function handleChartClick(event, elements) {
+        if (currentView !== 'macro') return;
+        if (!elements || elements.length === 0) return;
+        var idx = elements[0].index;
+        var clickedLabel = chartInstance.data.labels[idx];
+        var subs = (subData[currentTipo] || {})[clickedLabel];
+        if (!subs || !subs.labels || subs.labels.length === 0) return;
+        currentCategory = clickedLabel;
+        currentView = 'sub';
+        renderCategorieChart();
+      }
+
+      if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+          currentTipo = this.value;
+          currentView = 'macro';
+          currentCategory = '';
+          renderCategorieChart();
         });
-    }
+      }
+      if (breadcrumbBack) {
+        breadcrumbBack.addEventListener('click', function() {
+          currentView = 'macro';
+          currentCategory = '';
+          renderCategorieChart();
+        });
+      }
 
-      // ============================================================
-    // TREND MENSILE
-    // ============================================================
+      renderCategorieChart();
 
-    var ctxTrend = document.getElementById('chartTrend');
+      // ——— Grafico Giornaliero ———
+      var ctxGiornaliero = document.getElementById('chartGiornaliero');
+      if (ctxGiornaliero && giornoData.labels && giornoData.labels.length > 0) {
+        new Chart(ctxGiornaliero, {
+          type: 'bar',
+          data: {
+            labels: giornoData.labels,
+            datasets: [
+              {
+                label: 'Entrate (€)',
+                data: giornoData.dataIngressi || [],
+                backgroundColor: 'rgba(124, 148, 115, 0.7)',
+                borderColor: colors.positive,
+                borderWidth: 2,
+                borderRadius: 6
+              },
+              {
+                label: 'Uscite (€)',
+                data: giornoData.dataUscite || [],
+                backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                borderColor: colors.negative,
+                borderWidth: 2,
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { color: colors.text, boxWidth: 16, font: { size: 14 }, usePointStyle: true, pointStyle: 'circle' }
+              }
+            },
+            scales: {
+              x: { ticks: { color: colors.text }, grid: { display: false } },
+              y: {
+                ticks: { color: colors.text, callback: function(v) { return '€' + Number(v).toFixed(0); } },
+                grid: { color: colors.grid },
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
 
-    if (ctxTrend && trendData.labels && trendData.labels.length > 0) {
+      // ——— Grafico Trend ———
+      var ctxTrend = document.getElementById('chartTrend');
+      if (ctxTrend && trendData.labels && trendData.labels.length > 0) {
         new Chart(ctxTrend, {
-            type: 'line',
-            data: {
-                labels: trendData.labels,
-                datasets: [
-                    {
-                        label: 'Uscite mensili',
-                        data: trendData.dataUscite || [],
-                        borderColor: colors.negative, 
-                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: colors.negative 
-                    },
-                    {
-                        label: 'Entrate mensili',
-                        data: trendData.dataIngressi || [],
-                        borderColor: colors.positive, 
-                        backgroundColor: 'rgba(124, 148, 115, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: colors.positive 
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            color: colors.text, 
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                var value = Number(context.parsed.y) || 0;
-                                return context.dataset.label + ': €' + value.toFixed(2);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: colors.grid }, 
-                        ticks: { color: colors.text } 
-                    },
-                    y: {
-                        grid: { color: colors.grid }, 
-                        ticks: {
-                            color: colors.text, 
-                            callback: function(value) {
-                                return '€' + Number(value).toFixed(0);
-                            }
-                        },
-                        beginAtZero: true
-                    }
+          type: 'line',
+          data: {
+            labels: trendData.labels,
+            datasets: [
+              {
+                label: 'Uscite mensili',
+                data: trendData.dataUscite || [],
+                borderColor: colors.negative,
+                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.negative
+              },
+              {
+                label: 'Entrate mensili',
+                data: trendData.dataIngressi || [],
+                borderColor: colors.positive,
+                backgroundColor: 'rgba(124, 148, 115, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.positive
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { color: colors.text, usePointStyle: true }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    var value = Number(context.parsed.y) || 0;
+                    return context.dataset.label + ': €' + value.toFixed(2);
+                  }
                 }
+              }
+            },
+            scales: {
+              x: { grid: { color: colors.grid }, ticks: { color: colors.text } },
+              y: {
+                grid: { color: colors.grid },
+                ticks: { color: colors.text, callback: function(v) { return '€' + Number(v).toFixed(0); } },
+                beginAtZero: true
+              }
             }
+          }
         });
-    }
-    // ============================================================
-    // POPUP, DOWNLOAD E PERIODO GRAFICI
-    // ============================================================
+      }
 
-    var chartModal = document.getElementById('chart-modal');
-    var chartModalBody = chartModal && chartModal.querySelector('.chart-modal-body');
-    var chartModalTitle = document.getElementById('chart-modal-title');
-    var chartModalDownload = document.getElementById('chart-modal-download');
-    var modalChart = null;
-    var modalCanvas = null;
-    var modalPlaceholder = null;
+      // ——— Modal fullscreen ———
+      var chartModal = document.getElementById('chart-modal');
+      var chartModalBody = chartModal && chartModal.querySelector('.chart-modal-body');
+      var chartModalTitle = document.getElementById('chart-modal-title');
+      var chartModalDownload = document.getElementById('chart-modal-download');
+      var modalChart = null;
+      var modalCanvas = null;
+      var modalPlaceholder = null;
 
-    function closeChartModal() {
+      function closeChartModal() {
         if (!chartModal || !modalCanvas || !modalPlaceholder) return;
-
         modalPlaceholder.parentNode.insertBefore(modalCanvas, modalPlaceholder);
         modalPlaceholder.remove();
         if (modalChart) modalChart.resize();
-        modalCanvas = null;
-        modalPlaceholder = null;
-        modalChart = null;
+        modalCanvas = null; modalPlaceholder = null; modalChart = null;
         chartModal.style.display = 'none';
         document.body.style.overflow = '';
-    }
+      }
 
-    function openChartModal(button) {
+      function openChartModal(button) {
         if (!chartModal || !chartModalBody) return;
-
         var sourceCanvas = document.getElementById('chart' + button.dataset.chart.charAt(0).toUpperCase() + button.dataset.chart.slice(1));
         var sourceChart = sourceCanvas && Chart.getChart(sourceCanvas);
         if (!sourceChart) return;
-
         modalChart = sourceChart;
         modalCanvas = sourceCanvas;
         modalPlaceholder = document.createElement('span');
         modalPlaceholder.setAttribute('aria-hidden', 'true');
         sourceCanvas.parentNode.insertBefore(modalPlaceholder, sourceCanvas);
         chartModalBody.appendChild(sourceCanvas);
-        chartModalTitle.textContent = button.closest('.chart-card').querySelector('.chart-title > span').textContent;
+        chartModalTitle.textContent = button.closest('.chart-card').querySelector('.chart-card-title').textContent;
         chartModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         window.requestAnimationFrame(function() {
-            window.requestAnimationFrame(function() {
-                modalChart.resize();
-            });
+          window.requestAnimationFrame(function() { modalChart.resize(); });
         });
-    }
+      }
 
-    document.querySelectorAll('.chart-fullscreen').forEach(function(button) {
+      document.querySelectorAll('.chart-fullscreen').forEach(function(button) {
         button.addEventListener('click', function() { openChartModal(button); });
-    });
+      });
 
-    document.querySelectorAll('.chart-download').forEach(function(button) {
+      document.querySelectorAll('.chart-download').forEach(function(button) {
         button.addEventListener('click', function() {
-            var canvas = document.getElementById('chart' + button.dataset.chart.charAt(0).toUpperCase() + button.dataset.chart.slice(1));
-            var chart = canvas && Chart.getChart(canvas);
-            if (!chart) return;
-            var link = document.createElement('a');
-            link.download = 'ciullotracker-' + button.dataset.chart + '-<%= selectedYear %>-<%= selectedMonth %>.png';
-            link.href = chart.toBase64Image('image/png', 1);
-            link.click();
+          var canvas = document.getElementById('chart' + button.dataset.chart.charAt(0).toUpperCase() + button.dataset.chart.slice(1));
+          var chart = canvas && Chart.getChart(canvas);
+          if (!chart) return;
+          var link = document.createElement('a');
+          link.download = 'ciullotracker-' + button.dataset.chart + '-<%= selectedYear %>-<%= selectedMonth %>.png';
+          link.href = chart.toBase64Image('image/png', 1);
+          link.click();
         });
-    });
+      });
 
-    if (document.getElementById('chart-modal-close')) {
+      if (document.getElementById('chart-modal-close')) {
         document.getElementById('chart-modal-close').addEventListener('click', closeChartModal);
-    }
-    if (chartModalDownload) {
+      }
+      if (chartModalDownload) {
         chartModalDownload.addEventListener('click', function() {
-            if (!modalChart) return;
-            var link = document.createElement('a');
-            link.download = 'ciullotracker-grafico-<%= selectedYear %>-<%= selectedMonth %>.png';
-            link.href = modalChart.toBase64Image('image/png', 1);
-            link.click();
+          if (!modalChart) return;
+          var link = document.createElement('a');
+          link.download = 'ciullotracker-grafico-<%= selectedYear %>-<%= selectedMonth %>.png';
+          link.href = modalChart.toBase64Image('image/png', 1);
+          link.click();
         });
-    }
-    if (chartModal) {
+      }
+      if (chartModal) {
         chartModal.addEventListener('click', function(event) {
-            if (event.target === chartModal) closeChartModal();
+          if (event.target === chartModal) closeChartModal();
         });
-    }
-    document.addEventListener('keydown', function(event) {
+      }
+      document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') closeChartModal();
-    });
-    document.querySelector('.chart-period-form')?.addEventListener('change', function() {
+      });
+      document.querySelector('.chart-period-form')?.addEventListener('change', function() {
         this.submit();
-    });
+      });
 
-    // 4. FORZA L'AGGIORNAMENTO DEI GRAFICI QUANDO CAMBI TEMA
-    new MutationObserver(function() {
-        location.reload(); // Ricarica la pagina per applicare i nuovi colori HEX a tutti i canvas
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      // ——— Tema dinamico: ricarica ———
+      new MutationObserver(function() {
+        location.reload();
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-})();
-
-</script>
+    })();
+  </script>
 
 </body>
 </html>
