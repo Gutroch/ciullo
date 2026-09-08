@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Storico · CiulloTracker' }) %>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'history' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Storico &amp; Esportazione</div>
+      <div class="page-subtitle">Filtra, modifica e scarica i dati delle spese registrate</div>
+
+      <!-- Filtri -->
+      <form method="GET" action="/history" class="card squircle filters-bar">
+        <div class="field">
+          <label for="mese">Mese</label>
+          <select class="input" name="mese" id="mese">
+            <option value="">Tutti</option>
+            <% var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']; %>
+            <% mesi.forEach(function(m, i) { %>
+              <option value="<%= i+1 %>" <%= filtri.mese == (i+1) ? 'selected' : '' %>><%= m %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="anno">Anno</label>
+          <select class="input" name="anno" id="anno">
+            <option value="">Tutti</option>
+            <% anniDisponibili.forEach(function(a) { %>
+              <option value="<%= a %>" <%= filtri.anno == a ? 'selected' : '' %>><%= a %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="categoria">Categoria</label>
+          <select class="input" name="categoria" id="categoria">
+            <option value="">Tutte</option>
+            <% if (categorie && Array.isArray(categorie)) { %>
+              <% categorie.forEach(function(c) { %>
+                <option value="<%= c %>" <%= filtri.categoria === c ? 'selected' : '' %>><%= c %></option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sottocategoria">Sottocategoria</label>
+          <select class="input" name="sottocategoria" id="sottocategoria">
+            <option value="">Tutte</option>
+            <% if (sottocategorieDisponibili && Array.isArray(sottocategorieDisponibili)) { %>
+              <% sottocategorieDisponibili.forEach(function(s) { %>
+                <option value="<%= s %>" <%= filtri.sottocategoria === s ? 'selected' : '' %>><%= s %></option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+        <div class="field" style="display: flex; gap: 8px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Filtra</button>
+          <a href="/history" class="btn btn-secondary" style="flex: 1; text-align: center;">Reset</a>
+        </div>
+      </form>
+
+      <!-- Export Bar -->
+      <div class="export-bar">
+        <span class="label">Esporta:</span>
+        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+          CSV
+        </a>
+        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+          Excel
+        </a>
+        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+          JSON
+        </a>
+        <span class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
+          Saldo totale:
+          <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
+        </span>
+        <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);">
+          <strong><%= expenses ? expenses.length : 0 %></strong> movimenti trovati
+        </span>
+      </div>
+
+      <!-- Tabella -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Importo</th>
+              <th>Categoria</th>
+              <th>Sottocategoria</th>
+              <th>Inserito da</th>
+              <th>Per conto di</th>
+              <th>Note</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!expenses || expenses.length === 0) { %>
+              <tr>
+                <td colspan="9" class="empty-state">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <span style="font-size: 2rem;">📭</span>
+                    <span>Nessuna spesa trovata con i filtri selezionati.</span>
+                    <a href="/expenses/new" class="btn btn-primary" style="display: inline-block;">Aggiungi una spesa</a>
+                  </div>
+                </td>
+              </tr>
+            <% } else { %>
+              <% expenses.forEach(function(e) { %>
+                <tr>
+                  <td><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
+                  <td>
+                    <span class="badge <%= e.tipo === 'ingresso' ? 'badge-success' : 'badge-danger' %>">
+                      <%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="qty-btn-group">
+                      <button class="qty-btn dec" data-id="<%= e.id %>" title="Decrementa">−</button>
+                      <span class="amount-cell" style="color: <%= e.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
+                        € <%= parseFloat(e.importo).toFixed(2) %>
+                      </span>
+                      <button class="qty-btn inc" data-id="<%= e.id %>" title="Incrementa">+</button>
+                    </div>
+                  </td>
+                  <td><%= e.categoria || '—' %></td>
+                  <td><%= e.sottocategoria || '—' %></td>
+                  <td><%= e.inserito_da || '—' %></td>
+                  <td><%= e.per_conto_di || '—' %></td>
+                  <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= e.note || '' %>">
+                    <%= e.note || '—' %>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm" title="Modifica">Mod</a>
+                      <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" title="Elimina">Elim</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+          <% if (expenses && expenses.length > 0) { %>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>Totali</strong></td>
+                <td style="color: var(--negative);">
+                  Uscite: € <%= expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
+                </td>
+                <td style="color: var(--positive);">
+                  Entrate: € <%= expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0).toFixed(2) %>
+                </td>
+                <td colspan="5" style="color: var(--text-primary);">
+                  Saldo: € <%= (expenses.filter(e => e.tipo === 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0) - 
+                                expenses.filter(e => e.tipo !== 'ingresso').reduce((sum, e) => sum + parseFloat(e.importo), 0)).toFixed(2) %>
+                </td>
+              </tr>
+            </tfoot>
+          <% } %>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer', { user: user }) %>
+
+  <script src="/js/history-buttons.js"></script>
+
+</body>
+</html>

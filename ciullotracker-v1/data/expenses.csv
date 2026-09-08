@@ -1,0 +1,13 @@
+id,data_inserimento,data_spesa,tipo,importo,categoria,inserito_da,per_conto_di,note
+1,2026-09-01,2026-09-01,ingresso,0.00,Stipendio Papà,system,Famiglia,
+2,2026-09-01,2026-09-01,ingresso,0.00,Stipendio Mamma,system,Famiglia,
+3,2026-09-01,2026-09-01,ingresso,0.00,Luca / Diego,system,Famiglia,
+4,2026-09-01,2026-09-01,ingresso,0.00,Vinted,system,Famiglia,
+5,2026-09-01,2026-09-01,ingresso,0.00,Assegno Familiare,system,Famiglia,
+6,2026-09-01,2026-09-01,uscita,544.63,TASSE + CASA,system,Famiglia,
+7,2026-09-01,2026-09-01,uscita,467.63,Mutuo,system,Famiglia,
+8,2026-09-01,2026-09-01,uscita,745.77,INVESTIMENTI,system,Famiglia,
+9,2026-09-01,2026-09-01,uscita,302.53,Prestito,system,Famiglia,
+10,2026-09-01,2026-09-01,uscita,379.33,Prestito 2,system,Famiglia,
+11,2026-09-01,2026-09-01,uscita,77.00,Rifiuti / TARI,system,Famiglia,
+12,2026-09-01,2026-09-01,uscita,63.91,Telefono,system,Famiglia,

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: (editMode ? 'Modifica' : 'Nuovo') + ' · CiulloTracker' }) %>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'new' }) %>
+
+    <main class="main-content">
+      <div class="page-title"><%= editMode ? 'Modifica' : 'Nuovo' %></div>
+      <div class="page-subtitle"><%= editMode ? 'Aggiorna i dati della spesa' : 'Registra in pochi secondi' %></div>
+
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+      <div class="new-expense-layout">
+      <div class="card squircle new-expense-form-card">
+        <form action="<%= editMode ? '/expenses/' + expense.id + '/update' : '/expenses' %>" method="POST" id="expenseForm">
+
+          <div class="field">
+            <label>Tipo</label>
+            <div class="segmented">
+              <label class="segmented-item">
+                <input type="radio" name="tipo" value="uscita" <%= (!editMode || expense.tipo !== 'ingresso') ? 'checked' : '' %>> Spesa
+              </label>
+              <label class="segmented-item">
+                <input type="radio" name="tipo" value="ingresso" <%= (editMode && expense.tipo === 'ingresso') ? 'checked' : '' %>> Ingresso
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="importo">Importo (€) <span class="field-hint">— puoi anche scrivere un calcolo, es. 90+10</span></label>
+            <input class="input input-amount" type="text" inputmode="text" id="importo" name="importo" placeholder="0.00 oppure 90+10" required autocomplete="off" data-calc data-calc-min="0.01" value="<%= editMode ? expense.importo : '' %>" />
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="data_spesa">Data</label>
+              <input class="input" type="date" id="data_spesa" name="data_spesa" value="<%= editMode ? expense.data_spesa : oggi %>" required />
+            </div>
+            <div class="field">
+              <label for="categoria">Categoria</label>
+              <select class="input" id="categoria" name="categoria">
+                <% if (editMode && expense.tipo === 'ingresso') { %>
+                  <% categorieEntrate.forEach(function(c) { %>
+                    <option value="<%= c %>" <%= c === expense.categoria ? 'selected' : '' %>><%= c %></option>
+                  <% }); %>
+                <% } else { %>
+                  <% Object.keys(categorieSpese).forEach(function(c) { %>
+                    <option value="<%= c %>" <%= (editMode && c === expense.categoria) ? 'selected' : '' %>><%= c %></option>
+                  <% }); %>
+                <% } %>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sottocategoria (solo per uscite) -->
+          <div class="field" id="sottocategoriaGroup">
+            <label for="sottocategoria">Sottocategoria</label>
+            <select class="input" id="sottocategoria" name="sottocategoria">
+              <option value="">— Nessuna —</option>
+              <% if (editMode && expense.tipo === 'uscita' && expense.sottocategoria) { %>
+                <!-- Verrà popolato via JS -->
+              <% } %>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="note">Note (opzionale)</label>
+            <input class="input" type="text" id="note" name="note" placeholder="Es. Spesa al supermercato" value="<%= editMode ? expense.note : '' %>" />
+          </div>
+
+          <!-- Sezione Avanzate -->
+          <div class="accordion">
+            <div class="accordion-header" id="advToggle">
+              <span>Opzioni avanzate</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="accordion-body" id="advBody">
+              <div class="field">
+                <label for="inserito_da">Inserito da</label>
+                <select class="input" id="inserito_da" name="inserito_da">
+                  <option value="">— Io stesso (<%= user.username %>) —</option>
+                  <% utenti.forEach(function(u) { %>
+                    <option value="<%= u.username %>" <%= (editMode && expense.inserito_da === u.username) ? 'selected' : '' %>><%= u.username %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <label for="per_conto_di">Per conto di</label>
+                <select class="input" id="per_conto_di" name="per_conto_di">
+                  <option value="">— Me stesso (<%= user.username %>) —</option>
+                  <% utenti.forEach(function(u) { %>
+                    <option value="<%= u.username %>" <%= (editMode && expense.per_conto_di === u.username) ? 'selected' : '' %>><%= u.username %></option>
+                  <% }); %>
+                  <option value="Tutta la famiglia" selected>Tutta la famiglia</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn"><%= editMode ? 'Aggiorna' : 'Salva' %></button>
+          <% if (editMode) { %>
+            <a href="/history" class="btn btn-secondary btn-block" style="margin-top:8px; text-align:center;">Annulla</a>
+          <% } %>
+        </form>
+      </div>
+
+      <section class="card squircle recent-expenses-card" aria-labelledby="recent-expenses-title">
+        <div class="chart-title">
+          <span id="recent-expenses-title">Ultimi movimenti</span>
+          <a href="/history" class="recent-expenses-link">Vedi tutti</a>
+        </div>
+        <% if (!ultimeSpese || ultimeSpese.length === 0) { %>
+          <div class="empty-state">Nessun movimento registrato.</div>
+        <% } else { %>
+          <% ultimeSpese.forEach(function(e) { %>
+            <div class="expense-item">
+              <div class="expense-meta">
+                <span class="expense-cat"><%= e.tipo === 'ingresso' ? 'Ingresso' : 'Spesa' %> · <%= e.categoria %><%= e.sottocategoria ? ' → ' + e.sottocategoria : '' %></span>
+                <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
+                <span class="expense-sub"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · <%= e.inserito_da %> → <%= e.per_conto_di %></span>
+              </div>
+              <div class="expense-amount"><%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= Number(e.importo).toFixed(2) %></div>
+            </div>
+          <% }); %>
+        <% } %>
+      </section>
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/footer', { user: user }) %>
+
+  <script>
+    // Dati passati dal backend
+    const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
+    const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;
+    const editMode = <%- editMode ? 'true' : 'false' %>;
+    const currentSottocategoria = <%- (editMode && expense.sottocategoria) ? JSON.stringify(expense.sottocategoria) : 'null' %>;
+
+    // Gestione tipo Spesa/Ingresso
+    (function(){
+      const radios = document.querySelectorAll('input[name="tipo"]');
+      const submitBtn = document.getElementById('submitBtn');
+      const amountInput = document.getElementById('importo');
+      const categoriaSelect = document.getElementById('categoria');
+      const sottocategoriaSelect = document.getElementById('sottocategoria');
+
+      // Popola il select delle categorie in base al tipo
+      function populateCategorie(tipo) {
+        const options = tipo === 'ingresso' ? categorieEntrate : Object.keys(categorieSpese);
+        categoriaSelect.innerHTML = '';
+        options.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          categoriaSelect.appendChild(opt);
+        });
+        // Se in modifica, ripristina la categoria selezionata (gestito dopo)
+      }
+
+      // Popola le sottocategorie in base alla categoria selezionata (solo per uscite)
+      function populateSottocategorie(categoria, tipo) {
+        const group = document.getElementById('sottocategoriaGroup');
+        if (tipo === 'ingresso') {
+          group.style.display = 'none';
+          return;
+        }
+        group.style.display = 'block';
+        const sottos = categorieSpese[categoria] || [];
+        sottocategoriaSelect.innerHTML = '<option value="">— Nessuna —</option>';
+        sottos.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          sottocategoriaSelect.appendChild(opt);
+        });
+        // Se in modifica e abbiamo una sottocategoria, selezioniamola
+        if (editMode && currentSottocategoria && sottos.includes(currentSottocategoria)) {
+          sottocategoriaSelect.value = currentSottocategoria;
+        }
+      }
+
+      function updateForm(tipo) {
+        populateCategorie(tipo);
+        // Dopo aver popolato le categorie, ripristina la selezione se in modifica
+        if (editMode) {
+          const oldCat = <%- editMode ? JSON.stringify(expense.categoria) : 'null' %>;
+          if (oldCat) {
+            const optionExists = Array.from(categoriaSelect.options).some(opt => opt.value === oldCat);
+            if (optionExists) categoriaSelect.value = oldCat;
+          }
+        }
+        // Popola sottocategorie in base alla categoria corrente e tipo
+        const currentCat = categoriaSelect.value;
+        populateSottocategorie(currentCat, tipo);
+        // Aggiorna colore e testo del pulsante
+        if (tipo === 'ingresso') {
+          submitBtn.textContent = editMode ? 'Aggiorna Ingresso' : 'Salva Ingresso';
+          amountInput.style.color = 'var(--accent)';
+        } else {
+          submitBtn.textContent = editMode ? 'Aggiorna Spesa' : 'Salva Spesa';
+          amountInput.style.color = '';
+        }
+      }
+
+      radios.forEach(r => {
+        r.addEventListener('change', function() {
+          const tipo = this.value;
+          updateForm(tipo);
+        });
+      });
+
+      // Quando cambia la categoria, aggiorna le sottocategorie
+      categoriaSelect.addEventListener('change', function() {
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        const cat = this.value;
+        populateSottocategorie(cat, tipo);
+      });
+
+      // Inizializza
+      const initialTipo = document.querySelector('input[name="tipo"]:checked').value;
+      updateForm(initialTipo);
+    })();
+
+    // Accordion opzioni avanzate
+    (function () {
+      var header = document.getElementById('advToggle');
+      var body = document.getElementById('advBody');
+      header.addEventListener('click', function () {
+        header.classList.toggle('open');
+        body.classList.toggle('open');
+      });
+      if (editMode) {
+        // Se in modifica, apriamo le opzioni avanzate per mostrare i campi
+        header.classList.add('open');
+        body.classList.add('open');
+      }
+    })();
+  </script>
+</body>
+</html>
