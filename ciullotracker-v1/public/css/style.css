@@ -1,11 +1,5 @@
-/* ============================================================
-   CiulloTracker — Design System
-   Editoriale, morbido, preciso. Functional Beauty.
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Reenie+Beanie&display=swap');
 
-/* ---------- Reset ---------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; min-width: 0; }
 
@@ -1012,3 +1006,49 @@ body::before { content: ''; position: fixed; inset: 0; z-index: 50; pointer-even
 @keyframes softly-float { 0%, 100% { transform: translateY(-10px) rotate(-2deg); } 50% { transform: translateY(10px) rotate(2deg); } }
 @media (max-width: 899px) { .main-content { padding-top: 28px; } .grid-4 { grid-template-columns: repeat(2, 1fr) !important; } .grid-4 > .kpi-card:first-child { padding-left: 20px; } .card { padding: 22px; } }
 @media (max-width: 520px) { .grid-4 { grid-template-columns: 1fr 1fr !important; gap: 12px; } .kpi-card { min-height: 112px; padding: 18px; } .grid-4 > .kpi-card:first-child { padding-left: 18px; } .login-card { padding: 36px 22px; } }
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.kpi-card {
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,.86);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.page-title {
+  margin-bottom: 0.25em;
+}
+
+.page-subtitle {
+  margin-bottom: 16px;
+}
+
+.section-kicker {
+  margin-top: 48px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.grid-2, .grid-4 {
+  row-gap: 24px;
+}
