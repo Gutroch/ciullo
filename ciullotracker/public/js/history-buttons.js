@@ -49,13 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
             decBtn.className = 'qty-btn dec';
             decBtn.dataset.id = expenseId;
             decBtn.textContent = '−';
-            decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, rgba(1, 71, 46, 0.16)); background: var(--bg-secondary, #e9edc9); color: #8a3324; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
+            decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, rgba(29, 30, 28, 0.14)); background: var(--bg-secondary, #EEEAE2); color: #B76E6E; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
             var incBtn = document.createElement('button');
             incBtn.className = 'qty-btn inc';
             incBtn.dataset.id = expenseId;
             incBtn.textContent = '+';
-            incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, rgba(1, 71, 46, 0.16)); background: var(--bg-secondary, #e9edc9); color: #588157; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
+            incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, rgba(29, 30, 28, 0.14)); background: var(--bg-secondary, #EEEAE2); color: #6F9277; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
             btnGroup.appendChild(decBtn);
             btnGroup.appendChild(incBtn);
@@ -101,32 +101,32 @@ document.addEventListener('DOMContentLoaded', function() {
         popup.className = 'increment-popup';
         // Forzo sfondo bianco e testo scuro per garantire leggibilità
         popup.style.cssText = `
-            background: #fffdf5;
-            border-radius: 20px;
+            background: #FBFAF7;
+            border-radius: 14px;
             padding: 32px;
             max-width: 420px;
             width: 90%;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 55px rgba(29, 30, 28, 0.14), 0 4px 14px rgba(29, 30, 28, 0.06);
             animation: modalIn 0.3s ease;
-            border: 1px solid rgba(1, 71, 46, 0.16);
-            color: #01472e;
+            border: 1px solid var(--border, #DDD9D0);
+            color: #1D1E1C;
         `;
 
         var defaultAmount = 1.00;
         var title = isIncrement ? 'Incrementa importo' : 'Decrementa importo';
         var actionLabel = isIncrement ? 'Aggiungi' : 'Sottrai';
         var colorClass = isIncrement ? 'positive' : 'negative';
-        var colorHex = isIncrement ? '#588157' : '#8a3324';
+        var colorHex = isIncrement ? '#6F9277' : '#B76E6E';
 
         popup.innerHTML = `
-            <h3 style="margin: 0 0 20px 0; color: #01472e; font-size: 1.3rem; text-align: center;">${title}</h3>
+            <h3 style="margin: 0 0 20px 0; color: #1D1E1C; font-size: 1.3rem; text-align: center;">${title}</h3>
             <div style="margin-bottom:20px;">
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(1, 71, 46, 0.16);">
-                    <span style="color:#5c6b52;">Importo attuale</span>
-                    <span style="font-weight:600; color:#01472e;">€${currentAmount.toFixed(2)}</span>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(29, 30, 28, 0.14);">
+                    <span style="color:#62645F;">Importo attuale</span>
+                    <span style="font-weight:600; color:#1D1E1C;">€${currentAmount.toFixed(2)}</span>
                 </div>
                 <div style="margin-top:16px;">
-                    <label style="display:block;color:#5c6b52;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€) <span style="font-weight:400;color:#8a9a80;">— anche un calcolo, es. 15+5</span></label>
+                    <label style="display:block;color:#62645F;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€) <span style="font-weight:400;color:#91938D;">— anche un calcolo, es. 15+5</span></label>
                     <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" inputmode="text" autocomplete="off" autofocus>
                     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
                         <button class="quick-amount-btn" data-value="0.50">0,50</button>
@@ -138,8 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button class="quick-amount-btn" data-value="50.00">50,00</button>
                     </div>
                 </div>
-                <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(1, 71, 46, 0.16);">
-                    <span style="color:#5c6b52;">Nuovo importo</span>
+                <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(29, 30, 28, 0.14);">
+                    <span style="color:#62645F;">Nuovo importo</span>
                     <span id="popup-new-amount" style="display:block;font-weight:700;font-size:2rem;color:${colorHex};margin-top:4px;">
                         €${currentAmount.toFixed(2)}
                     </span>
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (parsed === null || isNaN(parsed) || parsed < 0) parsed = 0;
             var newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
             newAmountDisplay.textContent = '€' + newAmount.toFixed(2);
-            newAmountDisplay.style.color = isIncrement ? '#588157' : '#8a3324';
+            newAmountDisplay.style.color = isIncrement ? '#6F9277' : '#B76E6E';
         }
 
         inputField.addEventListener('input', updatePreview);
@@ -263,12 +263,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     var amountCell = row.querySelector('.amount-cell');
                     if (amountCell) {
                         amountCell.textContent = '€' + newAmount.toFixed(2);
-                        amountCell.style.color = data.isIngresso ? '#588157' : '#8a3324';
+                        amountCell.style.color = data.isIngresso ? '#6F9277' : '#B76E6E';
                     }
                     updateTotals();
                 } else if (amountElement) {
                     amountElement.textContent = (data.isIngresso ? '+' : '−') + ' €' + newAmount.toFixed(2);
-                    amountElement.style.color = data.isIngresso ? '#588157' : '#8a3324';
+                    amountElement.style.color = data.isIngresso ? '#6F9277' : '#B76E6E';
                     if (window.location.pathname === '/') {
                         setTimeout(function() { location.reload(); }, 500);
                     }
@@ -338,15 +338,15 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 30px;
             padding: 12px 24px;
             border-radius: 12px;
-            background: var(--bg-secondary, #e9edc9);
-            border: 1px solid var(--border-color, rgba(1, 71, 46, 0.16));
+            background: var(--bg-secondary, #EEEAE2);
+            border: 1px solid var(--border-color, rgba(29, 30, 28, 0.14));
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             font-weight: 500;
             z-index: 9999;
             animation: slideIn 0.3s ease;
             max-width: 90%;
-            ${type === 'success' ? 'border-left: 4px solid #588157; color: #588157;' : ''}
-            ${type === 'error' ? 'border-left: 4px solid #8a3324; color: #8a3324;' : ''}
+            ${type === 'success' ? 'border-left: 4px solid #6F9277; color: #6F9277;' : ''}
+            ${type === 'error' ? 'border-left: 4px solid #B76E6E; color: #B76E6E;' : ''}
         `;
         toast.textContent = message;
         document.body.appendChild(toast);

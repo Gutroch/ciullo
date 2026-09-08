@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
         return {
-            text: isDark ? '#ccd5ae' : '#01472e',
+            text: isDark ? '#F1F0EA' : '#1D1E1C',
             grid: isDark
                 ? 'rgba(204, 213, 174, 0.14)'
                 : 'rgba(1, 71, 46, 0.1)',
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             'rgba(138, 51, 36, 0.75)',
 
                         borderColor:
-                            '#01472e',
+                            '#1D1E1C',
 
                         borderWidth: 2,
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             'rgba(88, 129, 87, 0.75)',
 
                         borderColor:
-                            '#a3b18a',
+                            '#8C829A',
 
                         borderWidth: 2,
 
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataUscite || [],
 
                         borderColor:
-                            '#01472e',
+                            '#1D1E1C',
 
                         backgroundColor:
                             'rgba(138, 51, 36, 0.14)',
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#01472e'
+                            '#1D1E1C'
                     },
 
                     {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataIngressi || [],
 
                         borderColor:
-                            '#a3b18a',
+                            '#8C829A',
 
                         backgroundColor:
                             'rgba(88, 129, 87, 0.14)',
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#a3b18a'
+                            '#8C829A'
                     }
                 ]
             },
@@ -290,12 +290,12 @@ document.addEventListener('DOMContentLoaded', function() {
         window.chartUtentiData
     ) {
         const colors = [
-            '#01472e',
-            '#a3b18a',
-            '#bc6c25',
-            '#588157',
-            '#e9edc9',
-            '#8a3324',
+            '#1D1E1C',
+            '#8C829A',
+            '#C99B72',
+            '#6F9277',
+            '#708A9B',
+            '#B76E6E',
             '#6b8f47',
             '#d9a066'
         ];

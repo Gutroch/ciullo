@@ -4,7 +4,6 @@
   <%- include('partials/head', { title: 'Budget · CiulloTracker' }) %>
 </head>
 <body>
-<div class="blob-field" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'budget' }) %>
@@ -88,25 +87,5 @@
   </div>
 
   <%- include('partials/footer', { user: user }) %>
-
-  <style>
-    .budget-table td {
-      padding: 8px 12px;
-      vertical-align: middle;
-    }
-    .budget-table input.input-budget {
-      width: 120px;
-      padding: 6px 8px;
-      font-size: 0.95rem;
-      text-align: right;
-    }
-    .budget-table tfoot td {
-      font-size: 1.1rem;
-      padding-top: 12px;
-    }
-    .filters-bar .field {
-      margin-bottom: 0;
-    }
-  </style>
 </body>
 </html>
