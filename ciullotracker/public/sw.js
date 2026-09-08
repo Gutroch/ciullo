@@ -1,5 +1,5 @@
 // sw.js - Service Worker per PWA
-const CACHE_NAME = 'ciullotracker-v3';
+const CACHE_NAME = 'ciullotracker-v4';
 const STATIC_ASSETS = [
   '/css/style.css',
   '/js/history-buttons.js',
@@ -81,8 +81,8 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
     body: data.body || 'Nuova notifica',
-    icon: '/icons/favicon-192x192.png',
-    badge: '/icons/favicon-96x96.png',
+    icon: '/icons/favicon-96x96.jpg',
+    badge: '/icons/favicon-96x96.jpg',
     vibrate: [200, 100, 200]
   };
   event.waitUntil(
