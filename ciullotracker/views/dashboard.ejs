@@ -26,7 +26,7 @@
 
     .kpi-card:hover {
       transform: translateY(-2px);
-      box-shadow: 6px 6px 0px var(--ink);
+      box-shadow: var(--shadow);
     }
 
     .kpi-label {
@@ -55,7 +55,7 @@
 
     .chart-card:hover {
       transform: translateY(-2px);
-      box-shadow: 6px 6px 0px var(--ink);
+      box-shadow: var(--shadow);
     }
 
     .chart-title {
@@ -221,10 +221,10 @@
       bottom: 30px;
       right: 30px;
       padding: 12px 24px;
-      border-radius: 12px;
+      border-radius: 1.5rem;
       background: var(--bg-secondary);
       border: var(--border-w) solid var(--border);
-      box-shadow: 8px 8px 0px var(--ink);
+      box-shadow: var(--shadow);
       font-weight: 500;
       z-index: 9999;
       animation: slideIn 0.3s ease;
@@ -272,11 +272,11 @@
 
     .increment-popup {
       background: var(--surface);
-      border-radius: 20px;
+      border-radius: 2.5rem;
       padding: 32px;
       max-width: 420px;
       width: 90%;
-      box-shadow: 10px 10px 0px var(--ink);
+      box-shadow: var(--shadow);
       animation: modalIn 0.3s ease;
       border: var(--border-w) solid var(--border);
       color: var(--text);
@@ -342,7 +342,7 @@
 
     .increment-popup .popup-cancel {
       padding: 10px 24px;
-      border-radius: 10px;
+      border-radius: 1.25rem;
       border: var(--border-w) solid var(--border);
       background: transparent;
       color: var(--text-muted);
@@ -358,7 +358,7 @@
 
     .increment-popup .popup-confirm {
       padding: 10px 24px;
-      border-radius: 10px;
+      border-radius: 1.25rem;
       border: none;
       color: white;
       cursor: pointer;
@@ -391,7 +391,7 @@
 
     .quick-amount-btn {
       padding: 4px 12px;
-      border-radius: 6px;
+      border-radius: 0.75rem;
       border: var(--border-w) solid var(--border);
       background: var(--surface-alt);
       color: var(--text-muted);
@@ -409,7 +409,7 @@
       width: 100%;
       padding: 10px 14px;
       border: var(--border-w) solid var(--border);
-      border-radius: 8px;
+      border-radius: 1rem;
       background: var(--surface-alt);
       color: var(--text);
       font-size: 1.1rem;
@@ -420,7 +420,7 @@
     .popup-input:focus {
       outline: none;
       border-color: var(--positive);
-      box-shadow: 4px 4px 0px var(--ink);
+      box-shadow: var(--shadow);
     }
 
     @keyframes fadeIn {
@@ -450,12 +450,12 @@
 
     .chart-modal-content {
       background: var(--bg-primary, var(--surface));
-      border-radius: 16px;
+      border-radius: 2rem;
       max-width: 90vw;
       max-height: 90vh;
       width: 800px;
       padding: 30px;
-      box-shadow: 10px 10px 0px var(--ink);
+      box-shadow: var(--shadow);
       position: relative;
       animation: modalIn 0.3s ease;
     }
@@ -675,7 +675,7 @@
     border: var(--border-w) solid var(--border);
     color: var(--text-primary);
     padding: 4px 12px;
-    border-radius: 8px;
+    border-radius: 1rem;
     cursor: pointer;
     font-size: 0.85rem;
     transition: all 0.2s;
@@ -929,17 +929,17 @@ var dashboardChartData = {
         var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
             // 1. COLORI ESPLICITI (Il Canvas NON legge le variabili CSS "var(--...)")
-            text: dark ? '#F2EFE7' : '#1C1B18',          // Corrisponde a --text nel tuo style.css
-            grid: dark ? 'rgba(242, 239, 231, 0.1)' : 'rgba(28, 27, 24, 0.1)',
-            bgPrimary: dark ? '#201E19' : '#FAF9F5',     // Corrisponde a --surface nel tuo style.css
-            positive: dark ? '#8FB782' : '#5B7F52',
-            negative: dark ? '#D08573' : '#B34A3A',
-            
-            // 2. PALETTE DI COLORI DIVERSI E DISTINTI (HEX fissi, Chart.js li legge perfettamente)
+            text: dark ? '#ccd5ae' : '#01472e',          // Corrisponde a --text nel tuo style.css
+            grid: dark ? 'rgba(204, 213, 174, 0.12)' : 'rgba(1, 71, 46, 0.1)',
+            bgPrimary: dark ? '#0d2c20' : '#fffdf5',     // Corrisponde a --surface nel tuo style.css
+            positive: dark ? '#8fbf7a' : '#588157',
+            negative: dark ? '#e0836a' : '#8a3324',
+
+            // 2. PALETTE "Forest & Sage" — HEX fissi, Chart.js li legge perfettamente
             palette: [
-                '#B5714B', '#7C9473', '#4C6B8A', '#9AB68C',
-                '#C9A227', '#8A7B9E', '#C97B4A', '#6E88A6',
-                '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'
+                '#01472e', '#a3b18a', '#bc6c25', '#ccd5ae',
+                '#588157', '#e9edc9', '#8a3324', '#6b8f47',
+                '#4a6b42', '#d9a066', '#7c9473', '#c9baa0'
             ]
         };
     }

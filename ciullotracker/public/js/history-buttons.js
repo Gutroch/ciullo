@@ -49,13 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
             decBtn.className = 'qty-btn dec';
             decBtn.dataset.id = expenseId;
             decBtn.textContent = '−';
-            decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, #dee2e6); background: var(--bg-secondary, #f8f9fa); color: #FF6B6B; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
+            decBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, rgba(1, 71, 46, 0.16)); background: var(--bg-secondary, #e9edc9); color: #8a3324; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
             var incBtn = document.createElement('button');
             incBtn.className = 'qty-btn inc';
             incBtn.dataset.id = expenseId;
             incBtn.textContent = '+';
-            incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, #dee2e6); background: var(--bg-secondary, #f8f9fa); color: #4ECDC4; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
+            incBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color, rgba(1, 71, 46, 0.16)); background: var(--bg-secondary, #e9edc9); color: #588157; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;';
 
             btnGroup.appendChild(decBtn);
             btnGroup.appendChild(incBtn);
@@ -101,32 +101,32 @@ document.addEventListener('DOMContentLoaded', function() {
         popup.className = 'increment-popup';
         // Forzo sfondo bianco e testo scuro per garantire leggibilità
         popup.style.cssText = `
-            background: #ffffff;
+            background: #fffdf5;
             border-radius: 20px;
             padding: 32px;
             max-width: 420px;
             width: 90%;
             box-shadow: 0 25px 80px rgba(0,0,0,0.4);
             animation: modalIn 0.3s ease;
-            border: 1px solid #dee2e6;
-            color: #0a0a0a;
+            border: 1px solid rgba(1, 71, 46, 0.16);
+            color: #01472e;
         `;
 
         var defaultAmount = 1.00;
         var title = isIncrement ? 'Incrementa importo' : 'Decrementa importo';
         var actionLabel = isIncrement ? 'Aggiungi' : 'Sottrai';
         var colorClass = isIncrement ? 'positive' : 'negative';
-        var colorHex = isIncrement ? '#4ECDC4' : '#FF6B6B';
+        var colorHex = isIncrement ? '#588157' : '#8a3324';
 
         popup.innerHTML = `
-            <h3 style="margin: 0 0 20px 0; color: #0a0a0a; font-size: 1.3rem; text-align: center;">${title}</h3>
+            <h3 style="margin: 0 0 20px 0; color: #01472e; font-size: 1.3rem; text-align: center;">${title}</h3>
             <div style="margin-bottom:20px;">
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #dee2e6;">
-                    <span style="color:#6c757d;">Importo attuale</span>
-                    <span style="font-weight:600; color:#0a0a0a;">€${currentAmount.toFixed(2)}</span>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(1, 71, 46, 0.16);">
+                    <span style="color:#5c6b52;">Importo attuale</span>
+                    <span style="font-weight:600; color:#01472e;">€${currentAmount.toFixed(2)}</span>
                 </div>
                 <div style="margin-top:16px;">
-                    <label style="display:block;color:#6c757d;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€) <span style="font-weight:400;color:#9a9aa0;">— anche un calcolo, es. 15+5</span></label>
+                    <label style="display:block;color:#5c6b52;font-size:0.9rem;margin-bottom:6px;">${actionLabel} (€) <span style="font-weight:400;color:#8a9a80;">— anche un calcolo, es. 15+5</span></label>
                     <input type="text" id="popup-amount-input" class="popup-input" value="${defaultAmount.toFixed(2)}" inputmode="text" autocomplete="off" autofocus>
                     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
                         <button class="quick-amount-btn" data-value="0.50">0,50</button>
@@ -138,8 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button class="quick-amount-btn" data-value="50.00">50,00</button>
                     </div>
                 </div>
-                <div style="margin-top:16px;padding-top:12px;border-top:1px solid #dee2e6;">
-                    <span style="color:#6c757d;">Nuovo importo</span>
+                <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(1, 71, 46, 0.16);">
+                    <span style="color:#5c6b52;">Nuovo importo</span>
                     <span id="popup-new-amount" style="display:block;font-weight:700;font-size:2rem;color:${colorHex};margin-top:4px;">
                         €${currentAmount.toFixed(2)}
                     </span>
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (parsed === null || isNaN(parsed) || parsed < 0) parsed = 0;
             var newAmount = isIncrement ? currentAmount + parsed : Math.max(0.01, currentAmount - parsed);
             newAmountDisplay.textContent = '€' + newAmount.toFixed(2);
-            newAmountDisplay.style.color = isIncrement ? '#4ECDC4' : '#FF6B6B';
+            newAmountDisplay.style.color = isIncrement ? '#588157' : '#8a3324';
         }
 
         inputField.addEventListener('input', updatePreview);
@@ -263,12 +263,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     var amountCell = row.querySelector('.amount-cell');
                     if (amountCell) {
                         amountCell.textContent = '€' + newAmount.toFixed(2);
-                        amountCell.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
+                        amountCell.style.color = data.isIngresso ? '#588157' : '#8a3324';
                     }
                     updateTotals();
                 } else if (amountElement) {
                     amountElement.textContent = (data.isIngresso ? '+' : '−') + ' €' + newAmount.toFixed(2);
-                    amountElement.style.color = data.isIngresso ? '#4ECDC4' : '#FF6B6B';
+                    amountElement.style.color = data.isIngresso ? '#588157' : '#8a3324';
                     if (window.location.pathname === '/') {
                         setTimeout(function() { location.reload(); }, 500);
                     }
@@ -338,15 +338,15 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 30px;
             padding: 12px 24px;
             border-radius: 12px;
-            background: var(--bg-secondary, #f8f9fa);
-            border: 1px solid var(--border-color, #dee2e6);
+            background: var(--bg-secondary, #e9edc9);
+            border: 1px solid var(--border-color, rgba(1, 71, 46, 0.16));
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             font-weight: 500;
             z-index: 9999;
             animation: slideIn 0.3s ease;
             max-width: 90%;
-            ${type === 'success' ? 'border-left: 4px solid #4ECDC4; color: #4ECDC4;' : ''}
-            ${type === 'error' ? 'border-left: 4px solid #FF6B6B; color: #FF6B6B;' : ''}
+            ${type === 'success' ? 'border-left: 4px solid #588157; color: #588157;' : ''}
+            ${type === 'error' ? 'border-left: 4px solid #8a3324; color: #8a3324;' : ''}
         `;
         toast.textContent = message;
         document.body.appendChild(toast);

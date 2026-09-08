@@ -4,8 +4,8 @@
   "description": "Gestione spese e promemoria",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4ECDC4",
+  "background_color": "#01472e",
+  "theme_color": "#01472e",
   "orientation": "portrait",
   "icons": [
     {

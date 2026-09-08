@@ -12,13 +12,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
         return {
-            text: isDark ? '#e0e0e0' : '#333',
+            text: isDark ? '#ccd5ae' : '#01472e',
             grid: isDark
-                ? 'rgba(255,255,255,0.1)'
-                : 'rgba(0,0,0,0.1)',
+                ? 'rgba(204, 213, 174, 0.14)'
+                : 'rgba(1, 71, 46, 0.1)',
             background: isDark
-                ? 'rgba(255,255,255,0.05)'
-                : 'rgba(0,0,0,0.02)'
+                ? 'rgba(204, 213, 174, 0.08)'
+                : 'rgba(1, 71, 46, 0.05)'
         };
     }
 
@@ -60,10 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartGiornalieroData.dataUscite || [],
 
                         backgroundColor:
-                            'rgba(255, 107, 107, 0.7)',
+                            'rgba(138, 51, 36, 0.75)',
 
                         borderColor:
-                            '#B5714B',
+                            '#01472e',
 
                         borderWidth: 2,
 
@@ -77,10 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartGiornalieroData.dataIngressi || [],
 
                         backgroundColor:
-                            'rgba(78, 205, 196, 0.7)',
+                            'rgba(88, 129, 87, 0.75)',
 
                         borderColor:
-                            '#7C9473',
+                            '#a3b18a',
 
                         borderWidth: 2,
 
@@ -180,17 +180,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataUscite || [],
 
                         borderColor:
-                            '#B5714B',
+                            '#01472e',
 
                         backgroundColor:
-                            'rgba(255, 107, 107, 0.1)',
+                            'rgba(138, 51, 36, 0.14)',
 
                         fill: true,
 
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#B5714B'
+                            '#01472e'
                     },
 
                     {
@@ -200,17 +200,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataIngressi || [],
 
                         borderColor:
-                            '#7C9473',
+                            '#a3b18a',
 
                         backgroundColor:
-                            'rgba(78, 205, 196, 0.1)',
+                            'rgba(88, 129, 87, 0.14)',
 
                         fill: true,
 
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#7C9473'
+                            '#a3b18a'
                     }
                 ]
             },
@@ -290,14 +290,14 @@ document.addEventListener('DOMContentLoaded', function() {
         window.chartUtentiData
     ) {
         const colors = [
-            '#B5714B',
-            '#7C9473',
-            '#4C6B8A',
-            '#9AB68C',
-            '#C9A227',
-            '#8A7B9E',
-            '#C97B4A',
-            '#6E88A6'
+            '#01472e',
+            '#a3b18a',
+            '#bc6c25',
+            '#588157',
+            '#e9edc9',
+            '#8a3324',
+            '#6b8f47',
+            '#d9a066'
         ];
 
         const labels =

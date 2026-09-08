@@ -28,7 +28,7 @@
       margin-bottom: 20px;
       padding: 16px 20px;
       background: var(--bg-secondary);
-      border-radius: 12px;
+      border-radius: 1.5rem;
       border: var(--border-w) solid var(--border);
       align-items: center;
     }
@@ -104,7 +104,7 @@
     .badge {
       display: inline-block;
       padding: 2px 10px;
-      border-radius: 20px;
+      border-radius: 2.5rem;
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -186,10 +186,10 @@
       bottom: 30px;
       right: 30px;
       padding: 12px 24px;
-      border-radius: 12px;
+      border-radius: 1.5rem;
       background: var(--bg-secondary);
       border: var(--border-w) solid var(--border);
-      box-shadow: 8px 8px 0px var(--ink);
+      box-shadow: var(--shadow);
       font-weight: 500;
       z-index: 9999;
       animation: slideIn 0.3s ease;
@@ -237,11 +237,11 @@
 
     .increment-popup {
       background: var(--surface);
-      border-radius: 20px;
+      border-radius: 2.5rem;
       padding: 32px;
       max-width: 420px;
       width: 90%;
-      box-shadow: 10px 10px 0px var(--ink);
+      box-shadow: var(--shadow);
       animation: modalIn 0.3s ease;
       border: var(--border-w) solid var(--border);
       color: var(--text);
@@ -307,7 +307,7 @@
 
     .increment-popup .popup-cancel {
       padding: 10px 24px;
-      border-radius: 10px;
+      border-radius: 1.25rem;
       border: var(--border-w) solid var(--border);
       background: transparent;
       color: var(--text-muted);
@@ -323,7 +323,7 @@
 
     .increment-popup .popup-confirm {
       padding: 10px 24px;
-      border-radius: 10px;
+      border-radius: 1.25rem;
       border: none;
       color: white;
       cursor: pointer;
@@ -356,7 +356,7 @@
 
     .quick-amount-btn {
       padding: 4px 12px;
-      border-radius: 6px;
+      border-radius: 0.75rem;
       border: var(--border-w) solid var(--border);
       background: var(--surface-alt);
       color: var(--text-muted);
@@ -374,7 +374,7 @@
       width: 100%;
       padding: 10px 14px;
       border: var(--border-w) solid var(--border);
-      border-radius: 8px;
+      border-radius: 1rem;
       background: var(--surface-alt);
       color: var(--text);
       font-size: 1.1rem;
@@ -385,7 +385,7 @@
     .popup-input:focus {
       outline: none;
       border-color: var(--positive);
-      box-shadow: 4px 4px 0px var(--ink);
+      box-shadow: var(--shadow);
     }
 
     @keyframes fadeIn {
@@ -479,12 +479,12 @@
     }
 
     [data-theme="dark"] {
-      --bg-primary: #1e1e1e;
-      --bg-secondary: #2d2d2d;
-      --bg-hover: #3a3a3a;
-      --text-primary: #f5f5f5;
-      --text-secondary: #b0b0b0;
-      --border-color: #444444;
+      --bg-primary: var(--surface);
+      --bg-secondary: var(--surface-alt);
+      --bg-hover: var(--surface-alt);
+      --text-primary: var(--text);
+      --text-secondary: var(--text-muted);
+      --border-color: var(--border);
     }
   </style>
 </head>

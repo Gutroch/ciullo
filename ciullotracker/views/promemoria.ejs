@@ -60,7 +60,7 @@
     .promemoria-table .badge {
       display: inline-block;
       padding: 2px 10px;
-      border-radius: 20px;
+      border-radius: 2.5rem;
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -71,11 +71,11 @@
 
     .promemoria-table .badge-importo {
       font-weight: 600;
-      color: #FF6B6B;
+      color: #8a3324;
     }
 
     .promemoria-table .badge-ingresso {
-      color: #4ECDC4;
+      color: #588157;
     }
 
     .action-buttons {
@@ -96,7 +96,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(1, 71, 46, 0.55);
       backdrop-filter: blur(8px);
       display: none;
       justify-content: center;
@@ -110,22 +110,22 @@
     }
 
     .modal-content {
-      background: #ffffff;
-      border-radius: 20px;
+      background: #fffdf5;
+      border-radius: 2.5rem;
       padding: 32px;
       max-width: 540px;
       width: 90%;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      box-shadow: 0 25px 80px rgba(1, 71, 46, 0.35);
       animation: modalIn 0.3s ease;
-      border: 1px solid #dee2e6;
-      color: #0a0a0a;
+      border: 1px solid rgba(1, 71, 46, 0.16);
+      color: #01472e;
       max-height: 90vh;
       overflow-y: auto;
     }
 
     .modal-content h3 {
       margin: 0 0 20px 0;
-      color: #0a0a0a;
+      color: #01472e;
       font-size: 1.3rem;
       text-align: center;
     }
@@ -145,10 +145,10 @@
     .modal-content .field .input {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      background: #f8f9fa;
-      color: #0a0a0a;
+      border: 1px solid rgba(1, 71, 46, 0.16);
+      border-radius: 1rem;
+      background: #e9edc9;
+      color: #01472e;
       font-size: 0.95rem;
       box-sizing: border-box;
       transition: border-color 0.2s;
@@ -156,8 +156,8 @@
 
     .modal-content .field .input:focus {
       outline: none;
-      border-color: #4ECDC4;
-      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+      border-color: #588157;
+      box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.2);
     }
 
     .modal-content .field .input-sm {
@@ -185,7 +185,7 @@
 
     .modal-actions .btn {
       padding: 10px 24px;
-      border-radius: 10px;
+      border-radius: 1.25rem;
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
@@ -195,31 +195,31 @@
 
     .modal-actions .btn-secondary {
       background: transparent;
-      border: 1px solid #dee2e6;
-      color: #6c757d;
+      border: 1px solid rgba(1, 71, 46, 0.16);
+      color: #5c6b52;
     }
 
     .modal-actions .btn-secondary:hover {
-      background: #f0f0f0;
+      background: #ccd5ae;
     }
 
     .modal-actions .btn-primary {
-      background: #4ECDC4;
+      background: #588157;
       color: white;
     }
 
     .modal-actions .btn-primary:hover {
-      background: #3dbdb5;
+      background: #46694a;
       transform: scale(1.02);
     }
 
     .modal-actions .btn-danger {
-      background: #FF6B6B;
+      background: #8a3324;
       color: white;
     }
 
     .modal-actions .btn-danger:hover {
-      background: #e85a5a;
+      background: #6f2a1c;
     }
 
     /* Toast notification */
@@ -228,10 +228,10 @@
       bottom: 30px;
       right: 30px;
       padding: 12px 24px;
-      border-radius: 12px;
+      border-radius: 1.5rem;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 20px rgba(1, 71, 46, 0.18);
       font-weight: 500;
       z-index: 9999;
       animation: slideIn 0.3s ease;
@@ -239,13 +239,13 @@
     }
 
     .toast-notification.success {
-      border-left: 4px solid #4ECDC4;
-      color: #4ECDC4;
+      border-left: 4px solid #588157;
+      color: #588157;
     }
 
     .toast-notification.error {
-      border-left: 4px solid #FF6B6B;
-      color: #FF6B6B;
+      border-left: 4px solid #8a3324;
+      color: #8a3324;
     }
 
     .toast-notification.fade-out {
@@ -287,27 +287,28 @@
     }
 
     :root {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8f9fa;
-      --bg-hover: #f0f0f0;
-      --text-primary: #0a0a0a;
-      --text-secondary: #6c757d;
-      --border-color: #dee2e6;
-      --accent: #4ECDC4;
-      --danger: #FF6B6B;
+      --bg-primary: #fffdf5;
+      --bg-secondary: #e9edc9;
+      --bg-hover: #ccd5ae;
+      --text-primary: #01472e;
+      --text-secondary: #5c6b52;
+      --border-color: rgba(1, 71, 46, 0.16);
+      --accent: #588157;
+      --danger: #8a3324;
     }
 
     [data-theme="dark"] {
-      --bg-primary: #1e1e1e;
-      --bg-secondary: #2d2d2d;
-      --bg-hover: #3a3a3a;
-      --text-primary: #f5f5f5;
-      --text-secondary: #b0b0b0;
-      --border-color: #444444;
+      --bg-primary: #0d2c20;
+      --bg-secondary: #12392a;
+      --bg-hover: #1d4a35;
+      --text-primary: #ccd5ae;
+      --text-secondary: #93a98c;
+      --border-color: rgba(204, 213, 174, 0.16);
     }
   </style>
 </head>
 <body>
+<div class="blob-field" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'promemoria' }) %>
@@ -319,7 +320,7 @@
       <!-- Actions -->
       <div class="page-actions">
         <button class="btn btn-primary" id="btn-add">+ Aggiungi</button>
-        <button class="btn btn-danger" id="btn-delete-all" style="background: #dc3545; color: white; border: none;">Elimina tutti</button>
+        <button class="btn btn-danger" id="btn-delete-all" style="background: #8a3324; color: #fefae0; border: none;">Elimina tutti</button>
       </div>
 
       <!-- Tabella -->
@@ -359,7 +360,7 @@
                   <td>
                     <div class="action-buttons">
                       <button class="btn btn-primary btn-sm btn-edit" data-id="<%= p.id %>">Mod</button>
-                      <button class="btn btn-danger btn-sm btn-delete" data-id="<%= p.id %>" style="background: #dc3545; color: white; border: none;">Elim</button>
+                      <button class="btn btn-danger btn-sm btn-delete" data-id="<%= p.id %>" style="background: #8a3324; color: #fefae0; border: none;">Elim</button>
                     </div>
                   </td>
                 </tr>
