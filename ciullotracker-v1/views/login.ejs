@@ -16,6 +16,7 @@
       <% } %>
 
       <form action="/login" method="POST" autocomplete="off">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="field">
           <label for="username">Username</label>
           <input class="input" type="text" id="username" name="username" required autofocus />

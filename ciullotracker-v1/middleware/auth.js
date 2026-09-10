@@ -23,10 +23,17 @@ function requireAdmin(req, res, next) {
   });
 }
 
+function requirePasswordChange(req, res, next) {
+  if (req.session?.user?.mustChangePassword && !['/change-password', '/logout'].includes(req.path)) {
+    return res.redirect('/change-password');
+  }
+  next();
+}
+
 // Rende disponibile l'utente corrente a tutte le view (navbar, ecc.)
 function attachUser(req, res, next) {
   res.locals.currentUser = (req.session && req.session.user) || null;
   next();
 }
 
-module.exports = { requireAuth, requireAdmin, attachUser };
+module.exports = { requireAuth, requireAdmin, requirePasswordChange, attachUser };

@@ -1,6 +1,7 @@
 // models/users.js - Versione Redis (CORRETTA)
 const { getRedisClient } = require('../config/redis');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const REDIS_KEYS = {
   USERS: 'ciullotracker:users'
@@ -50,29 +51,17 @@ class Users {
   // Crea nuovo utente
   static async createUser(username, password, ruolo = 'user') {
     try {
-      const users = await this.getAllUsers();
-      
-      if (users.find(u => u.username === username)) {
-        return { ok: false, error: 'Username già in uso' };
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      const passwordHash = bcrypt.hashSync(password, salt);
-
-      const newUser = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-        username,
-        passwordHash,
-        ruolo: ruolo || 'user'
-      };
-
-      users.push(newUser);
-      await this._saveUsers(users);
-
-      return { 
-        ok: true, 
-        user: { id: newUser.id, username: newUser.username, ruolo: newUser.ruolo } 
-      };
+      return await this._withLock(async () => {
+        const users = await this.getAllUsers();
+        if (users.find(u => u.username === username)) return { ok: false, error: 'Username già in uso' };
+        const newUser = {
+          id: crypto.randomUUID(), username, passwordHash: bcrypt.hashSync(password, 10),
+          ruolo: ruolo || 'user', mustChangePassword: false
+        };
+        users.push(newUser);
+        await this._saveUsers(users);
+        return { ok: true, user: { id: newUser.id, username: newUser.username, ruolo: newUser.ruolo } };
+      });
     } catch (error) {
       console.error(' Errore creazione utente:', error.message);
       return { ok: false, error: 'Errore del server' };
@@ -82,16 +71,15 @@ class Users {
   // Reset password
   static async resetPassword(id, newPassword) {
     try {
-      const users = await this.getAllUsers();
-      const user = users.find(u => u.id === id);
-      if (!user) {
-        return { ok: false, error: 'Utente non trovato' };
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      user.passwordHash = bcrypt.hashSync(newPassword, salt);
-      await this._saveUsers(users);
-      return { ok: true };
+      return await this._withLock(async () => {
+        const users = await this.getAllUsers();
+        const user = users.find(u => u.id === id);
+        if (!user) return { ok: false, error: 'Utente non trovato' };
+        user.passwordHash = bcrypt.hashSync(newPassword, 10);
+        user.mustChangePassword = false;
+        await this._saveUsers(users);
+        return { ok: true };
+      });
     } catch (error) {
       console.error(' Errore reset password:', error.message);
       return { ok: false, error: 'Errore del server' };
@@ -101,15 +89,13 @@ class Users {
   // Elimina utente
   static async deleteUser(id) {
     try {
-      const users = await this.getAllUsers();
-      const filtered = users.filter(u => u.id !== id);
-      
-      if (filtered.length === users.length) {
-        return { ok: false, error: 'Utente non trovato' };
-      }
-
-      await this._saveUsers(filtered);
-      return { ok: true };
+      return await this._withLock(async () => {
+        const users = await this.getAllUsers();
+        const filtered = users.filter(u => u.id !== id);
+        if (filtered.length === users.length) return { ok: false, error: 'Utente non trovato' };
+        await this._saveUsers(filtered);
+        return { ok: true };
+      });
     } catch (error) {
       console.error(' Errore eliminazione utente:', error.message);
       return { ok: false, error: 'Errore del server' };
@@ -118,14 +104,15 @@ class Users {
 
   // Assicura che esista un admin di default
   static async ensureDefaultAdmin() {
-    const users = await this.getAllUsers();
-    const adminExists = users.some(u => u.ruolo === 'admin');
-    
-    if (!adminExists) {
-      console.log('⚠️ Nessun admin trovato, creo admin predefinito...');
-      await this.createUser('admin', 'admin123', 'admin');
-      console.log(' Admin creato: username=admin, password=admin123');
-    }
+    return this._withLock(async () => {
+      const users = await this.getAllUsers();
+      if (users.length > 0) return null;
+      const password = crypto.randomBytes(16).toString('base64url');
+      const admin = { id: crypto.randomUUID(), username: 'admin', passwordHash: bcrypt.hashSync(password, 10), ruolo: 'admin', mustChangePassword: true };
+      await this._saveUsers([admin]);
+      console.warn('⚠️ ADMIN INIZIALE: username=admin password=%s. Cambiarla al primo accesso e conservarla in modo sicuro.', password);
+      return password;
+    });
   }
 
   // Importa da CSV (migrazione)
@@ -144,10 +131,11 @@ class Users {
           : bcrypt.hashSync(rawPassword, bcrypt.genSaltSync(10));
 
         users.push({
-          id: row.id || (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)),
+          id: row.id || crypto.randomUUID(),
           username: row.username,
           passwordHash,
           ruolo: row.ruolo || 'user',
+          mustChangePassword: false,
         });
         imported++;
       }
@@ -167,6 +155,32 @@ class Users {
   static async _saveUsers(users) {
     const redis = getRedisClient();
     await redis.set(REDIS_KEYS.USERS, JSON.stringify(users));
+  }
+
+  static async changePassword(id, newPassword) {
+    return this.resetPassword(id, newPassword);
+  }
+
+  // Il lock Redis serializza le modifiche all'array legacy e impedisce lost update tra processi.
+  static async _withLock(operation) {
+    const redis = getRedisClient();
+    const lockKey = 'ciullotracker:users:lock';
+    const token = crypto.randomUUID();
+    let acquired = false;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (await redis.set(lockKey, token, { NX: true, PX: 5000 })) {
+        acquired = true;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    if (!acquired) throw new Error('Impossibile acquisire il lock Redis utenti.');
+    try {
+      return await operation();
+    } finally {
+      const unlock = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+      await redis.eval(unlock, { keys: [lockKey], arguments: [token] });
+    }
   }
 }
 

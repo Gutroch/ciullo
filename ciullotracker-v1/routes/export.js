@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const Expenses = require('../models/expenses');
 const { requireAuth } = require('../middleware/auth');
 const { toCsv } = require('../utils/csv');
@@ -22,7 +22,7 @@ function filtraSpese(all, query) {
 // GET /export/csv
 router.get('/export/csv', requireAuth, async (req, res) => {
   try {
-    const all = await Expenses.getAllExpenses();
+    const all = await Expenses.getAllExpenses(req.session.user);
     const filtered = filtraSpese(all, req.query);
     const csv = toCsv(EXPORT_COLUMNS, filtered);
 
@@ -38,17 +38,18 @@ router.get('/export/csv', requireAuth, async (req, res) => {
 // GET /export/xlsx
 router.get('/export/xlsx', requireAuth, async (req, res) => {
   try {
-    const all = await Expenses.getAllExpenses();
+    const all = await Expenses.getAllExpenses(req.session.user);
     const filtered = filtraSpese(all, req.query);
 
-    const data = filtered.map((e) => EXPORT_COLUMNS.map((c) => e[c]));
-    const sheetData = [EXPORT_LABELS, ...data];
-
-    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Storico Spese');
-
-    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Storico Spese');
+    worksheet.addRow(EXPORT_LABELS);
+    filtered.forEach((expense) => worksheet.addRow(EXPORT_COLUMNS.map((column) => {
+      const value = expense[column];
+      return typeof value === 'string' && /^[=+\-@]/.test(value) ? `'${value}` : value;
+    })));
+    worksheet.getRow(1).font = { bold: true };
+    const buffer = await workbook.xlsx.writeBuffer();
 
     res.setHeader(
       'Content-Type',
@@ -65,7 +66,7 @@ router.get('/export/xlsx', requireAuth, async (req, res) => {
 // GET /export/json
 router.get('/export/json', requireAuth, async (req, res) => {
   try {
-    const all = await Expenses.getAllExpenses();
+    const all = await Expenses.getAllExpenses(req.session.user);
     const filtered = filtraSpese(all, req.query);
     const clean = filtered.map((e) => {
       const obj = {};

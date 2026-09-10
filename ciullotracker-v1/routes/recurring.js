@@ -24,7 +24,7 @@ router.get('/recurring', requireAuth, async (req, res) => {
     await Recurring.processDueRecurring();
 
     const utenti = await Users.getAllUsers();
-    const voci = await Recurring.getAll();
+    const voci = await Recurring.getAll(req.session.user);
 
     const success = req.query.success || null;
     const error = req.query.error || null;
@@ -60,7 +60,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
     if (!Array.isArray(mesi)) mesi = [mesi];
 
     const utenti = await Users.getAllUsers();
-    const voci = await Recurring.getAll();
+    const voci = await Recurring.getAll(req.session.user);
 
     const importoValido = importo && !isNaN(parseFloat(importo)) && parseFloat(importo) > 0;
     const meseValido = ricorrenza !== 'mesi' || mesi.length > 0;
@@ -91,6 +91,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
       giorno,
       inserito_da,
       per_conto_di,
+      userId: req.session.user.id,
     });
 
     // Gestione retroattività
@@ -103,7 +104,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
       }
     }
 
-    const vociAggiornate = await Recurring.getAll();
+    const vociAggiornate = await Recurring.getAll(req.session.user);
 
     res.render('recurring', {
       user: req.session.user,
@@ -127,7 +128,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
 // GET /recurring/:id/edit - Mostra il form di modifica
 router.get('/recurring/:id/edit', requireAuth, async (req, res) => {
   try {
-    const voce = await Recurring.getById(req.params.id);
+    const voce = await Recurring.getById(req.params.id, req.session.user);
     if (!voce) {
       return res.status(404).render('error', { 
         user: req.session.user, 
@@ -168,7 +169,7 @@ router.post('/recurring/:id/update', requireAuth, async (req, res) => {
     const meseValido = ricorrenza !== 'mesi' || mesi.length > 0;
 
     if (!descrizione || !importoValido || !meseValido) {
-      const voce = await Recurring.getById(req.params.id);
+      const voce = await Recurring.getById(req.params.id, req.session.user);
       const utenti = await Users.getAllUsers();
       return res.status(400).render('recurring-edit', {
         user: req.session.user,
@@ -195,7 +196,8 @@ router.post('/recurring/:id/update', requireAuth, async (req, res) => {
       giorno,
       inserito_da,
       per_conto_di,
-    });
+      userId: req.session.user.id,
+    }, req.session.user);
 
     if (!updated) {
       throw new Error('Ricorrenza non trovata per update');
@@ -205,7 +207,7 @@ router.post('/recurring/:id/update', requireAuth, async (req, res) => {
     if (req.body.retroattiva === 'on' || req.body.retroattiva === 'true') {
       const giornoNum = parseInt(giorno);
       const mesiRetroattivi = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
-      const itemToExecute = await Recurring.getById(req.params.id);
+      const itemToExecute = await Recurring.getById(req.params.id, req.session.user);
       if (itemToExecute && shouldRunRetroactively(ricorrenza, mesiRetroattivi, giornoNum, new Date())) {
         const executed = await executeRetroactively(itemToExecute, mesiRetroattivi, giornoNum);
         if (executed) console.log(`Esecuzione retroattiva per: ${itemToExecute.descrizione}`);
@@ -225,7 +227,7 @@ router.post('/recurring/:id/update', requireAuth, async (req, res) => {
 // POST /recurring/:id/toggle - Attiva/disattiva
 router.post('/recurring/:id/toggle', requireAuth, async (req, res) => {
   try {
-    await Recurring.toggleAttivo(req.params.id);
+    if (!await Recurring.toggleAttivo(req.params.id, req.session.user)) return res.status(404).render('error', { user: req.session.user, message: 'Ricorrenza non trovata o accesso negato.' });
     res.redirect('/recurring');
   } catch (error) {
     console.error(' Errore toggle ricorrenza:', error);
@@ -239,7 +241,7 @@ router.post('/recurring/:id/toggle', requireAuth, async (req, res) => {
 // POST /recurring/:id/delete - Elimina
 router.post('/recurring/:id/delete', requireAuth, async (req, res) => {
   try {
-    await Recurring.remove(req.params.id);
+    if (!await Recurring.remove(req.params.id, req.session.user)) return res.status(404).render('error', { user: req.session.user, message: 'Ricorrenza non trovata o accesso negato.' });
     res.redirect('/recurring');
   } catch (error) {
     console.error(' Errore eliminazione ricorrenza:', error);

@@ -63,11 +63,12 @@ class Expenses {
   }
 
   // Ottiene tutte le spese
-  static async getAllExpenses() {
+  static async getAllExpenses(user) {
     try {
       const redis = getRedisClient();
       const data = await redis.get(REDIS_KEYS.EXPENSES);
-      return data ? JSON.parse(data).map(expense => this.normalizeExpense(expense)) : [];
+      const expenses = data ? JSON.parse(data).map(expense => this.normalizeExpense(expense)) : [];
+      return user?.ruolo === 'admin' ? expenses : expenses.filter(expense => expense.userId === user?.id);
     } catch (error) {
       console.error(' Errore lettura spese da Redis:', error.message);
       return [];
@@ -78,7 +79,7 @@ class Expenses {
   static async addExpense(data) {
     try {
       const redis = getRedisClient();
-      const expenses = await this.getAllExpenses();
+      const expenses = await this.getAllExpenses({ ruolo: 'admin' });
 
       const newExpense = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -90,6 +91,7 @@ class Expenses {
         inserito_da: data.inserito_da || 'system',
         per_conto_di: data.per_conto_di || 'system',
         note: data.note || ''
+        ,userId: data.userId
       };
 
       expenses.unshift(newExpense);
@@ -102,14 +104,15 @@ class Expenses {
   }
 
   // Aggiorna una spesa esistente
-  static async updateExpense(id, data) {
+  static async updateExpense(id, data, user) {
     try {
       const redis = getRedisClient();
-      const expenses = await this.getAllExpenses();
+      const expenses = await this.getAllExpenses({ ruolo: 'admin' });
       const index = expenses.findIndex(e => e.id === id);
       if (index === -1) return null;
 
       const old = expenses[index];
+      if (user?.ruolo !== 'admin' && old.userId !== user?.id) return null;
       const updated = {
         ...old,
         data_spesa: data.data_spesa || old.data_spesa,
@@ -132,10 +135,12 @@ class Expenses {
   }
 
   // Elimina una spesa
-  static async deleteExpense(id) {
+  static async deleteExpense(id, user) {
     try {
       const redis = getRedisClient();
-      const expenses = await this.getAllExpenses();
+      const expenses = await this.getAllExpenses({ ruolo: 'admin' });
+      const target = expenses.find(expense => expense.id === id);
+      if (!target || (user?.ruolo !== 'admin' && target.userId !== user?.id)) return false;
       const filtered = expenses.filter(e => e.id !== id);
       if (filtered.length === expenses.length) return false;
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(filtered));
@@ -144,6 +149,11 @@ class Expenses {
       console.error(' Errore eliminazione spesa:', error.message);
       return false;
     }
+  }
+
+  static async getById(id, user) {
+    const expenses = await this.getAllExpenses(user);
+    return expenses.find(expense => expense.id === id) || null;
   }
 
   // Importa dati da CSV (utility)
