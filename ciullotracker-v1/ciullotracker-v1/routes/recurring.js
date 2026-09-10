@@ -1,0 +1,255 @@
+const express = require('express');
+const router = express.Router();
+const Recurring = require('../models/recurring');
+const Expenses = require('../models/expenses');
+const Users = require('../models/users');
+const { requireAuth } = require('../middleware/auth');
+
+function shouldRunRetroactively(ricorrenza, mesi, giorno, oggi) {
+  if (!Number.isInteger(giorno) || giorno > oggi.getDate()) return false;
+  if (ricorrenza === 'mensile') return true;
+  return ricorrenza === 'mesi' && (mesi || []).map(Number).includes(oggi.getMonth() + 1);
+}
+
+async function executeRetroactively(item, mesi, giorno) {
+  const oggi = new Date();
+  if (!shouldRunRetroactively(item.ricorrenza, mesi, giorno, oggi)) return false;
+
+  const dataSpesa = new Date(oggi.getFullYear(), oggi.getMonth(), giorno);
+  return Recurring.execute(item, dataSpesa);
+}
+
+router.get('/recurring', requireAuth, async (req, res) => {
+  try {
+    await Recurring.processDueRecurring();
+
+    const utenti = await Users.getAllUsers();
+    const voci = await Recurring.getAll(req.session.user);
+
+    const success = req.query.success || null;
+    const error = req.query.error || null;
+
+    res.render('recurring', {
+      user: req.session.user,
+      voci,
+      utenti,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
+      error,
+      success,
+    });
+  } catch (error) {
+    console.error(' Errore caricamento ricorrenze:', error);
+    res.status(500).render('error', {
+      user: req.session.user,
+      message: 'Si è verificato un errore nel caricamento delle ricorrenze.'
+    });
+  }
+});
+
+
+// POST /recurring - Crea una nuova spesa/entrata ricorrente
+
+router.post('/recurring', requireAuth, async (req, res) => {
+  try {
+    const { descrizione, importo, tipo, categoria, ricorrenza, giorno, sottocategoria } = req.body;
+    const inserito_da = req.body.inserito_da || req.session.user.username;
+    const per_conto_di = req.body.per_conto_di || req.session.user.username;
+    let mesi = req.body.mesi || [];
+    if (!Array.isArray(mesi)) mesi = [mesi];
+
+    const utenti = await Users.getAllUsers();
+    const voci = await Recurring.getAll(req.session.user);
+
+    const importoValido = importo && !isNaN(parseFloat(importo)) && parseFloat(importo) > 0;
+    const meseValido = ricorrenza !== 'mesi' || mesi.length > 0;
+
+    if (!descrizione || !importoValido || !meseValido) {
+      return res.status(400).render('recurring', {
+        user: req.session.user,
+        voci,
+        utenti,
+        categorieSpese: Expenses.CATEGORIE_SPESE,
+        categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+        sottocategorieMap: Expenses.CATEGORIE_SPESE,
+        error: !meseValido
+          ? 'Seleziona almeno un mese per una ricorrenza "Mesi specifici".'
+          : 'Inserisci una descrizione e un importo valido maggiore di zero.',
+        success: null,
+      });
+    }
+
+    const newItem = await Recurring.add({
+      descrizione,
+      importo,
+      tipo,
+      categoria,
+      sottocategoria: (tipo === 'uscita' && sottocategoria) ? sottocategoria : '',
+      ricorrenza,
+      mesi,
+      giorno,
+      inserito_da,
+      per_conto_di,
+      userId: req.session.user.id,
+    });
+
+    // Gestione retroattività
+    if (req.body.retroattiva === 'on' || req.body.retroattiva === 'true') {
+      const giornoNum = parseInt(giorno);
+      const mesiRetroattivi = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
+
+      if (shouldRunRetroactively(ricorrenza, mesiRetroattivi, giornoNum, new Date())) {
+        await executeRetroactively(newItem, mesiRetroattivi, giornoNum);
+      }
+    }
+
+    const vociAggiornate = await Recurring.getAll(req.session.user);
+
+    res.render('recurring', {
+      user: req.session.user,
+      voci: vociAggiornate,
+      utenti,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
+      error: null,
+      success: 'Spesa ricorrente salvata correttamente!',
+    });
+  } catch (error) {
+    console.error(' Errore creazione ricorrenza:', error);
+    res.status(500).render('error', {
+      user: req.session.user,
+      message: 'Si è verificato un errore nella creazione della ricorrenza.'
+    });
+  }
+});
+
+// GET /recurring/:id/edit - Mostra il form di modifica
+router.get('/recurring/:id/edit', requireAuth, async (req, res) => {
+  try {
+    const voce = await Recurring.getById(req.params.id, req.session.user);
+    if (!voce) {
+      return res.status(404).render('error', { 
+        user: req.session.user, 
+        message: 'Ricorrenza non trovata.' 
+      });
+    }
+    
+    const utenti = await Users.getAllUsers();
+    res.render('recurring-edit', {
+      user: req.session.user,
+      voce,
+      utenti,
+      categorieSpese: Expenses.CATEGORIE_SPESE,
+      categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+      sottocategorieMap: Expenses.CATEGORIE_SPESE,
+      error: null,
+      success: null,
+    });
+  } catch (error) {
+    console.error(' Errore caricamento modifica ricorrenza:', error);
+    res.status(500).render('error', { 
+      user: req.session.user, 
+      message: 'Errore caricamento modifica.' 
+    });
+  }
+});
+
+// POST /recurring/:id/update - Aggiorna una ricorrenza
+router.post('/recurring/:id/update', requireAuth, async (req, res) => {
+  try {
+    const { descrizione, importo, tipo, categoria, ricorrenza, giorno, sottocategoria } = req.body;
+    const inserito_da = req.body.inserito_da || req.session.user.username;
+    const per_conto_di = req.body.per_conto_di || req.session.user.username;
+    let mesi = req.body.mesi || [];
+    if (!Array.isArray(mesi)) mesi = [mesi];
+
+    const importoValido = importo && !isNaN(parseFloat(importo)) && parseFloat(importo) > 0;
+    const meseValido = ricorrenza !== 'mesi' || mesi.length > 0;
+
+    if (!descrizione || !importoValido || !meseValido) {
+      const voce = await Recurring.getById(req.params.id, req.session.user);
+      const utenti = await Users.getAllUsers();
+      return res.status(400).render('recurring-edit', {
+        user: req.session.user,
+        voce,
+        utenti,
+        categorieSpese: Expenses.CATEGORIE_SPESE,
+        categorieEntrate: Expenses.CATEGORIE_ENTRATE,
+        sottocategorieMap: Expenses.CATEGORIE_SPESE,
+        error: !meseValido 
+          ? 'Seleziona almeno un mese per ricorrenza "Mesi specifici".' 
+          : 'Inserisci descrizione e importo valido.',
+        success: null,
+      });
+    }
+
+    const updated = await Recurring.update(req.params.id, {
+      descrizione,
+      importo,
+      tipo,
+      categoria,
+      sottocategoria: (tipo === 'uscita' && sottocategoria) ? sottocategoria : '',
+      ricorrenza,
+      mesi,
+      giorno,
+      inserito_da,
+      per_conto_di,
+      userId: req.session.user.id,
+    }, req.session.user);
+
+    if (!updated) {
+      throw new Error('Ricorrenza non trovata per update');
+    }
+
+    // --- Gestione retroattività anche in modifica ---
+    if (req.body.retroattiva === 'on' || req.body.retroattiva === 'true') {
+      const giornoNum = parseInt(giorno);
+      const mesiRetroattivi = Array.isArray(req.body.mesi) ? req.body.mesi : [req.body.mesi];
+      const itemToExecute = await Recurring.getById(req.params.id, req.session.user);
+      if (itemToExecute && shouldRunRetroactively(ricorrenza, mesiRetroattivi, giornoNum, new Date())) {
+        const executed = await executeRetroactively(itemToExecute, mesiRetroattivi, giornoNum);
+        if (executed) console.log(`Esecuzione retroattiva per: ${itemToExecute.descrizione}`);
+      }
+    }
+
+    res.redirect('/recurring?success=Modifica effettuata');
+  } catch (error) {
+    console.error('Errore update ricorrenza:', error);
+    res.status(500).render('error', { 
+      user: req.session.user, 
+      message: 'Errore durante la modifica.' 
+    });
+  }
+});
+
+// POST /recurring/:id/toggle - Attiva/disattiva
+router.post('/recurring/:id/toggle', requireAuth, async (req, res) => {
+  try {
+    if (!await Recurring.toggleAttivo(req.params.id, req.session.user)) return res.status(404).render('error', { user: req.session.user, message: 'Ricorrenza non trovata o accesso negato.' });
+    res.redirect('/recurring');
+  } catch (error) {
+    console.error(' Errore toggle ricorrenza:', error);
+    res.status(500).render('error', {
+      user: req.session.user,
+      message: 'Si è verificato un errore nell\'aggiornamento della ricorrenza.'
+    });
+  }
+});
+
+// POST /recurring/:id/delete - Elimina
+router.post('/recurring/:id/delete', requireAuth, async (req, res) => {
+  try {
+    if (!await Recurring.remove(req.params.id, req.session.user)) return res.status(404).render('error', { user: req.session.user, message: 'Ricorrenza non trovata o accesso negato.' });
+    res.redirect('/recurring');
+  } catch (error) {
+    console.error(' Errore eliminazione ricorrenza:', error);
+    res.status(500).render('error', {
+      user: req.session.user,
+      message: 'Si è verificato un errore nell\'eliminazione della ricorrenza.'
+    });
+  }
+});
+
+module.exports = router;
