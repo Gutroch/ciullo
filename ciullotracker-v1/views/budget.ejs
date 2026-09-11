@@ -31,7 +31,6 @@
       <!-- Tabella budget -->
       <div class="card squircle" style="overflow-x:auto;">
         <form action="/budget/update" method="POST" id="budgetForm">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <input type="hidden" name="year" value="<%= year %>" />
 
           <table class="data-table budget-table">

@@ -2,12 +2,19 @@
 const express = require('express');
 const router = express.Router();
 const PromemoriaModel = require('../models/promemoriaModel');
-const { requireAuth } = require('../middleware/auth');
+
+// Middleware di autenticazione (se usi sessioni)
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.user) {
+    return next();
+  }
+  res.redirect('/auth/login');
+};
 
 // Pagina principale - lista promemoria
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const promemoria = await PromemoriaModel.findAll(req.session.user);
+    const promemoria = await PromemoriaModel.findAll();
     res.render('promemoria', {
       user: req.session.user,
       promemoria: promemoria,
@@ -25,7 +32,7 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // API: Salva (crea o aggiorna)
-router.post('/api/save', requireAuth, async (req, res) => {
+router.post('/api/save', isAuthenticated, async (req, res) => {
   try {
     const { id, descrizione, periodo, importo, scadenza, note } = req.body;
     
@@ -42,12 +49,8 @@ router.post('/api/save', requireAuth, async (req, res) => {
       periodo,
       importo: parseFloat(importo) || 0,
       scadenza: scadenza || null,
-      note: note || '',
-      userId: req.session.user.id,
-      actor: req.session.user
+      note: note || ''
     });
-
-    if (!promemoria) return res.status(404).json({ success: false, error: 'Promemoria non trovato o accesso negato' });
 
     res.json({ success: true, promemoria });
   } catch (error) {
@@ -60,9 +63,9 @@ router.post('/api/save', requireAuth, async (req, res) => {
 });
 
 // API: Recupera un promemoria per modifica
-router.get('/api/get/:id', requireAuth, async (req, res) => {
+router.get('/api/get/:id', isAuthenticated, async (req, res) => {
   try {
-    const promemoria = await PromemoriaModel.findById(req.params.id, req.session.user);
+    const promemoria = await PromemoriaModel.findById(req.params.id);
     if (!promemoria) {
       return res.status(404).json({ success: false, error: 'Promemoria non trovato' });
     }
@@ -73,10 +76,9 @@ router.get('/api/get/:id', requireAuth, async (req, res) => {
 });
 
 // API: Elimina un promemoria
-router.delete('/api/delete/:id', requireAuth, async (req, res) => {
+router.delete('/api/delete/:id', isAuthenticated, async (req, res) => {
   try {
-    const deleted = await PromemoriaModel.delete(req.params.id, req.session.user);
-    if (!deleted) return res.status(404).json({ success: false, error: 'Promemoria non trovato' });
+    await PromemoriaModel.delete(req.params.id);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -84,9 +86,9 @@ router.delete('/api/delete/:id', requireAuth, async (req, res) => {
 });
 
 // API: Elimina tutti i promemoria
-router.delete('/api/delete-all', requireAuth, async (req, res) => {
+router.delete('/api/delete-all', isAuthenticated, async (req, res) => {
   try {
-    await PromemoriaModel.deleteAll(req.session.user);
+    await PromemoriaModel.deleteAll();
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

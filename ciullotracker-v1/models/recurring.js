@@ -10,12 +10,11 @@ class Recurring {
   static CATEGORIE = Expenses.CATEGORIE;
 
   // Ottiene tutte le ricorrenze
-  static async getAll(user) {
+  static async getAll() {
     try {
       const redis = getRedisClient();
       const data = await redis.get(REDIS_KEYS.RECURRING);
-      const items = data ? JSON.parse(data) : [];
-      return user?.ruolo === 'admin' ? items : items.filter(item => item.userId === user?.id);
+      return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error(' Errore lettura ricorrenze:', error.message);
       return [];
@@ -23,9 +22,9 @@ class Recurring {
   }
 
   // Ottiene una ricorrenza per ID
-  static async getById(id, user) {
+  static async getById(id) {
     try {
-      const all = await this.getAll(user);
+      const all = await this.getAll();
       return all.find(r => r.id === id) || null;
     } catch (error) {
       console.error(' Errore getById ricorrenza:', error.message);
@@ -37,7 +36,7 @@ class Recurring {
   static async add(data) {
     try {
       const redis = getRedisClient();
-      const recurring = await this.getAll({ ruolo: 'admin' });
+      const recurring = await this.getAll();
       
       const newItem = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -53,7 +52,6 @@ class Recurring {
         per_conto_di: data.per_conto_di || 'system',
         attivo: true,
         ultima_esecuzione: null
-        ,userId: data.userId
       };
       
       recurring.push(newItem);
@@ -67,15 +65,14 @@ class Recurring {
   }
 
   // Aggiorna una ricorrenza
-  static async update(id, data, user) {
+  static async update(id, data) {
     try {
       const redis = getRedisClient();
-      const all = await this.getAll({ ruolo: 'admin' });
+      const all = await this.getAll();
       const index = all.findIndex(r => r.id === id);
       if (index === -1) return null;
 
       const item = all[index];
-      if (user?.ruolo !== 'admin' && item.userId !== user?.id) return null;
       // Aggiorna solo i campi consentiti
       item.descrizione = data.descrizione || item.descrizione;
       item.importo = parseFloat(data.importo) || item.importo;
@@ -99,13 +96,13 @@ class Recurring {
   }
 
   // Toggle attivo/disattivo
-  static async toggleAttivo(id, user) {
+  static async toggleAttivo(id) {
     try {
       const redis = getRedisClient();
-      const recurring = await this.getAll({ ruolo: 'admin' });
+      const recurring = await this.getAll();
       const item = recurring.find(r => r.id === id);
       
-      if (item && (user?.ruolo === 'admin' || item.userId === user?.id)) {
+      if (item) {
         item.attivo = !item.attivo;
         await redis.set(REDIS_KEYS.RECURRING, JSON.stringify(recurring));
       }
@@ -118,13 +115,12 @@ class Recurring {
   }
 
   // Elimina ricorrenza
-  static async remove(id, user) {
+  static async remove(id) {
     try {
       const redis = getRedisClient();
-      const recurring = await this.getAll({ ruolo: 'admin' });
+      const recurring = await this.getAll();
       const filtered = recurring.filter(r => r.id !== id);
-      const item = recurring.find(r => r.id === id);
-      if (!item || (user?.ruolo !== 'admin' && item.userId !== user?.id)) return false;
+      
       if (filtered.length === recurring.length) return false;
       
       await redis.set(REDIS_KEYS.RECURRING, JSON.stringify(filtered));
@@ -136,9 +132,9 @@ class Recurring {
   }
 
   // Ottiene le prossime scadenze
-  static async getUpcoming(giorni = 7, user) {
+  static async getUpcoming(giorni = 7) {
     try {
-      const recurring = await this.getAll(user);
+      const recurring = await this.getAll();
       const today = new Date();
       const future = new Date(today);
       future.setDate(future.getDate() + giorni);
@@ -164,7 +160,7 @@ class Recurring {
   static async processDueRecurring() {
     
     try {
-      const recurring = await this.getAll({ ruolo: 'admin' });
+      const recurring = await this.getAll();
       const today = new Date();
       
       let executed = 0;
@@ -279,10 +275,9 @@ class Recurring {
         inserito_da: item.inserito_da,
         per_conto_di: item.per_conto_di,
         note: `[Ricorrente] ${item.descrizione}`
-        ,userId: item.userId
       });
       
-      const recurring = await this.getAll({ ruolo: 'admin' });
+      const recurring = await this.getAll();
       const found = recurring.find(r => r.id === item.id);
       if (found) {
         found.ultima_esecuzione = dataStr;

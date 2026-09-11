@@ -11,8 +11,8 @@ function isInMonth(dateStr, month, year) {
   return d.getMonth() + 1 === month && d.getFullYear() === year;
 }
 
-async function getRecentExpenses(user) {
-  const all = await Expenses.getAllExpenses(user);
+async function getRecentExpenses() {
+  const all = await Expenses.getAllExpenses();
   return all.slice(0, 10);
 }
 
@@ -35,7 +35,7 @@ router.get('/', requireAuth, async (req, res) => {
     // Processa le spese ricorrenti scadute
     await Recurring.processDueRecurring();
 
-    const all = await Expenses.getAllExpenses(req.session.user);
+    const all = await Expenses.getAllExpenses();
     const years = [...new Set([
       today.getFullYear(),
       year,
@@ -219,7 +219,7 @@ const chartTrend = {
     };
 
     // Prossime scadenze (7 giorni)
-    const prossimeScadenze = await Recurring.getUpcoming(7, req.session.user);
+    const prossimeScadenze = await Recurring.getUpcoming(7);
 
     // Mese label formattata
     const meseLabel = now.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
@@ -270,7 +270,7 @@ const chartTrend = {
 router.get('/expenses/new', requireAuth, async (req, res) => {
   try {
     const utenti = await Users.getAllUsers();
-    const ultimeSpese = await getRecentExpenses(req.session.user);
+    const ultimeSpese = await getRecentExpenses();
     res.render('new-expense', {
       user: req.session.user,
       utenti,
@@ -304,7 +304,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
     const per_conto_di = req.body.per_conto_di || req.session.user.username;
 
     const utenti = await Users.getAllUsers();
-    let ultimeSpese = await getRecentExpenses(req.session.user);
+    let ultimeSpese = await getRecentExpenses();
 
     if (!importo || isNaN(parseFloat(importo)) || parseFloat(importo) <= 0) {
       return res.status(400).render('new-expense', {
@@ -331,10 +331,9 @@ router.post('/expenses', requireAuth, async (req, res) => {
       inserito_da,
       per_conto_di,
       note,
-      userId: req.session.user.id,
     });
 
-    ultimeSpese = await getRecentExpenses(req.session.user);
+    ultimeSpese = await getRecentExpenses();
     res.render('new-expense', {
       user: req.session.user,
       utenti,
@@ -362,7 +361,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
 
 router.get('/expenses/:id/edit', requireAuth, async (req, res) => {
   try {
-    const all = await Expenses.getAllExpenses(req.session.user);
+    const all = await Expenses.getAllExpenses();
     const expense = all.find(e => e.id === req.params.id);
     if (!expense) {
       return res.status(404).render('error', {
@@ -406,7 +405,7 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
 
     if (!importo || isNaN(parseFloat(importo)) || parseFloat(importo) <= 0) {
       // Se errore, mostriamo di nuovo il form di modifica con i dati vecchi
-      const all = await Expenses.getAllExpenses(req.session.user);
+      const all = await Expenses.getAllExpenses();
       const expense = all.find(e => e.id === req.params.id);
       const utenti = await Users.getAllUsers();
       return res.status(400).render('new-expense', {
@@ -423,7 +422,7 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
       });
     }
 
-    const updated = await Expenses.updateExpense(req.params.id, {
+    await Expenses.updateExpense(req.params.id, {
       data_spesa: data_spesa || new Date().toISOString().slice(0, 10),
       importo,
       tipo: tipoFinale,
@@ -432,9 +431,7 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
       inserito_da,
       per_conto_di,
       note,
-      userId: req.session.user.id,
-    }, req.session.user);
-    if (!updated) return res.status(404).render('error', { user: req.session.user, message: 'Spesa non trovata o accesso negato.' });
+    });
 
     // Reindirizza alla pagina da cui si proveniva (history o dashboard)
     const referer = req.headers.referer || '/history';
@@ -454,7 +451,7 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
 router.get('/history', requireAuth, async (req, res) => {
   try {
     await Recurring.processDueRecurring();
-    const all = await Expenses.getAllExpenses(req.session.user);
+    const all = await Expenses.getAllExpenses();
     const { mese, anno, categoria, sottocategoria } = req.query;
 
     let filtered = all;
@@ -497,9 +494,7 @@ router.get('/history', requireAuth, async (req, res) => {
 
 router.post('/expenses/:id/delete', requireAuth, async (req, res) => {
   try {
-    if (!await Expenses.deleteExpense(req.params.id, req.session.user)) {
-      return res.status(404).render('error', { user: req.session.user, message: 'Spesa non trovata o accesso negato.' });
-    }
+    await Expenses.deleteExpense(req.params.id);
     res.redirect('back');
   } catch (error) {
     console.error(' Errore eliminazione spesa:', error);
@@ -520,16 +515,16 @@ router.post('/expenses/:id/update-amount', requireAuth, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Importo non valido' });
     }
     
-    const all = await Expenses.getAllExpenses(req.session.user);
+    const all = await Expenses.getAllExpenses();
     const expense = all.find(e => e.id === id);
     if (!expense) {
       return res.status(404).json({ success: false, error: 'Spesa non trovata' });
     }
     
-    if (!await Expenses.updateExpense(id, {
+    await Expenses.updateExpense(id, {
       ...expense,
       importo: parseFloat(importo)
-    }, req.session.user)) return res.status(403).json({ success: false, error: 'Accesso negato' });
+    });
     
     res.json({ 
       success: true, 

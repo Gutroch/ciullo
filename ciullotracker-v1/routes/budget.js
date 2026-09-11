@@ -23,7 +23,7 @@ function computeMonthlyNet(expenses, year) {
 router.get('/', requireAuth, async (req, res) => {
   try {
     const year = parseInt(req.query.year) || new Date().getFullYear();
-    const allExpenses = await Expenses.getAllExpenses(req.session.user);
+    const allExpenses = await Expenses.getAllExpenses();
 
     // Calcola netto reale per ogni mese
     const realNet = computeMonthlyNet(allExpenses, year);

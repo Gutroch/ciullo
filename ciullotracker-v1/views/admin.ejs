@@ -20,7 +20,6 @@
         <div class="card squircle">
           <div class="chart-title">Crea nuovo utente</div>
           <form action="/admin/users" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="field">
               <label for="username">Username</label>
               <input class="input" type="text" id="username" name="username" required />
@@ -51,12 +50,10 @@
               </div>
               <div style="display:flex; gap:8px;">
                 <form action="/admin/users/<%= u.id %>/reset" method="POST" onsubmit="return promptReset(this);">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="newPassword" class="reset-input" />
                   <button type="submit" class="btn btn-secondary btn-sm">Reset PW</button>
                 </form>
                 <form action="/admin/users/<%= u.id %>/delete" method="POST" onsubmit="return confirm('Eliminare l\'utente <%= u.username %>?');">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                 </form>
               </div>

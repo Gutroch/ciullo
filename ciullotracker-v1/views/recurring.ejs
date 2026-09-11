@@ -20,7 +20,6 @@
         <div class="card squircle">
           <div class="chart-title">Nuova voce ricorrente</div>
           <form action="/recurring" method="POST" id="recurringForm">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
             <div class="field">
               <label>Tipo</label>
@@ -140,11 +139,9 @@
                   </div>
                   <a href="/recurring/<%= r.id %>/edit" class="btn btn-secondary btn-sm">Modifica</a>
                   <form action="/recurring/<%= r.id %>/toggle" method="POST">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <button type="submit" class="btn btn-secondary btn-sm"><%= r.attivo ? 'Disattiva' : 'Attiva' %></button>
                   </form>
                   <form action="/recurring/<%= r.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa voce ricorrente?');">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                   </form>
                 </div>

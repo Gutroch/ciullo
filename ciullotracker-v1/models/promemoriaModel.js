@@ -15,8 +15,6 @@ class PromemoriaModel {
   // Salva o aggiorna un promemoria
   static async save(data) {
     const id = data.id || this.generateId();
-    const existing = data.id ? await this.findById(data.id, data.actor) : null;
-    if (data.id && !existing) return null;
     const promemoria = {
       id,
       descrizione: data.descrizione.trim(),
@@ -24,7 +22,6 @@ class PromemoriaModel {
       importo: parseFloat(data.importo) || 0,
       scadenza: data.scadenza || null,
       note: data.note || '',
-      userId: existing?.userId || data.userId,
       creatoIl: data.creatoIl || new Date().toISOString()
     };
 
@@ -41,7 +38,7 @@ class PromemoriaModel {
   }
 
   // Recupera tutti i promemoria
-  static async findAll(user) {
+  static async findAll() {
     const ids = await redis.smembers(INDEX_KEY);
     if (!ids || ids.length === 0) return [];
 
@@ -55,8 +52,7 @@ class PromemoriaModel {
       .map(([err, data]) => {
         if (err || !data) return null;
         try {
-          const item = JSON.parse(data);
-          return user?.ruolo === 'admin' || item.userId === user?.id ? item : null;
+          return JSON.parse(data);
         } catch {
           return null;
         }
@@ -78,34 +74,26 @@ class PromemoriaModel {
   }
 
   // Recupera un singolo promemoria
-  static async findById(id, user) {
+  static async findById(id) {
     const data = await redis.get(KEY_PREFIX + id);
     if (!data) return null;
     try {
-      const item = JSON.parse(data);
-      return user?.ruolo === 'admin' || item.userId === user?.id ? item : null;
+      return JSON.parse(data);
     } catch {
       return null;
     }
   }
 
   // Elimina un promemoria
-  static async delete(id, user) {
-    const item = await this.findById(id, user);
-    if (!item) return false;
+  static async delete(id) {
     await redis.del(KEY_PREFIX + id);
     await redis.srem(INDEX_KEY, id);
     return true;
   }
 
   // Elimina tutti i promemoria (utile per reset)
-  static async deleteAll(user) {
+  static async deleteAll() {
     const ids = await redis.smembers(INDEX_KEY);
-    if (user?.ruolo !== 'admin') {
-      const owned = await this.findAll(user);
-      for (const item of owned) await this.delete(item.id, user);
-      return true;
-    }
     if (ids && ids.length > 0) {
       const keys = ids.map(id => KEY_PREFIX + id);
       await redis.del(keys);

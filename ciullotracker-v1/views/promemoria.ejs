@@ -131,7 +131,6 @@
       const modalCancel = document.getElementById('modal-cancel');
       const modalSubmit = document.getElementById('modal-submit');
       const tableBody = document.getElementById('table-body');
-      const csrfToken = decodeURIComponent(document.cookie.split('; ').find(row => row.startsWith('x-csrf-token='))?.split('=')[1] || '');
 
       // ---------- TOAST ----------
       function showToast(message, type) {
@@ -215,7 +214,7 @@
         try {
           const response = await fetch('/promemoria/api/save', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
           });
 
@@ -263,7 +262,7 @@
 
           try {
             const response = await fetch('/promemoria/api/delete/' + id, {
-              method: 'DELETE', headers: { 'X-CSRF-Token': csrfToken }
+              method: 'DELETE'
             });
             const result = await response.json();
             if (result.success) {
@@ -284,7 +283,7 @@
 
         try {
           const response = await fetch('/promemoria/api/delete-all', {
-            method: 'DELETE', headers: { 'X-CSRF-Token': csrfToken }
+            method: 'DELETE'
           });
           const result = await response.json();
           if (result.success) {

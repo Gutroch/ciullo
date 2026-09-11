@@ -138,7 +138,6 @@
                     <div class="action-buttons">
                       <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm" title="Modifica">Mod</a>
                       <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');" style="display: inline;">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <button type="submit" class="btn btn-danger btn-sm" title="Elimina">Elim</button>
                       </form>
                     </div>
