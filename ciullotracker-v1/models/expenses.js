@@ -10,14 +10,155 @@ const REDIS_KEYS = {
 class Expenses {
   // Categorie di spesa (uscite) con relative sottocategorie
   static CATEGORIE_SPESE = {
-    'TASSE + CASA': ['Mutuo', 'Spese Condominio', 'Luce', 'Gas', 'Bonifica', 'Rifiuti / TARI', 'Altro'],
-    'CIBO': ['Spesa', 'Spesa 2', 'Spesa 3', 'Spesa 4', 'Spesa 5', 'Macellaio', 'Macellaio 2', 'Fruttivendolo', 'Fruttivendolo 2', 'Fruttivendolo 3', 'Spese Veloci', 'Papà', 'Pranzo/Cena fuori', 'Uova', 'altro'],
-    'INVESTIMENTI': ['Prestito', 'Prestito 2', 'Massaggiatore', 'Amazon', 'Riparazioni Casa', 'Luca', 'Diego', 'Telefono', 'Altro'],
-    'SALUTE': ['Visite Mediche', 'Farmacia', 'Rocky'],
-    'ABITI': ['Primark', 'Vestiti Luca/Diego', 'Vestiti Mamma/Papà', 'Parrucchiera', 'Estetista'],
-    'AUTO': ['Problemi', 'Benzina', 'Bollo', 'Assicurazione', 'Revisione', 'Tagliando'],
-    'CONGUAGLIO':['Conguaglio'],
-    'ALTRO':['Altro'],
+    "CASA, UTENZE E TASSE": [
+        "Mutuo/Affitto",
+        "Spese Condominio",
+        "Luce",
+        "Gas",
+        "Acqua",
+        "Internet/Telefono",
+        "Rifiuti/TARI",
+        "IMU/Tasse Casa",
+        "Bonifica/Consorzio",
+        "Manutenzione/Riparazioni Casa",
+        "Arredamento/Elettrodomestici",
+        "Pulizie/Casa",
+        "Altro Casa"
+    ],
+
+    "CIBO E SPESA": [
+        "Supermercato/Spesa",
+        "Macellaio",
+        "Fruttivendolo",
+        "Panetteria/Colazione",
+        "Uova",
+        "Spese Veloci/Bar",
+        "Pranzo/Cena fuori",
+        "Delivery",
+        "Spesa per Papà/Familiari",
+        "Altro Cibo"
+    ],
+
+    "DEBITI, PRESTITI E FINANZA": [
+        "Prestito 1",
+        "Prestito 2",
+        "Carte di credito",
+        "Commissioni bancarie",
+        "Rimborsi/Debiti",
+        "Altro Finanza"
+    ],
+
+    "RISPARMIO E INVESTIMENTI": [
+        "PAC/Fondi",
+        "Pensione integrativa",
+        "Risparmio",
+        "Altro Investimenti"
+    ],
+
+    "SALUTE E BENESSERE": [
+        "Visite Mediche",
+        "Farmacia",
+        "Dentista",
+        "Analisi/Esami",
+        "Massaggiatore/Benessere",
+        "Palestra/Sport",
+        "Altro Salute"
+    ],
+
+    "ABBIGLIAMENTO E CURA PERSONALE": [
+        "Primark",
+        "Vestiti Luca/Diego",
+        "Vestiti Mamma/Papà",
+        "Calzature",
+        "Parrucchiera",
+        "Estetista",
+        "Cosmetica/Cura personale",
+        "Altro Abbigliamento"
+    ],
+
+    "AUTO E TRASPORTI": [
+        "Benzina/Carburante",
+        "Problemi/Riparazioni",
+        "Bollo",
+        "Assicurazione",
+        "Revisione",
+        "Tagliando",
+        "Autostrada/Pedaggi",
+        "Parcheggi",
+        "Mezzi pubblici",
+        "Altro Auto"
+    ],
+
+    "REGALI E OCCASIONI": [
+        "Fiorista",
+        "Regali Interni",
+        "Regali Estranei",
+        "Compleanni/Natale/Ricorrenze",
+        "Matrimoni/Eventi",
+        "Altro Regali"
+    ],
+
+    "FAMIGLIA E FIGLI": [
+        "Luca",
+        "Diego",
+        "Papà",
+        "Spese Figli",
+        "Scuola/Attività",
+        "Contributi familiari",
+        "Altro Famiglia"
+    ],
+
+    "ANIMALI": [
+        "Rocky",
+        "Veterinario",
+        "Cibo animali",
+        "Toelettatura",
+        "Altro Animali"
+    ],
+
+    "TECNOLOGIA E ABBONAMENTI": [
+        "Telefono",
+        "Internet",
+        "Abbonamenti Streaming",
+        "Software/Cloud",
+        "Elettronica",
+        "Altro Tecnologia"
+    ],
+
+    "SHOPPING GENERICO": [
+        "Amazon",
+        "Varie shopping",
+        "Altro Shopping"
+    ],
+
+    "SVAGO, TEMPO LIBERO E VACANZE": [
+        "Hobby",
+        "Cinema/Teatro",
+        "Libri",
+        "Viaggi/Vacanze",
+        "Hotel/Prenotazioni",
+        "Altro Svago"
+    ],
+
+    "ISTRUZIONE E FORMAZIONE": [
+        "Corsi",
+        "Libri scolastici",
+        "Tasse scolastiche",
+        "Altro Istruzione"
+    ],
+
+    "CONGUAGLI E RETTIFICHE": [
+        "Conguaglio",
+        "Rimborsi",
+        "Storni",
+        "Altro Conguagli"
+    ],
+
+    "VARIE O IMPREVISTI": [
+        "Altro",
+        "Imprevisti",
+        "Da classificare"
+    ]
   };
 
   // Categorie per le entrate (senza sottocategorie)
@@ -27,7 +168,6 @@ class Expenses {
     'Luca / Diego',
     'Portafogli Mamma',
     'Portafogli Papà',
-    'Vinted',
     'Assegno Familiare',
     'Conguaglio',
     'Conto Corrente',
