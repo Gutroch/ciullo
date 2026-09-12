@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Manutenzione · CiulloTracker' }) %>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="login-screen">
+    <div class="login-card squircle-lg" style="text-align:center;">
+      <div class="login-logo squircle-sm" aria-hidden="true"></div>
+      <div class="login-title">Manutenzione in corso</div>
+      <div class="login-subtitle">
+        <%= message && message.length ? message : 'CiulloTracker è temporaneamente non disponibile. Torna a trovarci a breve.' %>
+      </div>
+
+      <% if (user) { %>
+        <form action="/logout" method="POST" style="margin-top: 8px;">
+          <button type="submit" class="btn btn-secondary btn-block">Esci</button>
+        </form>
+      <% } else { %>
+        <a href="/login" class="btn btn-primary btn-block" style="margin-top: 8px;">Accedi</a>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('partials/footer', { user: user }) %>
+</body>
+</html>

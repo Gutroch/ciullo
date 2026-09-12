@@ -22,6 +22,7 @@ const exportRoutes = require('./routes/export');
 const recurringRoutes = require('./routes/recurring');
 const budgetRoutes = require('./routes/budget'); // <-- NUOVO IMPORT
 const { attachUser } = require('./middleware/auth');
+const { maintenanceGate } = require('./middleware/maintenance');
 
 const app = express();
 
@@ -101,6 +102,9 @@ app.use(
 );
 
 app.use(attachUser);
+
+// --- Modalità manutenzione (blocca tutti tranne gli admin) ---
+app.use(maintenanceGate);
 
 // --- Registrazione rotte ---
 app.use('/', authRoutes);

@@ -15,6 +15,13 @@
       <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
       <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
 
+      <% if (system && system.settings.maintenance) { %>
+        <div class="maintenance-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Modalità manutenzione attiva: solo gli amministratori possono usare l'app.
+        </div>
+      <% } %>
+
       <div class="grid grid-2" style="align-items:start;">
         <!-- Form creazione utente -->
         <div class="card squircle">
@@ -61,6 +68,110 @@
           <% }); %>
         </div>
       </div>
+
+      <% if (system) { %>
+        <div class="section-kicker">Manutenzione &amp; Sistema</div>
+        <div class="grid grid-2" style="align-items:start;">
+          <!-- Modalità manutenzione -->
+          <div class="card squircle">
+            <div class="admin-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Modalità Manutenzione
+            </div>
+            <form action="/admin/maintenance" method="POST" id="maintenanceForm">
+              <div class="switch-row">
+                <div>
+                  <div class="switch-label">Blocca l'accesso agli utenti</div>
+                  <div class="switch-hint">Gli amministratori restano sempre operativi.</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="maintenance" id="maintenanceToggle" <%= system.settings.maintenance ? 'checked' : '' %> />
+                  <span class="track"></span>
+                  <span class="thumb"></span>
+                </label>
+              </div>
+              <div class="field" style="margin-top: 10px;">
+                <label for="maintenanceMessage">Messaggio mostrato agli utenti <span class="field-hint">(opzionale)</span></label>
+                <input class="input" type="text" id="maintenanceMessage" name="maintenanceMessage"
+                  placeholder="Es. Stiamo aggiornando l'app, torniamo online a breve."
+                  value="<%= system.settings.maintenanceMessage || '' %>" />
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Salva</button>
+            </form>
+            <% if (system.settings.maintenanceUpdatedAt) { %>
+              <div class="admin-fine-print">
+                Ultimo aggiornamento: <%= new Date(system.settings.maintenanceUpdatedAt).toLocaleString('it-IT') %>
+                <% if (system.settings.maintenanceUpdatedBy) { %> · da <%= system.settings.maintenanceUpdatedBy %><% } %>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Info di sistema -->
+          <div class="card squircle">
+            <div class="admin-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+              Informazioni di Sistema
+            </div>
+            <div class="info-grid">
+              <div class="info-stat">
+                <div class="info-stat-label">Redis</div>
+                <div class="info-stat-value <%= system.redisOk ? 'ok' : 'warn' %>"><%= system.redisOk ? 'Connesso' : 'Non raggiungibile' %></div>
+              </div>
+              <div class="info-stat">
+                <div class="info-stat-label">Node.js</div>
+                <div class="info-stat-value"><%= system.nodeVersion %></div>
+              </div>
+              <div class="info-stat">
+                <div class="info-stat-label">Utenti</div>
+                <div class="info-stat-value"><%= system.stats.utenti %></div>
+              </div>
+              <div class="info-stat">
+                <div class="info-stat-label">Movimenti</div>
+                <div class="info-stat-value"><%= system.stats.spese %></div>
+              </div>
+              <div class="info-stat">
+                <div class="info-stat-label">Ricorrenze</div>
+                <div class="info-stat-value"><%= system.stats.ricorrenze %></div>
+              </div>
+              <div class="info-stat">
+                <div class="info-stat-label">Promemoria</div>
+                <div class="info-stat-value"><%= system.stats.promemoria %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-kicker">Backup Dati</div>
+        <div class="card squircle" style="margin-bottom: 24px;">
+          <div class="admin-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            Backup &amp; Ripristino
+          </div>
+          <p class="page-subtitle" style="margin-bottom:16px;">
+            Scarica un backup completo di utenti, movimenti, ricorrenze, budget e promemoria in formato JSON,
+            oppure ripristina i dati da un backup precedente.
+          </p>
+          <div class="backup-actions">
+            <a href="/admin/backup/download" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+              Scarica backup JSON
+            </a>
+            <span class="admin-fine-print" style="align-self:center; margin-top:0;">
+              (<%= system.stats.chiaviRedis %> chiavi incluse)
+            </span>
+          </div>
+
+          <div class="backup-upload">
+            <input type="file" id="restoreFile" accept="application/json,.json" />
+            <button type="button" id="restoreBtn" class="btn btn-secondary" disabled>Ripristina da file</button>
+          </div>
+          <div class="admin-fine-print">
+            Il ripristino sovrascrive solo le chiavi presenti nel file di backup: i dati esistenti non elencati nel
+            file restano invariati. Operazione irreversibile per le chiavi coinvolte: assicurati di scaricare un
+            backup aggiornato prima di procedere.
+          </div>
+        </div>
+      <% } %>
     </main>
   </div>
 
@@ -74,6 +185,87 @@
       form.querySelector('.reset-input').value = pwd;
       return true;
     }
+
+    // ---------- TOAST (stesso pattern usato in Promemoria) ----------
+    function showToast(message, type) {
+      var existing = document.querySelector('.toast-notification');
+      if (existing) existing.remove();
+
+      var toast = document.createElement('div');
+      toast.className = 'toast-notification ' + type;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(function () {
+        toast.classList.add('fade-out');
+        setTimeout(function () { toast.remove(); }, 300);
+      }, 3500);
+    }
+
+    // ---------- BACKUP: ripristino da file JSON ----------
+    (function () {
+      var fileInput = document.getElementById('restoreFile');
+      var restoreBtn = document.getElementById('restoreBtn');
+      if (!fileInput || !restoreBtn) return;
+
+      fileInput.addEventListener('change', function () {
+        restoreBtn.disabled = !fileInput.files || fileInput.files.length === 0;
+      });
+
+      restoreBtn.addEventListener('click', function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        if (!confirm('Ripristinare i dati da "' + file.name + '"? Le chiavi presenti nel file sovrascriveranno i dati attuali corrispondenti. Continuare?')) {
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function () {
+          var parsed;
+          try {
+            parsed = JSON.parse(reader.result);
+          } catch (e) {
+            showToast('Il file selezionato non è un JSON valido.', 'error');
+            return;
+          }
+
+          if (!parsed || !Array.isArray(parsed.entries)) {
+            showToast('Il file non sembra un backup di CiulloTracker valido.', 'error');
+            return;
+          }
+
+          restoreBtn.disabled = true;
+          restoreBtn.textContent = 'Ripristino in corso…';
+
+          fetch('/admin/backup/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entries: parsed.entries }),
+          })
+            .then(function (res) { return res.json(); })
+            .then(function (result) {
+              restoreBtn.textContent = 'Ripristina da file';
+              restoreBtn.disabled = false;
+              if (result && result.ok) {
+                showToast('Backup ripristinato: ' + result.restored + ' voci aggiornate.', 'success');
+                setTimeout(function () { window.location.reload(); }, 1200);
+              } else {
+                showToast('Errore: ' + (result && result.error ? result.error : 'ripristino fallito'), 'error');
+              }
+            })
+            .catch(function (err) {
+              restoreBtn.textContent = 'Ripristina da file';
+              restoreBtn.disabled = false;
+              showToast('Errore: ' + err.message, 'error');
+            });
+        };
+        reader.onerror = function () {
+          showToast('Impossibile leggere il file selezionato.', 'error');
+        };
+        reader.readAsText(file);
+      });
+    })();
   </script>
 </body>
 </html>

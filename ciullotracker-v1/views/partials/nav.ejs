@@ -51,6 +51,7 @@
     <a href="/admin" class="nav-link <%= isActive('admin') ? 'active' : '' %>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
       Pannello Admin
+      <% if (typeof maintenanceActive !== 'undefined' && maintenanceActive) { %><span class="maint-dot" title="Manutenzione attiva"></span><% } %>
     </a>
     <% } %>
   </nav>
@@ -150,6 +151,7 @@
     <a href="/admin" class="sheet-item <%= isActive('admin') ? 'active' : '' %>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
       Pannello Admin
+      <% if (typeof maintenanceActive !== 'undefined' && maintenanceActive) { %><span class="maint-dot" title="Manutenzione attiva"></span><% } %>
     </a>
     <% } %>
 

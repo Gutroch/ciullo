@@ -1161,3 +1161,165 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 700; background: var(
 }
 
 .grid-2, .grid-4 { row-gap: 24px; }
+
+/* ============================================================
+   MOTION — micro-interazioni Material 3 (ripple, reveal, lift)
+   ============================================================ */
+
+/* --- Ripple al tap/click, in stile M3 state-layer --- */
+.btn, .nav-link, .bottom-nav-item, .sheet-item, .fab-circle, .qty-btn,
+.quick-amount-btn, .chart-fullscreen, .chart-download, .breadcrumb-btn,
+.segmented-item, .accordion-header, .switch, .hamburger-btn, .theme-toggle-btn,
+.account-btn, .splash-skip {
+  position: relative;
+  overflow: hidden;
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: currentColor;
+  opacity: 0.22;
+  pointer-events: none;
+  animation: ripple-anim 550ms var(--ease-standard);
+  z-index: 0;
+}
+.btn-primary .ripple, .fab-circle .ripple { background: #fff; }
+@keyframes ripple-anim { to { transform: scale(2.6); opacity: 0; } }
+
+/* --- Reveal in ingresso per card, righe spesa e tabelle --- */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--motion-slow) var(--ease-enter), transform var(--motion-slow) var(--ease-enter);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.reveal-in { opacity: 1; transform: translateY(0); }
+
+/* --- Alert: comparsa morbida --- */
+.alert { animation: alert-in 0.35s var(--ease-enter); }
+@keyframes alert-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Bottoni: piccolo sollevamento in stile elevazione M3 --- */
+.btn-primary:hover, .btn-secondary:hover, .btn-danger:hover { transform: translateY(-1px); }
+.btn:active { transform: scale(0.97) translateY(0); }
+
+/* --- Icone nav: leggero scorrimento su hover --- */
+.nav-link svg { transition: transform var(--motion-base) var(--ease-standard); }
+.nav-link:hover svg { transform: translateX(2px); }
+
+/* --- FAB "Nuovo": respiro sottile per farsi notare senza disturbare --- */
+@keyframes fab-breathe {
+  0%, 100% { box-shadow: var(--shadow); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 16%, transparent), var(--shadow); }
+}
+.bottom-nav-fab .fab-circle { animation: fab-breathe 2.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .bottom-nav-fab .fab-circle { animation: none !important; }
+}
+
+/* ============================================================
+   SWITCH — Material 3 (toggle manutenzione ecc.)
+   ============================================================ */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.switch .track {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-strong);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+}
+.switch .thumb {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  background: var(--border-strong);
+  border-radius: 50%;
+  transition: left var(--motion-base) var(--ease-enter), width var(--motion-base) var(--ease-standard),
+    height var(--motion-base) var(--ease-standard), background var(--motion-base) var(--ease-standard);
+}
+.switch input:checked ~ .track { background: var(--accent); border-color: var(--accent); }
+.switch input:checked ~ .thumb { left: 22px; width: 20px; height: 20px; background: var(--on-accent); box-shadow: var(--shadow-sm); }
+.switch input:focus-visible ~ .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+.switch input:disabled { cursor: not-allowed; }
+.switch input:disabled ~ .track { opacity: 0.6; }
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+.switch-row + .switch-row { border-top: 1px solid var(--border); }
+.switch-label { font-weight: 500; font-size: 0.92rem; color: var(--text); }
+.switch-hint { font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
+
+/* ============================================================
+   ADMIN — sezioni manutenzione / backup / sistema
+   ============================================================ */
+.admin-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-soft); margin-bottom: var(--space-4);
+}
+.admin-section-title svg { width: 17px; height: 17px; color: var(--text-faint); }
+
+.maintenance-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 18px; border-radius: var(--radius-md);
+  background: var(--warning-soft); color: color-mix(in srgb, var(--warning) 78%, var(--text) 10%);
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+  font-weight: 600; font-size: 0.86rem; margin-bottom: var(--space-5);
+  animation: fade-in-up 0.4s var(--ease-enter);
+}
+.maintenance-banner svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.info-stat { padding: 14px 16px; border-radius: var(--radius-md); background: var(--surface-alt); border: 1px solid var(--border); transition: transform var(--motion-base) var(--ease-standard); }
+.info-stat:hover { transform: translateY(-2px); }
+.info-stat-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); font-weight: 700; margin-bottom: 4px; }
+.info-stat-value { font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem; color: var(--text); }
+.info-stat-value.ok { color: var(--success); }
+.info-stat-value.warn { color: var(--danger); }
+
+.backup-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.backup-upload {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px dashed var(--border);
+}
+.backup-upload input[type="file"] { font-size: 0.8rem; color: var(--text-soft); max-width: 100%; }
+.admin-fine-print { font-size: 0.76rem; color: var(--text-faint); margin-top: 8px; line-height: 1.5; }
+
+.maint-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--warning); margin-left: auto; flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--warning-soft);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.65; } }
+@media (prefers-reduced-motion: reduce) { .maint-dot { animation: none; } }
