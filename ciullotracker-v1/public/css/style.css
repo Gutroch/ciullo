@@ -861,7 +861,7 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 700; background: var(
   font-size: 1.15rem;
   overflow: hidden;
   box-shadow: var(--shadow);
-  background: #FFFFFF url('/icons/icon-192.svg') center / cover no-repeat;
+  background: #FFFFFF url('/icons/icon-192-v2.svg') center / cover no-repeat;
   font-size: 0;
 }
 .login-title {
@@ -1019,7 +1019,7 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 700; background: var(
 }
 .splash-mark {
   width: 84px; height: 84px; border-radius: 22px;
-  background: #FFFFFF url('/icons/icon-192.svg') center / cover no-repeat;
+  background: #FFFFFF url('/icons/icon-192-v2.svg') center / cover no-repeat;
   box-shadow: var(--shadow-lg);
   margin-bottom: var(--space-5);
   opacity: 0; transform: translateY(6px) scale(.92);
@@ -1323,3 +1323,38 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 700; background: var(
 }
 @keyframes pulse-dot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.65; } }
 @media (prefers-reduced-motion: reduce) { .maint-dot { animation: none; } }
+
+#update-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.update-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.update-box h2 {
+  margin-top: 0;
+}
+
+.update-box button {
+  margin-top: 16px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 999px;
+  background: #1A73E8;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}

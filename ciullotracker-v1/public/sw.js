@@ -1,18 +1,19 @@
-const CACHE_NAME = 'ciullotracker-v6-softly';
+const CACHE_NAME = 'ciullotracker-v7-softly';
 const STATIC_ASSETS = [
   '/css/style.css',
   '/js/history-buttons.js',
   '/js/dashboard-charts.js',
   '/js/pwa.js',
-  '/manifest.json'
-  ,'/icons/favicon.svg'
+  '/manifest.json',
+  '/icons/favicon.svg',
+  '/icons/icon-192-v2.svg',
+  '/icons/icon-512-v2.svg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -31,12 +32,23 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+
+  if (url.pathname === '/manifest.json' || url.pathname === '/sw.js') {
+    event.respondWith(fetch(req));
+    return;
+  }
 
   const isNavigation = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
