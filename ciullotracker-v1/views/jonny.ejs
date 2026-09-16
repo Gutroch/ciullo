@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Jonny · CiulloTracker' }) %>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'jonny' }) %>
+
+    <main class="main-content">
+      <div class="page-title">Jonny</div>
+      <div class="page-subtitle">Il tuo assistente per le spese, in arrivo</div>
+
+      <div class="alert-info">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>Il chatbot RAG collegato ai tuoi dati è ancora in lavorazione. Puoi già provare l'interfaccia qui sotto: Jonny risponderà per ora con un messaggio informativo.</span>
+      </div>
+
+      <div class="card jonny-hero">
+        <div class="avatar-feature" data-avatar-mount data-avatar-size="100%" aria-hidden="true"></div>
+        <div>
+          <div class="jonny-hero-title">Ciao, sono Jonny 👋</div>
+          <div class="jonny-hero-subtitle">Presto potrò leggere le tue spese, i tuoi budget e i tuoi promemoria per rispondere alle tue domande in linguaggio naturale.</div>
+          <div class="jonny-hero-status"><span class="dot"></span> In allenamento — RAG non ancora collegato</div>
+        </div>
+      </div>
+
+      <div class="card jonny-chat-card">
+        <div class="jonny-messages" id="jonnyMessages">
+          <div class="jonny-msg jonny-msg-bot">
+            <div class="jonny-msg-bubble">Ciao! Sono Jonny 👋 Scrivimi pure qualcosa: per ora rispondo sempre con un messaggio placeholder, ma l'interfaccia è già quella definitiva.</div>
+          </div>
+        </div>
+        <form class="jonny-input-row" id="jonnyForm">
+          <textarea class="input" id="jonnyInput" rows="1" placeholder="Scrivi un messaggio a Jonny…" autocomplete="off" maxlength="500" required></textarea>
+          <button type="submit" class="btn btn-primary" id="jonnySend">Invia</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    window.CiulloAvatarContext = {
+      page: 'jonny',
+      mood: 'greet'
+    };
+  </script>
+
+  <%- include('partials/footer', { user: user }) %>
+
+  <script src="/js/jonny-chat.js" defer></script>
+</body>
+</html>

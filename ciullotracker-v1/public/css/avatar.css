@@ -1,0 +1,70 @@
+/* ============================================================
+   AVATAR REATTIVO — bolla fissa (tutte le pagine) + versione
+   grande dedicata (dashboard, login)
+   ============================================================ */
+
+.avatar-bubble {
+  position: fixed;
+  right: 18px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  z-index: 96; /* sopra la bottom-nav (95), sotto la sheet (9998) */
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* è decorativo/reattivo, non deve intercettare i click */
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity .25s var(--ease-standard, ease), transform .25s var(--ease-standard, ease);
+}
+.avatar-bubble.avatar-ready { opacity: 1; transform: scale(1); }
+.avatar-bubble.avatar-unavailable { display: none; }
+
+@media (max-width: 860px) {
+  .avatar-bubble {
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    right: 14px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Card "compagno" nella dashboard: avatar grande + testo accanto */
+.avatar-companion-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.avatar-companion-card .avatar-feature {
+  width: 84px;
+  height: 84px;
+  flex: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.avatar-companion-card .avatar-feature.avatar-ready { opacity: 1; transform: translateY(0); }
+.avatar-companion-card .avatar-feature.avatar-unavailable { display: none; }
+.avatar-companion-card.avatar-feature-unavailable { display: none; }
+
+.avatar-companion-title { font-weight: 600; font-size: var(--text-lg); }
+.avatar-companion-subtitle { color: var(--text-soft); font-size: 0.86rem; margin-top: 2px; }
+
+/* Avatar grande nella schermata di login */
+.login-avatar-feature {
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 8px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.login-avatar-feature.avatar-ready { opacity: 1; transform: translateY(0); }
+.login-avatar-feature.avatar-unavailable { display: none; }

@@ -1,6 +1,6 @@
 <footer class="site-footer">
   <div class="site-footer-brand">
-    <img src="/icons/favicon-v2.svg" alt="" class="site-footer-logo" />
+    <span class="site-footer-logo" aria-hidden="true"></span>
     <span>CiulloTracker</span>
   </div>
   <span class="site-footer-copy">CiulloTracking · <%= new Date().getFullYear() %></span>
@@ -19,22 +19,12 @@
     </form>
   <% } %>
 </footer>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js')
-        .then(function(registration) {
-          console.log('Service Worker registrato con successo:', registration);
-        })
-        .catch(function(err) {
-          console.log('Registrazione Service Worker fallita:', err);
-        });
-    });
-  }
 
-  // La gestione del prompt "Installa App" (beforeinstallprompt) è centralizzata
-  // in partials/nav.ejs, che mostra il pulsante dedicato nella sidebar.
-  window.addEventListener('appinstalled', (evt) => {
-    console.log('App installata!');
-  });
+<!-- Avatar reattivo: bolla fissa, presente su tutte le pagine -->
+<div class="avatar-bubble" data-avatar-mount data-avatar-size="100%" aria-hidden="true"></div>
+<script type="module" src="/js/avatar-controller.js"></script>
+
+<script>
+  // La registrazione del service worker e il prompt "Installa App" sono
+  // centralizzati in /js/pwa.js e partials/nav.ejs: qui non serve altro.
 </script>

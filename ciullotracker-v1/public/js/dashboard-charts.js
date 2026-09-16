@@ -12,13 +12,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
         return {
-            text: isDark ? '#E8EAED' : '#1F1F1F',
+            text: isDark ? '#F5F5F5' : '#000000',
             grid: isDark
                 ? 'rgba(255,255,255,0.12)'
-                : 'rgba(31, 31, 31, 0.08)',
+                : 'rgba(0, 0, 0, 0.08)',
             background: isDark
                 ? 'rgba(255,255,255,0.06)'
-                : 'rgba(31, 31, 31, 0.04)'
+                : 'rgba(0, 0, 0, 0.04)'
         };
     }
 
@@ -60,10 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartGiornalieroData.dataUscite || [],
 
                         backgroundColor:
-                            'rgba(217, 48, 37, 0.78)',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.88)' : 'rgba(0,0,0,0.88)'),
 
                         borderColor:
-                            '#D93025',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? '#F5F5F5' : '#000000'),
 
                         borderWidth: 2,
 
@@ -77,10 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartGiornalieroData.dataIngressi || [],
 
                         backgroundColor:
-                            'rgba(24, 128, 56, 0.78)',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.38)' : 'rgba(0,0,0,0.34)'),
 
                         borderColor:
-                            '#188038',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)'),
 
                         borderWidth: 2,
 
@@ -180,17 +180,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataUscite || [],
 
                         borderColor:
-                            '#D93025',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? '#F5F5F5' : '#000000'),
 
                         backgroundColor:
-                            'rgba(217, 48, 37, 0.14)',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)'),
 
                         fill: true,
 
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#D93025'
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? '#F5F5F5' : '#000000')
                     },
 
                     {
@@ -200,17 +200,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.chartTrendData.dataIngressi || [],
 
                         borderColor:
-                            '#188038',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)'),
 
                         backgroundColor:
-                            'rgba(24, 128, 56, 0.14)',
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'),
 
                         fill: true,
 
                         tension: 0.4,
 
                         pointBackgroundColor:
-                            '#188038'
+                            (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)')
                     }
                 ]
             },
@@ -289,16 +289,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ctxUtenti &&
         window.chartUtentiData
     ) {
-        const colors = [
-            '#1A73E8',
-            '#EA4335',
-            '#FBBC05',
-            '#34A853',
-            '#8E24AA',
-            '#00ACC1',
-            '#E37400',
-            '#5F6368'
-        ];
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const colors = [1, .8, .64, .5, .38, .28, .2, .14].map(function (a) {
+            return dark ? 'rgba(255,255,255,' + a + ')' : 'rgba(0,0,0,' + a + ')';
+        });
 
         const labels =
             window.chartUtentiData.labels || [];
@@ -321,9 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         backgroundColor:
                             colors
                                 .slice(0, labels.length)
-                                .map(function(c) {
-                                    return c + 'CC';
-                                }),
+,
 
                         borderColor:
                             colors.slice(0, labels.length),

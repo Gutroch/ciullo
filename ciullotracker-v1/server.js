@@ -17,6 +17,7 @@ const adminRoutes = require('./routes/admin');
 const exportRoutes = require('./routes/export');
 const recurringRoutes = require('./routes/recurring');
 const budgetRoutes = require('./routes/budget');
+const jonnyRoutes = require('./routes/jonny');
 const { attachUser } = require('./middleware/auth');
 const { maintenanceGate } = require('./middleware/maintenance');
 
@@ -106,6 +107,7 @@ app.use('/', exportRoutes);
 app.use('/', recurringRoutes);
 app.use('/budget', budgetRoutes);
 app.use('/promemoria', promemoriaRoutes);
+app.use('/jonny', jonnyRoutes);
 
 app.use((req, res) => {
   res.status(404).render('error', {

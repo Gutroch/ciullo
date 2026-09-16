@@ -86,6 +86,14 @@
     </main>
   </div>
 
+  <script>
+    window.CiulloAvatarContext = {
+      page: 'budget',
+      mood: <%- months.some(function (m) { return m.differenza < 0; }) ? "'negative'" : "'positive'" %>,
+      reactions: <%- locals.success ? "['celebrate']" : "[]" %>
+    };
+  </script>
+
   <%- include('partials/footer', { user: user }) %>
 </body>
 </html>

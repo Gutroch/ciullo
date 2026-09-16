@@ -133,6 +133,13 @@
     </main>
   </div>
 
+  <script>
+    window.CiulloAvatarContext = {
+      page: 'new-expense',
+      reactions: <%- error ? "['error']" : (success ? "['celebrate']" : "[]") %>
+    };
+  </script>
+
   <%- include('partials/footer', { user: user }) %>
 
   <script>

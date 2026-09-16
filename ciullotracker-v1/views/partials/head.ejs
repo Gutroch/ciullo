@@ -1,14 +1,17 @@
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <meta name="theme-color" content="#FFFFFF" id="theme-color-meta" />
+  <meta name="theme-color" content="#E9E9EB" id="theme-color-meta" />
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-title" content="CiulloTracker">
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" href="/icons/favicon-v2.svg" />
-  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192-v2.svg">
+  <link rel="icon" href="/icons/favicon-v3.svg" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192-v3.svg">
   <title><%= typeof title !== 'undefined' ? title : 'CiulloTracker' %></title>
   <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/avatar.css" />
+  <link rel="stylesheet" href="/css/jonny.css" />
   <script>
     // Applica subito il tema salvato per evitare il "flash" bianco/nero al caricamento
     (function () {
@@ -17,7 +20,7 @@
       document.documentElement.setAttribute('data-theme', theme);
       // aggiorna il meta theme-color in base al tema
       var meta = document.getElementById('theme-color-meta');
-      if (meta) meta.setAttribute('content', theme === 'dark' ? '#131314' : '#FFFFFF');
+      if (meta) meta.setAttribute('content', theme === 'dark' ? '#08080A' : '#E9E9EB');
     })();
   </script>
   <script defer src="/js/pwa.js"></script>

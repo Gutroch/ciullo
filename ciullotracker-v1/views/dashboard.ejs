@@ -17,6 +17,21 @@
         <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
       </div>
 
+      <!-- Avatar reattivo: versione grande dedicata alla dashboard -->
+      <div class="card avatar-companion-card">
+        <div class="avatar-feature" data-avatar-mount data-avatar-size="100%" aria-hidden="true"></div>
+        <div>
+          <div class="avatar-companion-title">
+            <%= parseFloat(saldo) < 0 ? 'Occhio al saldo del mese' : 'Il mese sta andando bene' %>
+          </div>
+          <div class="avatar-companion-subtitle">
+            <%= parseFloat(saldo) < 0
+              ? 'Le uscite hanno superato le entrate in ' + meseLabel + '.'
+              : 'Le entrate coprono le uscite in ' + meseLabel + '.' %>
+          </div>
+        </div>
+      </div>
+
       <div class="section-kicker">Panoramica</div>
       <div class="grid grid-4">
         <div class="card kpi-card">
@@ -148,6 +163,13 @@
     </main>
   </div>
 
+  <script>
+    window.CiulloAvatarContext = {
+      page: 'dashboard',
+      mood: <%- parseFloat(saldo) < 0 ? "'negative'" : "'positive'" %>
+    };
+  </script>
+
   <%- include('partials/footer', { user: user }) %>
 
   <div id="chart-modal" class="chart-modal-overlay" style="display: none;">
@@ -206,16 +228,15 @@
       function getThemeColors() {
         var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         return {
-          text: dark ? '#E8EAED' : '#1F1F1F',
-          grid: dark ? 'rgba(232, 234, 237, 0.1)' : 'rgba(31, 31, 31, 0.08)',
-          bgPrimary: dark ? '#1E1F20' : '#FFFFFF',
-          positive: dark ? '#81C995' : '#188038',
-          negative: dark ? '#F2B8B5' : '#D93025',
-          palette: [
-            '#1A73E8', '#EA4335', '#FBBC05', '#34A853',
-            '#8E24AA', '#00ACC1', '#E37400', '#5F6368',
-            '#607D8B', '#C2185B', '#00897B', '#3949AB'
-          ]
+          text: dark ? '#F5F5F5' : '#000000',
+          grid: dark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)',
+          bgPrimary: dark ? '#141416' : '#FFFFFF',
+          // Uscite piene, entrate in trasparenza: a distinguerle e' la densita', non la tinta.
+          positive: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.40)',
+          negative: dark ? '#F5F5F5' : '#000000',
+          palette: [1, .82, .66, .52, .40, .30, .22, .16, .11, .08, .06, .04].map(function (a) {
+            return dark ? 'rgba(255,255,255,' + a + ')' : 'rgba(0,0,0,' + a + ')';
+          })
         };
       }
 
@@ -548,7 +569,7 @@
               {
                 label: 'Entrate (€)',
                 data: giornoData.dataIngressi || [],
-                backgroundColor: 'rgba(124, 148, 115, 0.7)',
+                backgroundColor: colors.positive,
                 borderColor: colors.positive,
                 borderWidth: 2,
                 borderRadius: 6
@@ -556,7 +577,7 @@
               {
                 label: 'Uscite (€)',
                 data: giornoData.dataUscite || [],
-                backgroundColor: 'rgba(255, 107, 107, 0.7)',
+                backgroundColor: colors.negative,
                 borderColor: colors.negative,
                 borderWidth: 2,
                 borderRadius: 6
@@ -609,7 +630,7 @@
                 label: 'Uscite mensili',
                 data: trendData.dataUscite || [],
                 borderColor: colors.negative,
-                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                backgroundColor: colors.grid,
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: colors.negative
@@ -618,7 +639,7 @@
                 label: 'Entrate mensili',
                 data: trendData.dataIngressi || [],
                 borderColor: colors.positive,
-                backgroundColor: 'rgba(124, 148, 115, 0.1)',
+                backgroundColor: colors.grid,
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: colors.positive
