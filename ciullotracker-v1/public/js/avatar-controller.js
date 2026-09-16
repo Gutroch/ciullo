@@ -1,67 +1,10 @@
-// public/js/avatar-controller.js
-//
-// Controller reattivo per l'avatar procedurale di CiulloTracker.
-// Usa la libreria @bible-strong/avatar-web + il file *.avatar.json
-// esportato da Bible Strong Avatar Lab (https://avatars.bible-strong.app),
-// formato di export "ESM definition".
-//
-// PERCHÉ IL MOTORE VIENE CARICATO DA CDN E NON DA /public
-// ============================================================
-// @bible-strong/avatar-core (dipendenza di avatar-web) usa "ajv" per
-// validare le definizioni, e ajv è distribuito solo in CommonJS: un
-// semplice tag <script type="module"> nel browser non riesce a caricarlo
-// da solo (richiederebbe un bundler come Vite/webpack). I CDN "esm" come
-// esm.sh o jsdelivr fanno esattamente questa conversione al volo e
-// impacchettano tutte le dipendenze in un unico modulo pronto per il
-// browser, quindi è la soluzione più semplice per un sito senza bundler
-// come questo. Il file .avatar.json invece resta locale (public/js/vendor).
-//
-// ============================================================
-// COME COLLEGARE IL TUO AVATAR
-// ============================================================
-// 1. Disegna/anima l'avatar sullo Studio.
-// 2. Esporta in formato "ESM definition".
-// 3. Copia il file scaricato dentro:
-//      public/js/vendor/avatar/jonny.avatar.json
-// 4. Ricarica il sito (serve una connessione internet la prima volta,
-//    per scaricare il motore da CDN; il file .json invece è locale e
-//    funziona offline fin da subito grazie al service worker).
-//
-// ============================================================
-// COME FUNZIONA LA MAPPATURA EVENTI -> ANIMAZIONI/ESPRESSIONI
-// ============================================================
-// A differenza del bundle "standalone", qui esistono sia ANIMAZIONI
-// (sequenze nel tempo) sia ESPRESSIONI (pose singole, es. "happy",
-// "worried"): per ogni evento il controller cerca prima un'animazione
-// corrispondente, poi un'espressione, nell'ordine indicato in
-// EVENT_CATALOG. Le espressioni vengono mostrate con setExpression() e,
-// se usate come reazione momentanea, tornano al mood corrente dopo un
-// breve tempo (non hanno un "fine" come le animazioni).
-//
-// Convenzione consigliata per i nomi nello Studio (vedi
-// AVATAR-INTEGRATION.md per la tabella completa):
-//   idle, sleeping, greet, happy, worried, celebrate, error, alert, wave
-//
-// ============================================================
-// API PUBBLICA (window.CiulloAvatar)
-// ============================================================
-//   CiulloAvatar.mood('positive' | 'negative' | 'greet' | ...)
-//   CiulloAvatar.react('celebrate' | 'error' | 'alert' | 'wave' | 'reply' | ...)
-//
-// Ogni pagina può dichiarare, PRIMA di questo script:
-//   <script>
-//     window.CiulloAvatarContext = { mood: 'positive', reactions: ['celebrate'] };
-//   </script>
-
 (function () {
   'use strict';
 
-  // Versione pinnata: aggiornala se pubblichi una nuova versione del
-  // pacchetto @bible-strong/avatar-web.
   var AVATAR_WEB_CDN_URL = 'https://esm.sh/@bible-strong/avatar-web@0.1.0';
   var DEFINITION_URL = '/js/vendor/avatar/jonny.avatar.json';
-  var IDLE_AFTER_MS = 45000; // dopo quanto tempo di inattività l'avatar "si addormenta"
-  var REACTION_EXPRESSION_HOLD_MS = 1800; // quanto resta visibile una reazione basata su espressione
+  var IDLE_AFTER_MS = 45000;
+  var REACTION_EXPRESSION_HOLD_MS = 1800;
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var EVENT_CATALOG = {
@@ -82,6 +25,19 @@
   var currentMood = 'idle';
   var moodBeforeSleep = 'idle';
   var idleTimer = null;
+  var lastInteractionAt = 0;
+  var lastGazeAt = 0;
+  var speechTimer = null;
+  var speechHideTimer = null;
+  var speechMessages = [
+    'Non dire gatto se non ce l\'hai nel sacco.',
+    'Piano con quei click... mi offendo in modalità censurata: [bip].',
+    'Sto controllando tutto. Anche quel piccolo errore laggiù.',
+    'Un passo alla volta, campione.',
+    'Questa spesa ha un’aria sospetta. Io non ho detto niente.',
+    'Se risparmiare fosse facile, sarei già in vacanza.',
+    'Promemoria: respirare prima di comprare.'
+  ];
 
   var webModulePromise = null;
   function loadAvatarWebModule() {
@@ -177,7 +133,8 @@
         container: container,
         baseline: null,
         current: { type: null, key: null },
-        reactionTimer: null
+        reactionTimer: null,
+        gazeTimer: null
       };
 
       var initial = resolveKey(instance, (EVENT_CATALOG[currentMood] || EVENT_CATALOG.idle).candidates)
@@ -241,9 +198,80 @@
     else resetIdleTimer();
   }
 
+  function reactToInteraction(eventName) {
+    var now = Date.now();
+    if (now - lastInteractionAt < 700) return;
+    lastInteractionAt = now;
+    react(eventName);
+  }
+
+  function updateGaze(event) {
+    if (!event || event.pointerType === 'touch') return;
+    var now = Date.now();
+    if (now - lastGazeAt < 180 || !instances.length) return;
+    lastGazeAt = now;
+
+    var horizontal = event.clientX < window.innerWidth * .38 ? 'left' : event.clientX > window.innerWidth * .62 ? 'right' : 'center';
+    var vertical = event.clientY < window.innerHeight * .32 ? 'up' : event.clientY > window.innerHeight * .68 ? 'down' : 'center';
+    var candidates = horizontal === 'right'
+      ? ['skeptical-right', 'far-right-glance', 'playful-right', 'attentive-left']
+      : horizontal === 'left'
+        ? ['curious-left', 'surprised-left', 'attentive-left', 'skeptical-left']
+        : vertical === 'up'
+          ? ['upward-side-glance', 'asymmetric-up-left', 'small-attentive']
+          : vertical === 'down'
+            ? ['downward-gaze', 'gentle-downward-gaze', 'wide-downward-gaze']
+            : ['small-attentive', 'neutral'];
+
+    instances.forEach(function (instance) {
+      var resolved = resolveKey(instance, candidates);
+      if (!resolved || resolved.type !== 'expression') return;
+      apply(instance, resolved);
+      if (instance.gazeTimer) clearTimeout(instance.gazeTimer);
+      instance.gazeTimer = setTimeout(function () {
+        apply(instance, instance.baseline);
+      }, 850);
+    });
+  }
+
+  function showSpeech() {
+    if (document.hidden) return;
+    var bubble = document.querySelector('.avatar-bubble.avatar-ready');
+    if (!bubble) return;
+    var speech = bubble.querySelector('.avatar-speech');
+    if (!speech) {
+      speech = document.createElement('div');
+      speech.className = 'avatar-speech';
+      speech.setAttribute('role', 'status');
+      speech.setAttribute('aria-live', 'polite');
+      bubble.appendChild(speech);
+    }
+    speech.textContent = speechMessages[Math.floor(Math.random() * speechMessages.length)];
+    speech.classList.add('is-visible');
+    reactToInteraction('greet');
+    if (speechHideTimer) clearTimeout(speechHideTimer);
+    speechHideTimer = setTimeout(function () {
+      speech.classList.remove('is-visible');
+    }, 4200);
+  }
+
+  function scheduleSpeech() {
+    if (speechTimer) clearTimeout(speechTimer);
+    speechTimer = setTimeout(function () {
+      showSpeech();
+      scheduleSpeech();
+    }, 24000 + Math.floor(Math.random() * 26000));
+  }
+
   ['mousemove', 'keydown', 'touchstart', 'click'].forEach(function (evt) {
     document.addEventListener(evt, wakeUpIfNeeded, { passive: true });
   });
+  document.addEventListener('pointermove', updateGaze, { passive: true });
+  document.addEventListener('pointerdown', function (event) {
+    reactToInteraction(event.target.closest && event.target.closest('.avatar-bubble') ? 'positive' : 'greet');
+  }, true);
+  document.addEventListener('keydown', function () { reactToInteraction('thinking'); }, { passive: true });
+  document.addEventListener('input', function () { reactToInteraction('thinking'); }, { passive: true });
 
   document.addEventListener('visibilitychange', function () {
     instances.forEach(function (instance) {
@@ -286,6 +314,7 @@
     if (Array.isArray(ctx.reactions)) {
       ctx.reactions.forEach(function (name) { react(name); });
     }
+    scheduleSpeech();
   }
 
   window.CiulloAvatar = { mood: setMood, react: react };

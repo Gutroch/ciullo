@@ -1,8 +1,3 @@
-// public/js/jonny-chat.js
-// Gestisce la chat della sezione Jonny. Per ora il backend risponde sempre
-// con un messaggio placeholder "in arrivo" (vedi routes/jonny.js): quando
-// il motore RAG sarà pronto basterà cambiare la risposta del server, questa
-// interfaccia resta la stessa.
 (function () {
   var form = document.getElementById('jonnyForm');
   if (!form) return; // script incluso solo nella pagina Jonny, ma per sicurezza

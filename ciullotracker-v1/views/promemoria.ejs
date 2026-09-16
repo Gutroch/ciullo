@@ -66,6 +66,15 @@
     </main>
   </div>
 
+  <script>
+    window.CiulloAvatarContext = {
+      page: 'promemoria',
+      mood: 'greet'
+    };
+  </script>
+
+  <%- include('partials/footer', { user: user }) %>
+
   <!-- MODAL per aggiungere/modificare -->
   <div id="modal" class="modal-overlay">
     <div class="modal-content">

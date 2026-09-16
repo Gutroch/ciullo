@@ -663,6 +663,8 @@ textarea.input { height: auto; padding: 0.75rem 0.875rem; }
    ============================================================ */
 .table-wrap {
   overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
   background: var(--surface);
   -webkit-backdrop-filter: var(--blur-md);
   backdrop-filter: var(--blur-md);
@@ -1317,6 +1319,12 @@ body > .app-shell, .login-screen { animation: page-enter var(--motion-scene) var
   .site-footer-logout-form { margin-left: auto; }
   .site-footer-credits { flex-basis: 100%; order: 4; line-height: 1.6; }
   .login-card { padding: var(--space-8) var(--space-5); margin-top: 4vh; }
+  .promemoria-table { min-width: 35rem; }
+  .modal-content { padding: var(--space-5); }
+  .modal-content .field-row { flex-direction: column; gap: 0; }
+  .modal-content .field-row .field { min-width: 0; }
+  .modal-actions { flex-wrap: wrap; }
+  .modal-actions .btn { flex: 1 1 8rem; }
   .toast-notification { left: var(--space-4); right: var(--space-4); bottom: calc(var(--bottom-nav-h) + var(--space-4)); text-align: center; }
 }
 

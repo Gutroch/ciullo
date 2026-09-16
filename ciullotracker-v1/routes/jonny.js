@@ -10,7 +10,7 @@ const { requireAuth } = require('../middleware/auth');
 // Risposte "in arrivo": ne scegliamo una a caso per dare un minimo di
 // varietà, ma sono tutte concettualmente lo stesso messaggio placeholder.
 const COMING_SOON_REPLIES = [
-  'Ciao, sono Jonny! Il mio cervello RAG è ancora in allenamento: presto potrò rispondere davvero alle tue domande su spese e budget. Torna a trovarmi a breve! 🚧',
+  'Ciao, sono Jonny! Il mio cervello è ancora in allenamento, come quello del cane: presto potrò rispondere davvero alle tue domande su spese e budget. Torna a trovarmi a breve! 🚧',
   'Per ora sono solo una bella faccia 🙂 Il chatbot collegato ai tuoi dati arriva presto — nel frattempo puoi già provare l\'interfaccia della chat.',
   'Sto ancora imparando! Quando sarò collegato ai tuoi dati potrò aiutarti con le tue spese in tempo reale. A prestissimo!'
 ];
@@ -27,9 +27,6 @@ router.get('/', requireAuth, (req, res) => {
   });
 });
 
-// Endpoint chat: per ora ignora il contenuto del messaggio e risponde
-// sempre con l'avviso "in arrivo". Quando il RAG sarà pronto, qui andrà
-// collegata la logica vera (retrieval sui dati dell'utente + generazione).
 router.post('/api/chat', requireAuth, (req, res) => {
   const message = typeof req.body.message === 'string' ? req.body.message.trim() : '';
   if (!message) {

@@ -18,13 +18,57 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none; /* è decorativo/reattivo, non deve intercettare i click */
+  pointer-events: auto;
   opacity: 0;
   transform: scale(.85);
   transition: opacity .25s var(--ease-standard, ease), transform .25s var(--ease-standard, ease);
+  overflow: visible;
+  cursor: default;
 }
+.avatar-bubble::after {
+  content: 'Jonny';
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 7px);
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-solid, var(--surface));
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+  font-size: .7rem;
+  font-weight: 650;
+  letter-spacing: .01em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px) scale(.94);
+  transition: opacity .18s ease, transform .18s ease;
+  white-space: nowrap;
+}
+.avatar-bubble:hover::after,
+.avatar-bubble:focus-visible::after { opacity: 1; transform: translateY(0) scale(1); }
 .avatar-bubble.avatar-ready { opacity: 1; transform: scale(1); }
 .avatar-bubble.avatar-unavailable { display: none; }
+.avatar-speech {
+  position: absolute;
+  right: 2px;
+  bottom: calc(100% + 30px);
+  width: max-content;
+  max-width: min(220px, 70vw);
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px 12px 3px 12px;
+  background: var(--surface-solid, var(--surface));
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+  font-size: .72rem;
+  line-height: 1.3;
+  opacity: 0;
+  transform: translateY(5px) scale(.96);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.avatar-speech.is-visible { opacity: 1; transform: translateY(0) scale(1); }
 
 @media (max-width: 860px) {
   .avatar-bubble {
@@ -33,6 +77,12 @@
     width: 50px;
     height: 50px;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-bubble,
+  .avatar-bubble::after,
+  .avatar-speech { transition: none; }
 }
 
 /* Card "compagno" nella dashboard: avatar grande + testo accanto */
