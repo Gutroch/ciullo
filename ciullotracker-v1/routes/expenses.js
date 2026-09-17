@@ -466,13 +466,14 @@ router.get('/history', requireAuth, async (req, res) => {
   try {
     await Recurring.processDueRecurring();
     const all = await Expenses.getAllExpenses();
-    const { mese, anno, categoria, sottocategoria } = req.query;
+    const { mese, anno, categoria, sottocategoria, tipo } = req.query;
 
     let filtered = all;
     if (mese) filtered = filtered.filter((e) => new Date(e.data_spesa).getMonth() + 1 === parseInt(mese, 10));
     if (anno) filtered = filtered.filter((e) => new Date(e.data_spesa).getFullYear() === parseInt(anno, 10));
     if (categoria) filtered = filtered.filter((e) => e.categoria === categoria);
     if (sottocategoria) filtered = filtered.filter((e) => e.sottocategoria === sottocategoria);
+    if (tipo === 'ingresso' || tipo === 'uscita') filtered = filtered.filter((e) => e.tipo === tipo);
 
     const anniDisponibili = [...new Set(all.map((e) => new Date(e.data_spesa).getFullYear()))].sort((a, b) => b - a);
     const categorieDisponibili = [...new Set(all.map((e) => e.categoria))].sort();
@@ -493,7 +494,7 @@ router.get('/history', requireAuth, async (req, res) => {
       sottocategorieDisponibili,
       saldoGlobale: saldoGlobale.toFixed(2),
       success: req.query.success || null,
-      filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '', sottocategoria: sottocategoria || '' },
+      filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '', sottocategoria: sottocategoria || '', tipo: tipo || '' },
     });
   } catch (error) {
     console.error(' Errore storico:', error);

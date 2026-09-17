@@ -57,6 +57,14 @@
             <% } %>
           </select>
         </div>
+        <div class="field">
+          <label for="tipo">Movimenti</label>
+          <select class="input" name="tipo" id="tipo">
+            <option value="" <%= !filtri.tipo ? 'selected' : '' %>>Entrambe</option>
+            <option value="ingresso" <%= filtri.tipo === 'ingresso' ? 'selected' : '' %>>Entrate</option>
+            <option value="uscita" <%= filtri.tipo === 'uscita' ? 'selected' : '' %>>Uscite</option>
+          </select>
+        </div>
         <div class="field" style="display: flex; gap: 8px;">
           <button type="submit" class="btn btn-primary" style="flex: 1;">Filtra</button>
           <a href="/history" class="btn btn-secondary" style="flex: 1; text-align: center;">Reset</a>
@@ -66,13 +74,13 @@
       <!-- Export Bar -->
       <div class="export-bar">
         <span class="label">Esporta:</span>
-        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+        <a class="btn btn-secondary" href="/export/csv?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>&tipo=<%= filtri.tipo %>">
           CSV
         </a>
-        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+        <a class="btn btn-secondary" href="/export/xlsx?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>&tipo=<%= filtri.tipo %>">
           Excel
         </a>
-        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>">
+        <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>&tipo=<%= filtri.tipo %>">
           JSON
         </a>
         <span class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">

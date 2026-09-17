@@ -10,12 +10,13 @@ const EXPORT_COLUMNS = ['data_spesa', 'tipo', 'importo', 'categoria', 'sottocate
 const EXPORT_LABELS = ['Data', 'Tipo', 'Importo', 'Categoria', 'Sottocategoria', 'Autore Inserimento', 'Beneficiario', 'Note'];
 
 function filtraSpese(all, query) {
-  const { mese, anno, categoria, sottocategoria } = query;
+  const { mese, anno, categoria, sottocategoria, tipo } = query;
   let filtered = all;
   if (mese) filtered = filtered.filter((e) => new Date(e.data_spesa).getMonth() + 1 === parseInt(mese, 10));
   if (anno) filtered = filtered.filter((e) => new Date(e.data_spesa).getFullYear() === parseInt(anno, 10));
   if (categoria) filtered = filtered.filter((e) => e.categoria === categoria);
   if (sottocategoria) filtered = filtered.filter((e) => e.sottocategoria === sottocategoria);
+  if (tipo === 'ingresso' || tipo === 'uscita') filtered = filtered.filter((e) => e.tipo === tipo);
   return filtered;
 }
 
