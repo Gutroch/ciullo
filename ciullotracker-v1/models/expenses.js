@@ -36,6 +36,7 @@ class Expenses {
         "Pranzo/Cena fuori",
         "Delivery",
         "Spesa per Papà/Familiari",
+        "Acqua",
         "Altro Cibo"
     ],
 
@@ -236,7 +237,7 @@ class Expenses {
       await redis.set(REDIS_KEYS.EXPENSES, JSON.stringify(expenses));
       return newExpense;
     } catch (error) {
-      console.error(' Errore aggiunta spesa:', error.message);
+      console.error(' Errore :', error.message);
       throw error;
     }
   }

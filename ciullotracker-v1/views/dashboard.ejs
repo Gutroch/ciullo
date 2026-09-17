@@ -11,6 +11,7 @@
     <main class="main-content">
       <div class="page-title">Dashboard</div>
       <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
       <div class="chart-period-hint">Per cambiare periodo, allarga un grafico e scegli mese e anno.</div>
       <div class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
         Saldo totale (tutti i periodi):

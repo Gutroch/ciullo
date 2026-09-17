@@ -273,7 +273,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(function() { location.reload(); }, 500);
                     }
                 }
-                showNotification('OK: importo aggiornato a €' + newAmount.toFixed(2), 'success');
+                showNotification(
+                    (data.isIngresso ? 'Entrata' : 'Spesa') + ' aggiornata a €' + newAmount.toFixed(2),
+                    'success'
+                );
             } else {
                 showNotification('Errore: ' + (data.error || 'Aggiornamento fallito'), 'error');
             }
@@ -332,28 +335,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var toast = document.createElement('div');
         toast.className = 'toast-notification ' + type;
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 12px 24px;
-            border-radius: 12px;
-            background: var(--surface, #FFFFFF);
-            border: 1px solid var(--border-color, rgba(29, 30, 28, 0.14));
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            font-weight: 500;
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            max-width: 90%;
-            ${type === 'success' ? 'border-left: 4px solid var(--success); color: var(--success);' : ''}
-            ${type === 'error' ? 'border-left: 4px solid var(--danger); color: var(--danger);' : ''}
-        `;
-        toast.textContent = message;
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        var jonny = document.createElement('div');
+        jonny.className = 'toast-jonny';
+        jonny.setAttribute('data-avatar-mount', '');
+        jonny.setAttribute('data-avatar-size', '100%');
+        jonny.setAttribute('aria-hidden', 'true');
+        toast.appendChild(jonny);
+        toast.appendChild(document.createTextNode(message));
         document.body.appendChild(toast);
 
         setTimeout(function() {
             toast.classList.add('fade-out');
-            toast.style.animation = 'slideOut 0.3s ease forwards';
             setTimeout(function() { toast.remove(); }, 300);
         }, 3000);
     }

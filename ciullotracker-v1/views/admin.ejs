@@ -193,7 +193,15 @@
 
       var toast = document.createElement('div');
       toast.className = 'toast-notification ' + type;
-      toast.textContent = message;
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      var jonny = document.createElement('div');
+      jonny.className = 'toast-jonny';
+      jonny.setAttribute('data-avatar-mount', '');
+      jonny.setAttribute('data-avatar-size', '100%');
+      jonny.setAttribute('aria-hidden', 'true');
+      toast.appendChild(jonny);
+      toast.appendChild(document.createTextNode(message));
       document.body.appendChild(toast);
 
       setTimeout(function () {

@@ -113,7 +113,7 @@ router.post('/recurring', requireAuth, async (req, res) => {
       categorieEntrate: Expenses.CATEGORIE_ENTRATE,
       sottocategorieMap: Expenses.CATEGORIE_SPESE,
       error: null,
-      success: 'Spesa ricorrente salvata correttamente!',
+      success: `${tipo === 'ingresso' ? 'Entrata' : 'Spesa'} ricorrente salvata correttamente!`,
     });
   } catch (error) {
     console.error(' Errore creazione ricorrenza:', error);

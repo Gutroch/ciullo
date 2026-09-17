@@ -30,19 +30,42 @@
   var speechTimer = null;
   var speechHideTimer = null;
   var speechMessages = [
-    'Non dire gatto se non ce l\'hai nel sacco.',
-    'Piano con quei click... mi offendo in modalità censurata: [bip].',
-    'Sto controllando tutto. Anche quel piccolo errore laggiù.',
-    'Un passo alla volta, campione.',
-    'Questa spesa ha un’aria sospetta. Io non ho detto niente.',
-    'Se risparmiare fosse facile, sarei già in vacanza.',
-    'Promemoria: respirare prima di comprare.'
+    "Non dire gatto se non ce l'hai nel sacco.",
+'Chi va piano va sano e va lontano.',
+'Meglio un uovo oggi che una gallina domani.',
+'Non tutte le ciambelle riescono col buco.',
+'A caval donato non si guarda in bocca.',
+"Tra il dire e il fare c'è di mezzo il mare.",
+"L'apparenza inganna.",
+'Chi dorme non piglia pesci.',
+'Il buon giorno si vede dal mattino.',
+'Rosso di sera, bel tempo si spera.',
+'Acqua cheta rompe i ponti.',
+'Can che abbaia non morde.',
+"Quando il gatto non c'è, i topi ballano.",
+'Fare il passo più lungo della gamba.',
+'Essere al verde.',
+'Costare un occhio della testa.',
+'Non avere peli sulla lingua.',
+'Prendere due piccioni con una fava.',
+'Cadere dalle nuvole.',
+'Essere un libro aperto.',
+'Vuotare il sacco.',
+'Mettere le mani avanti.',
+'Gettare la spugna.',
+'Andare a gonfie vele.',
+'Fare orecchie da mercante.',
+'Parlare al vento.',
+'Essere una goccia nel mare.',
+'Non è tutto oro quel che luccica.',
+'Chi troppo vuole nulla stringe.',
+'Il diavolo fa le pentole ma non i coperchi.'
   ];
 
   var webModulePromise = null;
   function loadAvatarWebModule() {
     if (!webModulePromise) {
-      webModulePromise = import(/* webpackIgnore: true */ AVATAR_WEB_CDN_URL).catch(function (err) {
+      webModulePromise = import(AVATAR_WEB_CDN_URL).catch(function (err) {
         console.info('[avatar] Impossibile caricare il motore da ' + AVATAR_WEB_CDN_URL + ' (serve una connessione internet la prima volta).', err);
         return null;
       });
@@ -111,6 +134,8 @@
   }
 
   function mountInstance(container) {
+    if (container.dataset.avatarMounted) return;
+    container.dataset.avatarMounted = '1';
     var size = container.getAttribute('data-avatar-size') || '100%';
     Promise.all([loadAvatarWebModule(), loadDefinition()]).then(function (results) {
       var mod = results[0];
@@ -252,7 +277,7 @@
     if (speechHideTimer) clearTimeout(speechHideTimer);
     speechHideTimer = setTimeout(function () {
       speech.classList.remove('is-visible');
-    }, 4200);
+    }, 8200);
   }
 
   function scheduleSpeech() {
@@ -277,18 +302,16 @@
     instances.forEach(function (instance) {
       if (!instance.api) return;
       if (document.hidden) {
-        try { instance.api.pause(); } catch (err) { /* noop */ }
+        try { instance.api.pause(); } catch (err) { }
       } else if (!prefersReducedMotion) {
         var toResume = instance.current;
-        instance.current = { type: null, key: null }; // forza apply() a non ignorare la richiesta
+        instance.current = { type: null, key: null }; 
         apply(instance, toResume);
       }
     });
     if (!document.hidden) wakeUpIfNeeded();
   });
 
-  // Reagisce al logout su qualunque form action="/logout" presente nella pagina
-  // (sidebar, sheet mobile, footer), ritardando l'invio di poco per far vedere il saluto.
   document.addEventListener('submit', function (e) {
     var form = e.target;
     if (!form || !form.getAttribute || form.getAttribute('action') !== '/logout') return;
@@ -308,6 +331,17 @@
     if (!nodes.length) return;
     nodes.forEach(mountInstance);
 
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.matches && node.matches('[data-avatar-mount]')) mountInstance(node);
+          if (node.querySelectorAll) node.querySelectorAll('[data-avatar-mount]').forEach(mountInstance);
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
     var ctx = window.CiulloAvatarContext || {};
     if (ctx.mood) setMood(ctx.mood);
     else resetIdleTimer();
@@ -319,6 +353,5 @@
 
   window.CiulloAvatar = { mood: setMood, react: react };
 
-  // Script di tipo "module": esegue già dopo il parsing del DOM, come defer.
   init();
 })();

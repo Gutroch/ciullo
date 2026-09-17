@@ -136,23 +136,55 @@ class Recurring {
     try {
       const recurring = await this.getAll();
       const today = new Date();
-      const future = new Date(today);
-      future.setDate(future.getDate() + giorni);
-      
-      return recurring.filter(r => {
-        if (!r.attivo) return false;
-        const giorno = r.giorno;
-        const todayDay = today.getDate();
-        const futureDay = future.getDate();
-        
-        if (giorno >= todayDay && giorno <= futureDay) {
-          return true;
+
+      return recurring.reduce((upcoming, item) => {
+        if (!item.attivo) return upcoming;
+
+        for (let offset = 0; offset <= giorni; offset += 1) {
+          const date = new Date(today);
+          date.setHours(0, 0, 0, 0);
+          date.setDate(today.getDate() + offset);
+
+          if (!this.shouldRunOnDate(item, date)) continue;
+
+          upcoming.push({
+            ...item,
+            prossimaData: [
+              date.getFullYear(),
+              String(date.getMonth() + 1).padStart(2, '0'),
+              String(date.getDate()).padStart(2, '0')
+            ].join('-')
+          });
+          break;
         }
-        return false;
-      });
+
+        return upcoming;
+      }, []);
     } catch (error) {
       console.error(' Errore getUpcoming:', error.message);
       return [];
+    }
+  }
+
+  static shouldRunOnDate(item, date) {
+    if (Number(item.giorno) !== date.getDate()) return false;
+
+    const month = date.getMonth() + 1;
+    switch (item.ricorrenza) {
+      case 'mensile':
+        return true;
+      case 'mesi':
+        return (item.mesi || []).map(Number).includes(month);
+      case 'bimestrale':
+        return month % 2 === 0;
+      case 'trimestrale':
+        return month % 3 === 0;
+      case 'semestrale':
+        return month % 6 === 0;
+      case 'annuale':
+        return month === 1;
+      default:
+        return false;
     }
   }
 
@@ -286,7 +318,7 @@ class Recurring {
       
       return true;
     } catch (error) {
-      console.error(' Errore esecuzione ricorrenza:', error.message);
+      console.error(' Errore :', error.message);
       throw error;
     }
   }

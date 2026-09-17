@@ -5,6 +5,16 @@ const Users = require('../models/users');
 const Recurring = require('../models/recurring');
 const { requireAuth } = require('../middleware/auth');
 
+function operationLabel(tipo) {
+  return tipo === 'ingresso' ? 'entrata' : 'spesa';
+}
+
+function redirectWithSuccess(referer, message) {
+  const target = referer && referer.startsWith('/') ? referer : '/history';
+  const separator = target.includes('?') ? '&' : '?';
+  return target + separator + 'success=' + encodeURIComponent(message);
+}
+
 // Helper: verifica se una data (ISO yyyy-mm-dd) appartiene al mese/anno indicati
 function isInMonth(dateStr, month, year) {
   const d = new Date(dateStr);
@@ -254,6 +264,7 @@ const chartTrend = {
       selectedMonth: month,
       selectedYear: year,
       years,
+      success: req.query.success || null,
     });
   } catch (error) {
     console.error(' Errore dashboard:', error);
@@ -342,7 +353,7 @@ router.post('/expenses', requireAuth, async (req, res) => {
       sottocategorieMap: Expenses.CATEGORIE_SPESE,
       oggi: new Date().toISOString().slice(0, 10),
       error: null,
-      success: 'Spesa registrata correttamente!',
+      success: `${tipoFinale === 'ingresso' ? 'Entrata' : 'Spesa'} registrata correttamente!`,
       expense: null,
       editMode: false,
       ultimeSpese,
@@ -435,7 +446,10 @@ router.post('/expenses/:id/update', requireAuth, async (req, res) => {
 
     // Reindirizza alla pagina da cui si proveniva (history o dashboard)
     const referer = req.headers.referer || '/history';
-    res.redirect(referer);
+    res.redirect(redirectWithSuccess(
+      referer,
+      `${tipoFinale === 'ingresso' ? 'Entrata' : 'Spesa'} aggiornata correttamente!`
+    ));
   } catch (error) {
     console.error(' Errore aggiornamento spesa:', error);
     res.status(500).render('error', {
@@ -478,6 +492,7 @@ router.get('/history', requireAuth, async (req, res) => {
       categorieDisponibili,
       sottocategorieDisponibili,
       saldoGlobale: saldoGlobale.toFixed(2),
+      success: req.query.success || null,
       filtri: { mese: mese || '', anno: anno || '', categoria: categoria || '', sottocategoria: sottocategoria || '' },
     });
   } catch (error) {
@@ -494,8 +509,13 @@ router.get('/history', requireAuth, async (req, res) => {
 
 router.post('/expenses/:id/delete', requireAuth, async (req, res) => {
   try {
+    const expense = await Expenses.getAllExpenses().then(all => all.find(e => e.id === req.params.id));
     await Expenses.deleteExpense(req.params.id);
-    res.redirect('back');
+    const referer = req.headers.referer || '/history';
+    res.redirect(redirectWithSuccess(
+      referer,
+      expense ? `${operationLabel(expense.tipo)[0].toUpperCase() + operationLabel(expense.tipo).slice(1)} eliminata correttamente!` : 'Movimento eliminato correttamente!'
+    ));
   } catch (error) {
     console.error(' Errore eliminazione spesa:', error);
     res.status(500).render('error', {

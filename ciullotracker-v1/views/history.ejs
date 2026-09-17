@@ -12,6 +12,8 @@
       <div class="page-title">Storico &amp; Esportazione</div>
       <div class="page-subtitle">Filtra, modifica e scarica i dati delle spese registrate</div>
 
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
       <!-- Filtri -->
       <form method="GET" action="/history" class="card squircle filters-bar">
         <div class="field">

@@ -124,7 +124,7 @@
             <div class="empty-state">Nessuna spesa ricorrente configurata.</div>
           <% } else { %>
             <% voci.forEach(function(r) { %>
-              <div class="expense-item squircle-sm">
+              <div class="expense-item recurring-item squircle-sm">
                 <div class="expense-meta">
                   <span class="expense-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %><%= r.attivo ? '' : ' · disattivata' %></span>
                   <span class="expense-name"><%= r.descrizione %></span>
@@ -133,7 +133,7 @@
                     <%= r.ricorrenza === 'mensile' ? 'Ogni mese' : 'Mesi: ' + r.mesi.map(function(m){ return mesiNomi[m-1]; }).join(', ') %>
                   </span>
                 </div>
-                <div style="display:flex; align-items:center; gap:10px;">
+                <div class="recurring-actions">
                   <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? 'var(--positive)' : 'var(--danger)' %>;">
                     <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
                   </div>

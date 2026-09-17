@@ -10,7 +10,7 @@
 
     <main class="main-content">
       <div class="page-title"><%= editMode ? 'Modifica' : 'Nuovo' %></div>
-      <div class="page-subtitle"><%= editMode ? 'Aggiorna i dati della spesa' : 'Registra in pochi secondi' %></div>
+      <div class="page-subtitle"><%= editMode ? (expense.tipo === 'ingresso' ? 'Aggiorna i dati dell\'entrata' : 'Aggiorna i dati della spesa') : 'Registra in pochi secondi' %></div>
 
       <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
       <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
