@@ -10,26 +10,21 @@
 
     <main class="main-content">
       <div class="page-title">Jonny</div>
-      <div class="page-subtitle">Il tuo assistente per le spese, in arrivo</div>
-
-      <div class="alert-info">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <span>Il chatbot collegato ai dati è ancora in lavorazione. Puoi già provare l'interfaccia qui sotto: Jonny risponderà per ora con un messaggio informativo.</span>
-      </div>
+      <div class="page-subtitle">Il tuo assistente per le spese</div>
 
       <div class="card jonny-hero">
         <div class="avatar-feature" data-avatar-mount data-avatar-size="100%" aria-hidden="true"></div>
         <div>
           <div class="jonny-hero-title">Ciao, sono Jonny 👋</div>
-          <div class="jonny-hero-subtitle">Presto potrò leggere le tue spese, i tuoi budget e i tuoi promemoria per rispondere alle tue domande in linguaggio naturale.</div>
-          <div class="jonny-hero-status"><span class="dot"></span> In Arrivo - Anteprima Grafica</div>
+          <div class="jonny-hero-subtitle">Chiedimi pure delle vostre spese, del budget o di come usare l'app: rispondo leggendo i vostri dati reali.</div>
+          <div class="jonny-hero-status"><span class="dot"></span> Online</div>
         </div>
       </div>
 
       <div class="card jonny-chat-card">
         <div class="jonny-messages" id="jonnyMessages">
           <div class="jonny-msg jonny-msg-bot">
-            <div class="jonny-msg-bubble">Ciao! Sono Jonny 👋 Scrivimi pure qualcosa: per ora rispondo sempre con un messaggio placeholder, ma l'interfaccia è già quella definitiva.</div>
+            <div class="jonny-msg-bubble">Ciao! Sono Jonny 👋 Chiedimi pure qualcosa sulle vostre spese, sul budget o su come usare l'app.</div>
           </div>
         </div>
         <form class="jonny-input-row" id="jonnyForm">
@@ -38,6 +33,22 @@
         </form>
       </div>
     </main>
+  </div>
+
+  <!-- Popup di conferma: appare SOLO quando Jonny propone di scrivere/modificare/eliminare dati.
+       Nessuna scrittura reale avviene finché l'utente non preme "Conferma". -->
+  <div class="modal-overlay" id="jonnyConfirmOverlay">
+    <div class="modal-content" role="alertdialog" aria-labelledby="jonnyConfirmTitle">
+      <h3 id="jonnyConfirmTitle">⚠️ Conferma richiesta</h3>
+      <div class="field">
+        <p id="jonnyConfirmText" style="margin:0; line-height:1.5;"></p>
+      </div>
+      <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color:var(--text-soft);">Jonny non modifica mai i tuoi dati senza il tuo ok esplicito.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="jonnyConfirmCancel">Annulla</button>
+        <button type="button" class="btn btn-primary" id="jonnyConfirmOk">Conferma</button>
+      </div>
+    </div>
   </div>
 
   <script>

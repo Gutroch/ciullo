@@ -1,10 +1,15 @@
 (function () {
   var form = document.getElementById('jonnyForm');
-  if (!form) return; // script incluso solo nella pagina Jonny, ma per sicurezza
+  if (!form) return;
 
   var input = document.getElementById('jonnyInput');
   var sendBtn = document.getElementById('jonnySend');
   var messages = document.getElementById('jonnyMessages');
+
+  var confirmOverlay = document.getElementById('jonnyConfirmOverlay');
+  var confirmText = document.getElementById('jonnyConfirmText');
+  var confirmOkBtn = document.getElementById('jonnyConfirmOk');
+  var confirmCancelBtn = document.getElementById('jonnyConfirmCancel');
 
   function scrollToBottom() {
     messages.scrollTop = messages.scrollHeight;
@@ -54,6 +59,53 @@
     }
   });
 
+  // --- Popup di conferma per le azioni di scrittura -------------------
+  // Finché il popup è aperto, blocchiamo l'invio di nuovi messaggi:
+  // l'utente deve prima decidere se confermare o annullare la proposta
+  // di Jonny, così non può "accavallarsi" un'altra richiesta nel mezzo.
+  function openConfirmPopup(text) {
+    confirmText.textContent = text;
+    confirmOverlay.classList.add('active');
+    setBusy(true);
+  }
+
+  function closeConfirmPopup() {
+    confirmOverlay.classList.remove('active');
+    setBusy(false);
+    input.focus();
+  }
+
+  function sendConfirmation(confirm) {
+    confirmOkBtn.disabled = true;
+    confirmCancelBtn.disabled = true;
+    showTyping();
+    fetch('/jonny/api/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirm: confirm })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        hideTyping();
+        var reply = (data && data.reply) || (confirm ? 'Fatto.' : 'Annullato.');
+        appendMessage(reply, 'bot');
+        if (window.CiulloAvatar) window.CiulloAvatar.react(confirm ? 'reply' : 'idle');
+      })
+      .catch(function () {
+        hideTyping();
+        appendMessage('Non sono riuscito a completare l\'operazione. Riprova tra poco.', 'bot');
+        if (window.CiulloAvatar) window.CiulloAvatar.react('error');
+      })
+      .finally(function () {
+        confirmOkBtn.disabled = false;
+        confirmCancelBtn.disabled = false;
+        closeConfirmPopup();
+      });
+  }
+
+  confirmOkBtn.addEventListener('click', function () { sendConfirmation(true); });
+  confirmCancelBtn.addEventListener('click', function () { sendConfirmation(false); });
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var text = input.value.trim();
@@ -77,6 +129,14 @@
         var reply = (data && data.reply) || 'Il chatbot non è ancora disponibile, riprova più tardi.';
         appendMessage(reply, 'bot');
         if (window.CiulloAvatar) window.CiulloAvatar.react('reply');
+
+        // Se Jonny propone una scrittura, blocchiamo tutto e chiediamo
+        // conferma esplicita all'utente prima che avvenga qualunque
+        // modifica reale ai dati.
+        if (data && data.requiresConfirmation) {
+          openConfirmPopup(data.confirmationText || reply);
+          return; // non riattivare l'input qui: lo fa closeConfirmPopup()
+        }
       })
       .catch(function () {
         hideTyping();
@@ -84,8 +144,10 @@
         if (window.CiulloAvatar) window.CiulloAvatar.react('error');
       })
       .finally(function () {
-        setBusy(false);
-        input.focus();
+        if (!confirmOverlay.classList.contains('active')) {
+          setBusy(false);
+          input.focus();
+        }
       });
   });
 })();
