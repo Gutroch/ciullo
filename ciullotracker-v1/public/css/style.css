@@ -1,7 +1,6 @@
 /* ============================================================
-   CIULLOTRACKER — sistema visivo monocromatico
-   Bianco e nero, materiali traslucidi, motion fisico.
-   Nessun colore: la gerarchia è fatta di peso, densità e luce.
+  CIULLOTRACKER — interfaccia neutra con colori semantici
+  Rosso e verde sono riservati a uscite ed entrate.
    ============================================================ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,32 +35,31 @@ html, body { height: 100%; min-width: 0; }
   --secondary-soft: var(--surface-alt);
   --warm: var(--text-soft);
   --warm-soft: var(--surface-alt);
-  --danger: rgb(var(--ink) / 1);
-  --danger-soft: rgb(var(--ink) / .07);
+  --danger: #D93025;
+  --danger-soft: rgb(217 48 37 / .10);
   --warning: rgb(var(--ink) / .72);
   --warning-soft: rgb(var(--ink) / .07);
-  --success: rgb(var(--ink) / 1);
-  --success-soft: rgb(var(--ink) / .07);
+  --success: #188038;
+  --success-soft: rgb(24 128 56 / .10);
   --info: rgb(var(--ink) / 1);
   --info-soft: rgb(var(--ink) / .07);
 
-  /* Banda di evidenziazione: distingue le entrate senza usare colore */
-  --highlight: rgb(var(--ink) / .13);
+  --highlight: rgb(24 128 56 / .12);
 
   /* --- Materiali traslucidi ---------------------------------- */
-  --glass-thin: rgb(var(--paper) / .55);
-  --glass: rgb(var(--paper) / .70);
-  --glass-thick: rgb(var(--paper) / .84);
-  --glass-edge: rgb(var(--paper) / .65);   /* bordo alto: la luce che il vetro cattura */
+  --glass-thin: rgb(var(--paper) / .20);
+  --glass: rgb(var(--paper) / .20);
+  --glass-thick: rgb(var(--paper) / .20);
+  --glass-edge: rgb(var(--paper) / .20);
   --glass-line: rgb(var(--ink) / .10);
   --scrim: rgb(var(--ink) / .38);
-  --blur-sm: saturate(120%) blur(12px);
-  --blur-md: saturate(130%) blur(22px);
-  --blur-lg: saturate(140%) blur(36px);
+  --blur-sm: blur(6px);
+  --blur-md: blur(6px);
+  --blur-lg: blur(6px);
 
   /* Retro-compat con markup inline esistente */
-  --positive: var(--text);
-  --negative: var(--text);
+  --positive: var(--success);
+  --negative: var(--danger);
   --muted: var(--text-soft);
   --text-muted: var(--text-soft);
   --text-primary: var(--text);
@@ -104,8 +102,8 @@ html, body { height: 100%; min-width: 0; }
   --text-2xl: 2rem;
   --text-3xl: 2.75rem;
 
-  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, monospace;
+  --font-ui: 'Chewy', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: 'Outfit', system-ui, -apple-system, sans-serif;
 
   /* --- Motion -----------------------------------------------
      Molle critiche per default (nessun rimbalzo): il rimbalzo è
@@ -159,12 +157,18 @@ html, body { height: 100%; min-width: 0; }
 
   --accent: rgb(var(--ink) / .96);
   --on-accent: #08080A;
-  --highlight: rgb(var(--ink) / .18);
+  --success: #81C995;
+  --success-soft: rgb(129 201 149 / .16);
+  --danger: #F28B82;
+  --danger-soft: rgb(242 139 130 / .16);
+  --positive: var(--success);
+  --negative: var(--danger);
+  --highlight: rgb(129 201 149 / .16);
 
-  --glass-thin: rgb(24 24 27 / .55);
-  --glass: rgb(24 24 27 / .66);
-  --glass-thick: rgb(24 24 27 / .82);
-  --glass-edge: rgb(var(--ink) / .16);
+  --glass-thin: rgb(24 24 27 / .20);
+  --glass: rgb(24 24 27 / .20);
+  --glass-thick: rgb(24 24 27 / .20);
+  --glass-edge: rgb(var(--ink) / .20);
   --glass-line: rgb(var(--ink) / .12);
   --scrim: rgb(0 0 0 / .58);
 
@@ -457,25 +461,12 @@ button { font-family: inherit; color: inherit; }
   white-space: nowrap;
   color: var(--text);
 }
-/* Il primo KPI è l'ancora della pagina: pieno inchiostro, invertito. */
-.grid-4 > .kpi-card:first-child {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--on-accent);
-}
-.grid-4 > .kpi-card:first-child .kpi-label { color: rgb(var(--paper) / .70); }
-[data-theme="dark"] .grid-4 > .kpi-card:first-child .kpi-label { color: rgb(0 0 0 / .62); }
-.grid-4 > .kpi-card:first-child .kpi-value,
-.grid-4 > .kpi-card:first-child .kpi-value.positive,
-.grid-4 > .kpi-card:first-child .kpi-value.negative { color: var(--on-accent) !important; }
-
-/* Entrate e uscite restano pieno inchiostro: a distinguerle bastano
-   l'etichetta e il segno già presenti nel dato. */
-.kpi-value.positive, .kpi-value.negative,
-.expense-amount.positive, .expense-amount.negative,
-.saldo-globale-badge strong.positive, .saldo-globale-badge strong.negative,
-.increment-popup .popup-value.new.positive,
-.increment-popup .popup-value.new.negative { color: var(--text); }
+.kpi-value.positive, .expense-amount.positive,
+.saldo-globale-badge strong.positive,
+.increment-popup .popup-value.new.positive { color: var(--positive); }
+.kpi-value.negative, .expense-amount.negative,
+.saldo-globale-badge strong.negative,
+.increment-popup .popup-value.new.negative { color: var(--negative); }
 .kpi-value.neutral, .expense-amount { color: var(--text); font-variant-numeric: tabular-nums; }
 
 /* ============================================================
@@ -610,6 +601,10 @@ textarea.input { height: auto; padding: 0.75rem 0.875rem; }
               color var(--motion-base) var(--ease-standard);
 }
 .segmented-item:has(input:checked) { background: var(--text); color: var(--on-accent); font-weight: 600; }
+.segmented-item.expense-option:has(input:checked) { background: var(--negative); color: #fff; }
+.segmented-item.income-option:has(input:checked) { background: var(--positive); color: #fff; }
+[data-theme="dark"] .segmented-item.expense-option:has(input:checked),
+[data-theme="dark"] .segmented-item.income-option:has(input:checked) { color: #08080A; }
 .segmented-item input { margin: 0; accent-color: currentColor; }
 .segmented-item input[type=radio] { width: 1rem; height: 1rem; }
 
@@ -632,10 +627,10 @@ textarea.input { height: auto; padding: 0.75rem 0.875rem; }
   background: var(--surface-alt); color: var(--text-soft);
   border: 1px solid transparent;
 }
-.badge-success { background: var(--text) !important; color: var(--on-accent) !important; }
-.badge-danger { background: transparent !important; color: var(--text) !important; border-color: var(--border-strong); }
+.badge-success { background: var(--success-soft) !important; color: var(--success) !important; border-color: var(--success-soft); }
+.badge-danger { background: var(--danger-soft) !important; color: var(--danger) !important; border-color: var(--danger-soft); }
 .badge-importo { font-weight: 600; color: var(--text); background: none; padding: 0; border: 0; }
-.badge-ingresso { color: var(--text); }
+.badge-ingresso { color: var(--positive); }
 
 /* ============================================================
    FEED SPESE
@@ -715,6 +710,14 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 650; background: var(
 .filters-bar { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); align-items: flex-end; }
 .filters-bar .field { margin-bottom: 0; min-width: 8.75rem; flex: 1; }
 .filters-bar .btn { height: 2.875rem; }
+.history-filters > summary { display: none; }
+.history-sort {
+  padding: 0; border: 0; background: none; color: inherit; font: inherit;
+  cursor: pointer; white-space: nowrap;
+}
+.history-sort:hover, .history-sort:focus-visible { color: var(--text-primary); }
+.history-sort span { margin-left: 0.2rem; opacity: 0.55; }
+.history-sort[aria-pressed="true"] span { opacity: 1; color: var(--text-primary); }
 
 .export-bar {
   display: flex; gap: 0.625rem; flex-wrap: wrap; margin-bottom: var(--space-5);
@@ -1326,6 +1329,18 @@ body > .app-shell, .login-screen { animation: page-enter var(--motion-scene) var
   .sidebar { display: none; }
   .bottom-nav { display: flex; }
   .main-content { padding: var(--space-5) var(--space-4) calc(var(--bottom-nav-h) + var(--space-8)); }
+  .history-filters { margin-bottom: var(--space-4); }
+  .history-filters > summary {
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: 2.875rem; padding: 0.625rem 1rem; border: 1px solid var(--glass-line);
+    border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary);
+    font-weight: 600; cursor: pointer; list-style: none;
+  }
+  .history-filters > summary::-webkit-details-marker { display: none; }
+  .history-filters > summary::after { content: "+"; font-size: 1.25rem; line-height: 1; }
+  .history-filters[open] > summary { margin-bottom: var(--space-2); }
+  .history-filters[open] > summary::after { content: "-"; }
+  .history-filters .filters-bar { margin-bottom: 0; }
   .new-expense-layout { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr !important; }

@@ -56,11 +56,11 @@
                 <span class="expense-sub"><%= u.ruolo %></span>
               </div>
               <div style="display:flex; gap:8px;">
-                <form action="/admin/users/<%= u.id %>/reset" method="POST" onsubmit="return promptReset(this);">
+                <form action="/admin/users/<%= u.id %>/reset" method="POST" class="js-reset-form">
                   <input type="hidden" name="newPassword" class="reset-input" />
                   <button type="submit" class="btn btn-secondary btn-sm">Reset PW</button>
                 </form>
-                <form action="/admin/users/<%= u.id %>/delete" method="POST" onsubmit="return confirm('Eliminare l\'utente <%= u.username %>?');">
+                <form action="/admin/users/<%= u.id %>/delete" method="POST" class="js-confirm-delete" data-confirm="Eliminare l'utente <%= u.username %>?">
                   <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                 </form>
               </div>
@@ -177,7 +177,7 @@
 
   <%- include('partials/footer', { user: user }) %>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     // Chiede la nuova password prima di inviare il form di reset
     function promptReset(form) {
       var pwd = prompt('Inserisci la nuova password per questo utente:');
@@ -185,6 +185,17 @@
       form.querySelector('.reset-input').value = pwd;
       return true;
     }
+
+    document.querySelectorAll('.js-reset-form').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        if (!promptReset(this)) e.preventDefault();
+      });
+    });
+    document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        if (!confirm(form.dataset.confirm)) e.preventDefault();
+      });
+    });
 
     // ---------- TOAST (stesso pattern usato in Promemoria) ----------
     function showToast(message, type) {

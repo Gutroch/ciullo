@@ -8,14 +8,14 @@ const REDIS_KEYS = {
 };
 
 class Expenses {
-  // Categorie di spesa (uscite) con relative sottocategorie
+    // Categorie di spesa (uscite) con relative sottocategorie
   static CATEGORIE_SPESE = {
     "CASA, UTENZE E TASSE": [
         "Mutuo/Affitto",
         "Spese Condominio",
         "Luce",
         "Gas",
-        "Acqua",
+        "Acqua (bolletta)",
         "Internet/Telefono",
         "Rifiuti/TARI",
         "IMU/Tasse Casa",
@@ -32,11 +32,12 @@ class Expenses {
         "Fruttivendolo",
         "Panetteria/Colazione",
         "Uova",
-        "Spese Veloci/Bar",
+        "Acqua da bere",
+        "Pizza",
         "Pranzo/Cena fuori",
+        "Spese Veloci/Bar",
         "Delivery",
         "Spesa per Papà/Familiari",
-        "Acqua",
         "Altro Cibo"
     ],
 
@@ -58,11 +59,11 @@ class Expenses {
 
     "SALUTE E BENESSERE": [
         "Visite Mediche",
-        "Farmacia",
         "Dentista",
         "Analisi/Esami",
-        "Massaggiatore/Benessere",
+        "Farmacia",
         "Palestra/Sport",
+        "Massaggiatore/Benessere",
         "Altro Salute"
     ],
 
@@ -79,11 +80,11 @@ class Expenses {
 
     "AUTO E TRASPORTI": [
         "Benzina/Carburante",
-        "Problemi/Riparazioni",
         "Bollo",
         "Assicurazione",
         "Revisione",
         "Tagliando",
+        "Problemi/Riparazioni",
         "Autostrada/Pedaggi",
         "Parcheggi",
         "Mezzi pubblici",
@@ -91,11 +92,11 @@ class Expenses {
     ],
 
     "REGALI E OCCASIONI": [
+        "Compleanni/Natale/Ricorrenze",
+        "Matrimoni/Eventi",
         "Fiorista",
         "Regali Interni",
         "Regali Estranei",
-        "Compleanni/Natale/Ricorrenze",
-        "Matrimoni/Eventi",
         "Altro Regali"
     ],
 
@@ -103,16 +104,16 @@ class Expenses {
         "Luca",
         "Diego",
         "Papà",
-        "Spese Figli",
         "Scuola/Attività",
+        "Spese Figli",
         "Contributi familiari",
         "Altro Famiglia"
     ],
 
     "ANIMALI": [
         "Rocky",
-        "Veterinario",
         "Cibo animali",
+        "Veterinario",
         "Toelettatura",
         "Altro Animali"
     ],
@@ -133,18 +134,18 @@ class Expenses {
     ],
 
     "SVAGO, TEMPO LIBERO E VACANZE": [
-        "Hobby",
-        "Cinema/Teatro",
-        "Libri",
         "Viaggi/Vacanze",
         "Hotel/Prenotazioni",
+        "Cinema/Teatro",
+        "Hobby",
+        "Libri",
         "Altro Svago"
     ],
 
     "ISTRUZIONE E FORMAZIONE": [
+        "Tasse scolastiche",
         "Corsi",
         "Libri scolastici",
-        "Tasse scolastiche",
         "Altro Istruzione"
     ],
 
@@ -156,9 +157,9 @@ class Expenses {
     ],
 
     "VARIE O IMPREVISTI": [
-        "Altro",
         "Imprevisti",
-        "Da classificare"
+        "Da classificare",
+        "Altro"
     ]
   };
 

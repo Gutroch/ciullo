@@ -1,4 +1,14 @@
-// routes/auth.js
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,   
+  max: 8,                     
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).render('login', { error: 'Troppi tentativi. Riprova tra qualche minuto.' });
+  }
+});
+
 const express = require('express');
 const router = express.Router();
 const Users = require('../models/users');
@@ -14,7 +24,7 @@ router.post('/logout', (req, res) => {
   });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { username, password, ricordami } = req.body;
   
   try {

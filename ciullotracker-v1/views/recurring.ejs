@@ -141,7 +141,7 @@
                   <form action="/recurring/<%= r.id %>/toggle" method="POST">
                     <button type="submit" class="btn btn-secondary btn-sm"><%= r.attivo ? 'Disattiva' : 'Attiva' %></button>
                   </form>
-                  <form action="/recurring/<%= r.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa voce ricorrente?');">
+                  <form action="/recurring/<%= r.id %>/delete" method="POST" class="js-confirm-delete" data-confirm="Eliminare questa voce ricorrente?">
                     <button type="submit" class="btn btn-danger btn-sm">Elimina</button>
                   </form>
                 </div>
@@ -155,7 +155,13 @@
 
   <%- include('partials/footer', { user: user }) %>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
+    document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        if (!confirm(form.dataset.confirm)) e.preventDefault();
+      });
+    });
+
     const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
     const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;
 

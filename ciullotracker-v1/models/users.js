@@ -120,12 +120,6 @@ class Users {
   static async ensureDefaultAdmin() {
     const users = await this.getAllUsers();
     const adminExists = users.some(u => u.ruolo === 'admin');
-    
-    if (!adminExists) {
-      console.log('⚠️ Nessun admin trovato, creo admin predefinito...');
-      await this.createUser('admin', 'admin123', 'admin');
-      console.log(' Admin creato: username=admin, password=admin123');
-    }
   }
 
   // Importa da CSV (migrazione)
@@ -138,7 +132,7 @@ class Users {
       for (const row of csvData) {
         if (!row.username || users.find((u) => u.username === row.username)) continue;
 
-        const rawPassword = row.password || 'password123';
+        const rawPassword = row.password;
         const passwordHash = BCRYPT_HASH_RE.test(rawPassword)
           ? rawPassword
           : bcrypt.hashSync(rawPassword, bcrypt.genSaltSync(10));

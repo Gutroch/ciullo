@@ -15,7 +15,9 @@
       <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
 
       <!-- Filtri -->
-      <form method="GET" action="/history" class="card squircle filters-bar">
+      <details class="history-filters">
+        <summary>Filtri</summary>
+        <form method="GET" action="/history" class="card squircle filters-bar">
         <div class="field">
           <label for="mese">Mese</label>
           <select class="input" name="mese" id="mese">
@@ -69,7 +71,8 @@
           <button type="submit" class="btn btn-primary" style="flex: 1;">Filtra</button>
           <a href="/history" class="btn btn-secondary" style="flex: 1; text-align: center;">Reset</a>
         </div>
-      </form>
+        </form>
+      </details>
 
       <!-- Export Bar -->
       <div class="export-bar">
@@ -97,14 +100,14 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Tipo</th>
-              <th>Importo</th>
-              <th>Categoria</th>
-              <th>Sottocategoria</th>
-              <th>Inserito da</th>
-              <th>Per conto di</th>
-              <th>Note</th>
+              <th><button type="button" class="history-sort" data-sort-key="date" data-sort-kind="date">Data <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="type" data-sort-kind="text">Tipo <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="amount" data-sort-kind="number">Importo <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="category" data-sort-kind="text">Categoria <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="subcategory" data-sort-kind="text">Sottocategoria <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="created-by" data-sort-kind="text">Inserito da <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="for-person" data-sort-kind="text">Per conto di <span aria-hidden="true">↕</span></button></th>
+              <th><button type="button" class="history-sort" data-sort-key="notes" data-sort-kind="text">Note <span aria-hidden="true">↕</span></button></th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -121,14 +124,14 @@
               </tr>
             <% } else { %>
               <% expenses.forEach(function(e) { %>
-                <tr>
-                  <td><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
-                  <td>
+                <tr data-sort-row>
+                  <td data-sort-date="<%= e.data_spesa %>"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %></td>
+                  <td data-sort-type="<%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %>">
                     <span class="badge <%= e.tipo === 'ingresso' ? 'badge-success' : 'badge-danger' %>">
                       <%= e.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %>
                     </span>
                   </td>
-                  <td>
+                  <td data-sort-amount="<%= Number(e.importo) %>">
                     <div class="qty-btn-group">
                       <button class="qty-btn dec" data-id="<%= e.id %>" title="Decrementa">−</button>
                       <span class="amount-cell" style="color: <%= e.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
@@ -137,17 +140,17 @@
                       <button class="qty-btn inc" data-id="<%= e.id %>" title="Incrementa">+</button>
                     </div>
                   </td>
-                  <td><%= e.categoria || '—' %></td>
-                  <td><%= e.sottocategoria || '—' %></td>
-                  <td><%= e.inserito_da || '—' %></td>
-                  <td><%= e.per_conto_di || '—' %></td>
-                  <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= e.note || '' %>">
+                  <td data-sort-category="<%= e.categoria || '' %>"><%= e.categoria || '—' %></td>
+                  <td data-sort-subcategory="<%= e.sottocategoria || '' %>"><%= e.sottocategoria || '—' %></td>
+                  <td data-sort-created-by="<%= e.inserito_da || '' %>"><%= e.inserito_da || '—' %></td>
+                  <td data-sort-for-person="<%= e.per_conto_di || '' %>"><%= e.per_conto_di || '—' %></td>
+                  <td data-sort-notes="<%= e.note || '' %>" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= e.note || '' %>">
                     <%= e.note || '—' %>
                   </td>
                   <td>
                     <div class="action-buttons">
                       <a href="/expenses/<%= e.id %>/edit" class="btn btn-primary btn-sm" title="Modifica">Mod</a>
-                      <form action="/expenses/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa spesa?');" style="display: inline;">
+                      <form action="/expenses/<%= e.id %>/delete" method="POST" class="js-confirm-delete" data-confirm="Eliminare questa spesa?" style="display: inline;">
                         <button type="submit" class="btn btn-danger btn-sm" title="Elimina">Elim</button>
                       </form>
                     </div>
@@ -181,6 +184,7 @@
   <%- include('partials/footer', { user: user }) %>
 
   <script src="/js/history-buttons.js"></script>
+  <script src="/js/history-table.js"></script>
 
 </body>
 </html>

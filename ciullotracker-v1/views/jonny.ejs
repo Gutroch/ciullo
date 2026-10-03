@@ -21,6 +21,14 @@
         </div>
       </div>
 
+      <div class="jonny-conversation-toolbar">
+        <label for="jonnyConversationSelect">Le tue conversazioni</label>
+        <select class="input" id="jonnyConversationSelect" aria-label="Seleziona una conversazione">
+          <option value="">Caricamento conversazioni...</option>
+        </select>
+        <button type="button" class="btn btn-secondary" id="jonnyNewConversation">Nuova chat</button>
+      </div>
+
       <div class="card jonny-chat-card">
         <div class="jonny-messages" id="jonnyMessages">
           <div class="jonny-msg jonny-msg-bot">
@@ -51,7 +59,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     window.CiulloAvatarContext = {
       page: 'jonny',
       mood: 'greet'

@@ -24,43 +24,37 @@ const { maintenanceGate } = require('./middleware/maintenance');
 
 const app = express();
 
-async function migrateDataFromCsv() {
-  try {
-    console.log('📂 Controllo migrazione dati da CSV...');
+const crypto = require('crypto');
+const helmet = require('helmet');
 
-    const existingExpenses = await Expenses.getAllExpenses();
+app.use((req, res, next) => {
+  res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
 
-    if (existingExpenses.length === 0) {
-      console.log('📂 Nessun dato in Redis, importo da CSV...');
-
-      const fs = require('fs');
-      const dataDir = path.join(__dirname, 'data');
-
-      if (fs.existsSync(path.join(dataDir, 'expenses.csv'))) {
-        const expensesData = readCsv('expenses.csv', ['data_spesa', 'importo', 'tipo', 'categoria', 'sottocategoria', 'inserito_da', 'per_conto_di', 'note']);
-        if (expensesData.rows.length > 0) {
-          const imported = await Expenses.importFromCsv(expensesData.rows);
-          console.log(` Importate ${imported} spese da CSV`);
-        }
-      }
-
-      if (fs.existsSync(path.join(dataDir, 'users.csv'))) {
-        const usersData = readCsv('users.csv', ['username', 'password', 'ruolo']);
-        if (usersData.rows.length > 0) {
-          const imported = await Users.importFromCsv(usersData.rows);
-          console.log(` Importati ${imported} utenti da CSV`);
-        }
-      }
-
-      await Users.ensureDefaultAdmin();
-      await Recurring.processDueRecurring();
-    } else {
-      console.log(` Dati già presenti in Redis (${existingExpenses.length} spese)`);
-    }
-  } catch (error) {
-    console.error(' Errore migrazione dati:', error.message);
-  }
-}
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          (req, res) => `'nonce-${res.locals.cspNonce}'`,
+          'https://cdnjs.cloudflare.com',
+          'https://cdn.jsdelivr.net',
+        ],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        fontSrc: ["'self'"],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+  })
+);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -86,13 +80,16 @@ app.set('trust proxy', 1);
 app.use(
   session({
     store: new RedisStore({ client: getRedisClient(), prefix: 'ciullotracker:sess:' }),
-    secret: process.env.SESSION_SECRET || 'home-budget-tracker-secret-cambia-in-produzione',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 8,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 8,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      },
     },
   })
 );
@@ -127,12 +124,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-migrateDataFromCsv().then(() => {
-  setInterval(() => Recurring.processDueRecurring(), 1000 * 60 * 60 * 6);
-
-  app.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(` CiulloTracker in ascolto sulla porta ${PORT}`);
   });
-});
 
 module.exports = app;

@@ -35,7 +35,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     window.CiulloAvatarContext = {
       page: 'login',
       mood: <%- error ? "'negative'" : "'greet'" %>,
@@ -45,7 +45,7 @@
 
   <%- include('partials/footer', { user: null }) %>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     // Applica il tema anche sulla schermata di login (nessuna sidebar disponibile qui)
   </script>
 </body>

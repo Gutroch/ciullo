@@ -57,6 +57,16 @@
   box-shadow: 0 0 0 3px var(--surface-strong);
 }
 
+.jonny-conversation-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.jonny-conversation-toolbar label { color: var(--text-soft); font-size: 0.85rem; font-weight: 600; }
+.jonny-conversation-toolbar .input { min-width: 0; }
+
 .jonny-chat-card {
   display: flex;
   flex-direction: column;
@@ -125,4 +135,7 @@
 @media (max-width: 640px) {
   .jonny-hero { flex-direction: column; text-align: center; }
   .jonny-hero-subtitle { max-width: none; }
+  .jonny-conversation-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .jonny-conversation-toolbar label { grid-column: 1 / -1; }
+  .jonny-conversation-toolbar .btn { white-space: nowrap; }
 }

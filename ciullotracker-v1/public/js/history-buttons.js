@@ -377,3 +377,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(styleSheet);
     }
 });
+
+document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
+  form.addEventListener('submit', function (e) {
+    if (!confirm(form.dataset.confirm)) e.preventDefault();
+  });
+});

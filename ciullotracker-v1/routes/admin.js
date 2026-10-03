@@ -114,7 +114,7 @@ router.post('/admin/users', requireAuth, requireAdmin, async (req, res) => {
 router.post('/admin/users/:id/reset', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { newPassword } = req.body;
-    const result = await Users.resetPassword(req.params.id, newPassword || 'password123');
+    const result = await Users.resetPassword(req.params.id, newPassword );
     const utenti = await Users.getAllUsers();
     const system = await buildSystemInfo();
     

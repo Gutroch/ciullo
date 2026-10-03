@@ -86,7 +86,7 @@
     </main>
   </div>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     window.CiulloAvatarContext = {
       page: 'budget',
       mood: <%- months.some(function (m) { return m.differenza < 0; }) ? "'negative'" : "'positive'" %>,

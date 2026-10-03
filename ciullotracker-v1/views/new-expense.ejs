@@ -22,10 +22,10 @@
           <div class="field">
             <label>Tipo</label>
             <div class="segmented">
-              <label class="segmented-item">
+              <label class="segmented-item expense-option">
                 <input type="radio" name="tipo" value="uscita" <%= (!editMode || expense.tipo !== 'ingresso') ? 'checked' : '' %>> Spesa
               </label>
-              <label class="segmented-item">
+              <label class="segmented-item income-option">
                 <input type="radio" name="tipo" value="ingresso" <%= (editMode && expense.tipo === 'ingresso') ? 'checked' : '' %>> Ingresso
               </label>
             </div>
@@ -124,7 +124,7 @@
                 <span class="expense-name"><%= e.note && e.note.length ? e.note : e.categoria %></span>
                 <span class="expense-sub"><%= new Date(e.data_spesa).toLocaleDateString('it-IT') %> · <%= e.inserito_da %> → <%= e.per_conto_di %></span>
               </div>
-              <div class="expense-amount"><%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= Number(e.importo).toFixed(2) %></div>
+              <div class="expense-amount <%= e.tipo === 'ingresso' ? 'positive' : 'negative' %>"><%= e.tipo === 'ingresso' ? '+' : '−' %> € <%= Number(e.importo).toFixed(2) %></div>
             </div>
           <% }); %>
         <% } %>
@@ -133,7 +133,7 @@
     </main>
   </div>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     window.CiulloAvatarContext = {
       page: 'new-expense',
       reactions: <%- error ? "['error']" : (success ? "['celebrate']" : "[]") %>
@@ -142,7 +142,7 @@
 
   <%- include('partials/footer', { user: user }) %>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     // Dati passati dal backend
     const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
     const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;
@@ -208,10 +208,12 @@
         // Aggiorna colore e testo del pulsante
         if (tipo === 'ingresso') {
           submitBtn.textContent = editMode ? 'Aggiorna Ingresso' : 'Salva Ingresso';
-          amountInput.style.color = 'var(--accent)';
+          amountInput.style.color = 'var(--positive)';
+          submitBtn.style.backgroundColor = 'var(--positive)';
         } else {
           submitBtn.textContent = editMode ? 'Aggiorna Spesa' : 'Salva Spesa';
-          amountInput.style.color = '';
+          amountInput.style.color = 'var(--negative)';
+          submitBtn.style.backgroundColor = 'var(--negative)';
         }
       }
 

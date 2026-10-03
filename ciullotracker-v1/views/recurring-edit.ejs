@@ -168,7 +168,7 @@
 
   <%- include('partials/footer', { user: user }) %>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     const categorieSpese = <%- JSON.stringify(categorieSpese) %>;
     const categorieEntrate = <%- JSON.stringify(categorieEntrate) %>;
     const voceTipo = '<%= voce.tipo %>';

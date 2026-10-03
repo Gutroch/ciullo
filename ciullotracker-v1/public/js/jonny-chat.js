@@ -5,6 +5,10 @@
   var input = document.getElementById('jonnyInput');
   var sendBtn = document.getElementById('jonnySend');
   var messages = document.getElementById('jonnyMessages');
+  var conversationSelect = document.getElementById('jonnyConversationSelect');
+  var newConversationBtn = document.getElementById('jonnyNewConversation');
+  var activeConversationId = '';
+  var busy = false;
 
   var confirmOverlay = document.getElementById('jonnyConfirmOverlay');
   var confirmText = document.getElementById('jonnyConfirmText');
@@ -41,10 +45,114 @@
     if (el) el.remove();
   }
 
-  function setBusy(busy) {
-    input.disabled = busy;
-    sendBtn.disabled = busy;
+  function setBusy(isBusy) {
+    busy = isBusy;
+    input.disabled = isBusy;
+    sendBtn.disabled = isBusy;
+    conversationSelect.disabled = isBusy;
+    newConversationBtn.disabled = isBusy;
   }
+
+  function renderMessages(history) {
+    messages.replaceChildren();
+    if (!history || history.length === 0) {
+      appendMessage('Ciao! Sono Jonny 👋 Chiedimi pure qualcosa sulle vostre spese, sul budget o su come usare l\'app.', 'bot');
+      return;
+    }
+
+    history.forEach(function (item) {
+      if (item && typeof item.content === 'string') {
+        appendMessage(item.content, item.role === 'user' ? 'user' : 'bot');
+      }
+    });
+  }
+
+  function updateConversationOptions(conversations, selectedId) {
+    conversationSelect.replaceChildren();
+    (conversations || []).forEach(function (conversation) {
+      var option = document.createElement('option');
+      option.value = conversation.id;
+      option.textContent = conversation.title || 'Nuova conversazione';
+      conversationSelect.appendChild(option);
+    });
+    activeConversationId = selectedId || '';
+    conversationSelect.value = activeConversationId;
+    conversationSelect.disabled = busy || !activeConversationId;
+  }
+
+  function handleConversationResponse(data) {
+    updateConversationOptions(data.conversations, data.activeConversationId);
+    renderMessages(data.messages || []);
+  }
+
+  function loadConversations() {
+    setBusy(true);
+    fetch('/jonny/api/conversations')
+      .then(function (res) {
+        if (!res.ok) throw new Error('Impossibile caricare la cronologia');
+        return res.json();
+      })
+      .then(function (data) {
+        handleConversationResponse(data);
+      })
+      .catch(function () {
+        appendMessage('Non sono riuscito a caricare le conversazioni salvate. Ricarica la pagina per riprovare.', 'bot');
+      })
+      .finally(function () {
+        setBusy(false);
+      });
+  }
+
+  loadConversations();
+
+  conversationSelect.addEventListener('change', function () {
+    var conversationId = conversationSelect.value;
+    if (!conversationId) return;
+    setBusy(true);
+    fetch('/jonny/api/conversations/' + encodeURIComponent(conversationId) + '/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Conversazione non disponibile');
+        return res.json();
+      })
+      .then(function (data) {
+        activeConversationId = data.activeConversationId;
+        renderMessages(data.messages || []);
+      })
+      .catch(function () {
+        appendMessage('Non sono riuscito ad aprire questa conversazione. Riprova.', 'bot');
+      })
+      .finally(function () {
+        setBusy(false);
+        input.focus();
+      });
+  });
+
+  newConversationBtn.addEventListener('click', function () {
+    setBusy(true);
+    fetch('/jonny/api/conversations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Impossibile creare una nuova conversazione');
+        return res.json();
+      })
+      .then(function (data) {
+        handleConversationResponse(data);
+      })
+      .catch(function () {
+        appendMessage('Non sono riuscito a creare una nuova conversazione. Riprova.', 'bot');
+      })
+      .finally(function () {
+        setBusy(false);
+        input.focus();
+      });
+  });
 
   function autoGrow() {
     input.style.height = 'auto';
@@ -89,6 +197,9 @@
         hideTyping();
         var reply = (data && data.reply) || (confirm ? 'Fatto.' : 'Annullato.');
         appendMessage(reply, 'bot');
+        if (data && data.conversations) {
+          updateConversationOptions(data.conversations, activeConversationId);
+        }
         if (window.CiulloAvatar) window.CiulloAvatar.react(confirm ? 'reply' : 'idle');
       })
       .catch(function () {
@@ -128,6 +239,9 @@
         hideTyping();
         var reply = (data && data.reply) || 'Il chatbot non è ancora disponibile, riprova più tardi.';
         appendMessage(reply, 'bot');
+        if (data && data.conversations) {
+          updateConversationOptions(data.conversations, activeConversationId);
+        }
         if (window.CiulloAvatar) window.CiulloAvatar.react('reply');
 
         // Se Jonny propone una scrittura, blocchiamo tutto e chiediamo

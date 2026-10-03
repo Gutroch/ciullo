@@ -10,10 +10,13 @@
   <link rel="icon" href="/icons/favicon-v3.svg" />
   <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192-v3.svg">
   <title><%= typeof title !== 'undefined' ? title : 'CiulloTracker' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/avatar.css" />
   <link rel="stylesheet" href="/css/jonny.css" />
-  <script>
+  <script nonce="<%= cspNonce %>">
     // Applica subito il tema salvato per evitare il "flash" bianco/nero al caricamento
     (function () {
       var saved = localStorage.getItem('hbt-theme');
