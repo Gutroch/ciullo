@@ -46,39 +46,62 @@
         heading.setAttribute('aria-sort', 'none');
 
         button.addEventListener('click', function() {
-            var key = button.dataset.sortKey;
-            var kind = button.dataset.sortKind;
-            var attribute = cellAttributes[key];
-            if (!attribute) return;
+    var key = button.dataset.sortKey;
+    var kind = button.dataset.sortKind;
+    var attribute = cellAttributes[key];
+    if (!attribute) return;
 
-            if (currentKey === key) {
-                currentDirection *= -1;
-            } else {
-                currentKey = key;
-                currentDirection = 1;
-            }
+    if (currentKey !== key) {
+        currentKey = key;
+        currentDirection = 1;
+    } else if (currentDirection === 1) {
+        currentDirection = -1;
+    } else {
+        // terzo click: torna all'ordine originale
+        currentKey = '';
+        currentDirection = 1;
+    }
 
-            rows.sort(function(leftRow, rightRow) {
-                var left = leftRow.cells[heading.cellIndex].dataset[attribute] || '';
-                var right = rightRow.cells[heading.cellIndex].dataset[attribute] || '';
-                var difference = compareValues(left, right, kind, currentDirection);
-                return difference || Number(leftRow.dataset.originalIndex) - Number(rightRow.dataset.originalIndex);
-            });
-
-            rows.forEach(function(row) {
-                body.appendChild(row);
-            });
-
-            table.querySelectorAll('.history-sort').forEach(function(otherButton) {
-                var active = otherButton === button;
-                otherButton.setAttribute('aria-pressed', String(active));
-                otherButton.querySelector('span').textContent = active
-                    ? (currentDirection === 1 ? '↑' : '↓')
-                    : '↕';
-                otherButton.closest('th').setAttribute('aria-sort', active
-                    ? (currentDirection === 1 ? 'ascending' : 'descending')
-                    : 'none');
-            });
+    if (currentKey === '') {
+        // Ordine originale: usa l'indice salvato all'avvio
+        rows.sort(function(leftRow, rightRow) {
+            return Number(leftRow.dataset.originalIndex) - Number(rightRow.dataset.originalIndex);
         });
+    } else {
+        rows.sort(function(leftRow, rightRow) {
+            var left = leftRow.cells[heading.cellIndex].dataset[attribute] || '';
+            var right = rightRow.cells[heading.cellIndex].dataset[attribute] || '';
+            var difference = compareValues(left, right, kind, currentDirection);
+            return difference || Number(leftRow.dataset.originalIndex) - Number(rightRow.dataset.originalIndex);
+        });
+    }
+
+    rows.forEach(function(row) {
+        body.appendChild(row);
+    });
+
+    // Aggiorna indicatori su tutti i bottoni
+    table.querySelectorAll('.history-sort').forEach(function(otherButton) {
+        var otherKey = otherButton.dataset.sortKey;
+        var isActive = otherKey === currentKey && currentKey !== '';
+
+        var indicator;
+        if (isActive) {
+            indicator = currentDirection === 1 ? '↑' : '↓';
+        } else {
+            indicator = '↕';
+        }
+
+        otherButton.setAttribute('aria-pressed', String(isActive));
+        otherButton.querySelector('span').textContent = indicator;
+
+        var th = otherButton.closest('th');
+        if (th) {
+            th.setAttribute('aria-sort', isActive
+                ? (currentDirection === 1 ? 'ascending' : 'descending')
+                : 'none');
+        }
+    });
+});
     });
 })();

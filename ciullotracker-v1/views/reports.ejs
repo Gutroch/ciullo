@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include('partials/head', { title: 'Report · CiulloTracker' }) %>
+</head>
+<body>
+  <%- include('partials/splash') %>
+  <div class="app-shell">
+    <%- include('partials/nav', { user: user, active: 'reports' }) %>
+    <main class="main-content report-page">
+      <div class="page-title">Report personalizzati</div>
+      <div class="page-subtitle">Componi un documento pronto da stampare o salvare in PDF</div>
+
+      <form method="GET" action="/reports" class="card squircle report-controls">
+        <div class="field">
+          <label for="dal">Dal</label>
+          <input class="input" type="date" name="dal" id="dal" value="<%= report.from %>">
+        </div>
+        <div class="field">
+          <label for="al">Al</label>
+          <input class="input" type="date" name="al" id="al" value="<%= report.to %>">
+        </div>
+        <div class="field">
+          <label for="categoria">Categoria</label>
+          <select class="input" name="categoria" id="categoria">
+            <option value="">Tutte le categorie</option>
+            <% categories.forEach(function(item) { %>
+              <option value="<%= item %>" <%= report.category === item ? 'selected' : '' %>><%= item %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tipo">Movimenti</label>
+          <select class="input" name="tipo" id="tipo">
+            <option value="">Entrate e uscite</option>
+            <option value="uscita" <%= report.type === 'uscita' ? 'selected' : '' %>>Solo uscite</option>
+            <option value="ingresso" <%= report.type === 'ingresso' ? 'selected' : '' %>>Solo entrate</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="raggruppa">Riepilogo per</label>
+          <select class="input" name="raggruppa" id="raggruppa">
+            <option value="categoria" <%= report.group === 'categoria' ? 'selected' : '' %>>Categoria</option>
+            <option value="mese" <%= report.group === 'mese' ? 'selected' : '' %>>Mese</option>
+            <option value="beneficiario" <%= report.group === 'beneficiario' ? 'selected' : '' %>>Beneficiario</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="intestazione">Intestazione</label>
+          <input class="input" type="text" name="intestazione" id="intestazione" maxlength="100" value="<%= report.heading %>">
+        </div>
+        <div class="field report-title-field">
+          <label for="titolo">Titolo del documento</label>
+          <input class="input" type="text" name="titolo" id="titolo" maxlength="100" value="<%= report.title %>">
+        </div>
+        <button type="submit" class="btn btn-primary">Aggiorna report</button>
+      </form>
+
+      <div class="report-actions">
+        <span><strong><%= report.expenses.length %></strong> movimenti nel periodo</span>
+        <button type="button" class="btn btn-secondary" onclick="window.print()" aria-label="Stampa o salva come PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          Stampa / PDF
+        </button>
+      </div>
+
+      <article class="report-document">
+        <header class="report-document-header">
+          <span class="report-logo" aria-hidden="true"><span class="brand-logo"></span></span>
+          <div class="report-heading"><%= report.heading %></div>
+          <h1><%= report.title %></h1>
+          <p class="report-period">
+            <% if (report.validRange) { %>
+              Dal <%= new Date(report.from + 'T00:00:00').toLocaleDateString('it-IT') %> al <%= new Date(report.to + 'T00:00:00').toLocaleDateString('it-IT') %>
+            <% } else { %>
+              Intervallo date non valido: la data iniziale è successiva a quella finale
+            <% } %>
+          </p>
+          <p class="report-generated">Generato il <%= report.generatedAt.toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'long', timeStyle: 'short' }) %></p>
+        </header>
+
+        <section class="report-metrics" aria-label="Riepilogo importi">
+          <div><span>Entrate</span><strong>€ <%= report.totals.income.toFixed(2) %></strong></div>
+          <div><span>Uscite</span><strong>€ <%= report.totals.expenses.toFixed(2) %></strong></div>
+          <div><span>Saldo</span><strong>€ <%= report.totals.net.toFixed(2) %></strong></div>
+          <div><span>Movimenti</span><strong><%= report.expenses.length %></strong></div>
+        </section>
+
+        <section class="report-section">
+          <h2>Riepilogo per <%= report.group === 'mese' ? 'mese' : report.group === 'beneficiario' ? 'beneficiario' : 'categoria' %></h2>
+          <div class="table-wrap report-table-wrap">
+            <table class="data-table report-table">
+              <thead><tr><th>Voce</th><th>Entrate</th><th>Uscite</th><th>Saldo</th><th>Movimenti</th></tr></thead>
+              <tbody>
+                <% if (!report.summary.length) { %>
+                  <tr><td colspan="5" class="empty-state">Nessun movimento nel periodo selezionato.</td></tr>
+                <% } else { %>
+                  <% report.summary.forEach(function(item) { %>
+                    <tr><td><%= item.label %></td><td>€ <%= item.income.toFixed(2) %></td><td>€ <%= item.expenses.toFixed(2) %></td><td>€ <%= item.net.toFixed(2) %></td><td><%= item.count %></td></tr>
+                  <% }); %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2>Dettaglio movimenti</h2>
+          <div class="table-wrap report-table-wrap">
+            <table class="data-table report-table">
+              <thead><tr><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Categoria</th><th>Per conto di</th><th>Importo</th></tr></thead>
+              <tbody>
+                <% if (!report.expenses.length) { %>
+                  <tr><td colspan="6" class="empty-state">Nessun movimento da mostrare.</td></tr>
+                <% } else { %>
+                  <% report.expenses.forEach(function(item) { %>
+                    <tr>
+                      <td><%= new Date(item.data_spesa + 'T00:00:00').toLocaleDateString('it-IT') %></td>
+                      <td><%= item.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %></td>
+                      <td><%= item.note || item.sottocategoria || '—' %></td>
+                      <td><%= item.categoria || '—' %></td>
+                      <td><%= item.per_conto_di || '—' %></td>
+                      <td>€ <%= (Number(item.importo) || 0).toFixed(2) %></td>
+                    </tr>
+                  <% }); %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <footer class="report-document-footer"><%= report.heading %> · Documento generato il <%= report.generatedAt.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) %></footer>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
