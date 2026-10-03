@@ -432,15 +432,17 @@ button { font-family: inherit; color: inherit; }
 .card:hover { border-color: var(--border-strong); }
 
 .grid { display: grid; gap: var(--space-4); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-4 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); align-items: stretch; }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-4 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-4); align-items: stretch; }
 .grid-2, .grid-4 { row-gap: var(--space-6); }
+.grid > *, .main-content > * { min-width: 0; max-width: 100%; }
 
 /* ============================================================
    KPI — qui sta tutta l'audacia del progetto: i numeri.
    ============================================================ */
 .kpi-card {
+  min-width: 0;
   display: flex; flex-direction: column; justify-content: center;
   align-items: flex-start; gap: 0.375rem;
   min-height: 8.25rem;
@@ -466,6 +468,7 @@ button { font-family: inherit; color: inherit; }
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis;
   color: var(--text);
 }
 .kpi-value.positive, .expense-amount.positive,
@@ -725,6 +728,14 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 650; background: var(
 .filters-bar .field { margin-bottom: 0; min-width: 8.75rem; flex: 1; }
 .filters-bar .btn { height: 2.875rem; }
 .history-filters > summary { display: none; }
+.filters-sheet-head, .filters-scrim { display: none; }
+html.filters-locked { overflow: hidden; }
+@keyframes filtersSheetIn  { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes filtersSheetOut { from { transform: translateY(0); }   to { transform: translateY(100%); } }
+/* Desktop: i filtri restano sempre visibili anche se il <details> è chiuso (browser recenti) */
+@media (min-width: 900px) {
+  .history-filters::details-content { content-visibility: visible; display: block; }
+}
 .history-sort {
   padding: 0; border: 0; background: none; color: inherit; font: inherit;
   cursor: pointer; white-space: nowrap;
@@ -766,7 +777,8 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 650; background: var(
 /* ============================================================
    GRAFICI
    ============================================================ */
-.chart-card { min-height: 18.75rem; padding: var(--space-6); }
+.chart-card { min-height: 18.75rem; padding: var(--space-6); min-width: 0; position: relative; }
+.chart-card canvas { display: block; width: 100%; }
 .chart-title {
   display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
   font-weight: 600; font-size: 0.9375rem; letter-spacing: -0.012em;
@@ -806,6 +818,7 @@ table.data-table tfoot, .budget-table tfoot { font-weight: 650; background: var(
 .saldo-globale-badge {
   font-size: 0.85rem; color: var(--text-soft); display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.375rem 0.8125rem; margin: -0.375rem 0 var(--space-4);
+  max-width: 100%; flex-wrap: wrap; row-gap: 0;
   background: var(--surface); border: 1px solid var(--glass-line); border-radius: var(--radius-pill);
   -webkit-backdrop-filter: var(--blur-sm);
   backdrop-filter: var(--blur-sm);
@@ -1340,23 +1353,89 @@ body > .app-shell, .login-screen { animation: page-enter var(--motion-scene) var
   .topbar, .bottom-nav, .sheet { -webkit-backdrop-filter: var(--blur-md); backdrop-filter: var(--blur-md); }
   .sidebar { display: none; }
   .bottom-nav { display: flex; }
-  .main-content { padding: var(--space-5) var(--space-4) calc(var(--bottom-nav-h) + var(--space-8)); }
+  .main-content { padding: var(--space-5) var(--space-4) calc(var(--bottom-nav-h) + var(--space-8)); overflow-x: clip; }
+  .avatar-companion-card, .avatar-feature { min-width: 0; max-width: 100%; }
+  .avatar-feature svg, .avatar-feature canvas, .avatar-feature img { max-width: 100%; height: auto; }
+  .chart-modal-header { flex-wrap: wrap; }
+  .chart-period-form { flex-wrap: wrap; justify-content: flex-end; }
+  .chart-period-form .input { min-width: 0; }
+  /* --- Filtri storico: il riepilogo è il pulsante, il form diventa un popup --- */
   .history-filters { margin-bottom: var(--space-4); }
   .history-filters > summary {
-    display: flex; align-items: center; justify-content: space-between;
-    min-height: 2.875rem; padding: 0.625rem 1rem; border: 1px solid var(--glass-line);
-    border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary);
-    font-weight: 600; cursor: pointer; list-style: none;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    min-height: 3rem; padding: 0.625rem 1rem; border: 1px solid var(--glass-line);
+    border-radius: var(--radius-md); background: var(--surface); color: var(--text);
+    font-weight: 600; cursor: pointer; list-style: none; -webkit-tap-highlight-color: transparent;
   }
   .history-filters > summary::-webkit-details-marker { display: none; }
   .history-filters > summary::after { content: "+"; font-size: 1.25rem; line-height: 1; }
-  .history-filters[open] > summary { margin-bottom: var(--space-2); }
-  .history-filters[open] > summary::after { content: "-"; }
-  .history-filters .filters-bar { margin-bottom: 0; }
+  .filters-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.4rem; height: 1.4rem; padding: 0 0.4rem; margin-left: 0.5rem;
+    border-radius: var(--radius-pill); background: var(--text); color: var(--on-accent);
+    font-size: 0.75rem; font-weight: 600; vertical-align: middle;
+  }
+
+  .history-filters[open] > .filters-scrim {
+    display: block; position: fixed; inset: 0; z-index: 9989;
+    background: var(--scrim);
+    animation: fadeIn var(--motion-base) var(--ease-standard);
+  }
+  .history-filters[open] .filters-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 9990;
+    display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 0;
+    max-height: calc(100vh - 2.5rem - env(safe-area-inset-top, 0px));
+    max-height: calc(100dvh - 2.5rem - env(safe-area-inset-top, 0px));
+    margin: 0; padding: 0;
+    overflow-y: auto; overscroll-behavior: contain;
+    background: var(--glass-panel);
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    border: 1px solid var(--border); border-bottom: 0;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    box-shadow: 0 -18px 60px rgb(0 0 0 / .24);
+    opacity: 1; transform: none;
+    animation: filtersSheetIn var(--motion-slow) var(--ease-enter);
+  }
+  .history-filters.is-closing > .filters-scrim { opacity: 0; transition: opacity 180ms var(--ease-standard); }
+  .history-filters.is-closing .filters-bar { animation: filtersSheetOut 180ms var(--ease-exit) forwards; }
+
+  .history-filters[open] .filters-sheet-head {
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 2;
+    padding: var(--space-4) var(--space-5) var(--space-3);
+    background: var(--glass-panel); border-bottom: 1px solid var(--border);
+  }
+  .filters-sheet-title { font-size: 1.125rem; font-weight: 650; letter-spacing: -0.018em; }
+  .filters-sheet-close {
+    width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center;
+    border: none; border-radius: 50%; background: var(--surface-alt); color: var(--text);
+    font-size: 1.5rem; line-height: 1; cursor: pointer;
+  }
+  .filters-sheet-close:active { transform: scale(.92); }
+
+  .history-filters[open] .filters-bar .field {
+    flex: none; width: 100%; min-width: 0; margin: 0;
+    padding: var(--space-4) var(--space-5) 0;
+  }
+  .history-filters[open] .filters-bar .field label {
+    display: block; margin-bottom: 0.375rem;
+    font-size: 0.875rem; font-weight: 600; color: var(--text-soft);
+  }
+  .history-filters[open] .filters-bar .input {
+    width: 100%; height: 3rem; font-size: max(16px, 1rem);   /* 16px: niente zoom automatico su iOS */
+  }
+  /* barra azioni sempre visibile in fondo al popup */
+  .history-filters[open] .filters-bar > .field:last-child {
+    position: sticky; bottom: 0; z-index: 2; margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-5) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    background: var(--glass-panel); border-top: 1px solid var(--border);
+  }
+  .history-filters[open] .filters-bar .btn { height: 3rem; }
   .new-expense-layout { grid-template-columns: 1fr; }
-  .grid-3 { grid-template-columns: 1fr; }
-  .grid-2 { grid-template-columns: 1fr !important; }
-  .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .grid-4 > .kpi-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .card { max-width: 100%; border-radius: var(--radius-md); }
   .chart-card { min-width: 0; }
   .chart-modal-content { width: 100%; max-height: calc(100dvh - 1.5rem); }

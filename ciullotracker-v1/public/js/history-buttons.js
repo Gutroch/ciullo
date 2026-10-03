@@ -383,3 +383,81 @@ document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
     if (!confirm(form.dataset.confirm)) e.preventDefault();
   });
 });
+
+// ========== FILTRI STORICO ==========
+// Desktop: il <details> resta sempre aperto (il riepilogo "Filtri" è nascosto).
+// Mobile: "Filtri +" apre il form come popup a bottom sheet, con scrim, chiusura da
+// ×, tap fuori ed Esc, e un badge col numero di filtri attivi.
+(function () {
+  var details = document.querySelector('.history-filters');
+  if (!details) return;
+  var form = details.querySelector('.filters-bar');
+  var summary = details.querySelector(':scope > summary');
+  if (!form || !summary) return;
+
+  var mq = window.matchMedia('(min-width: 900px)');
+  var root = document.documentElement;
+  var closing = false;
+
+  // Intestazione del popup (visibile solo su mobile quando è aperto)
+  var head = document.createElement('div');
+  head.className = 'filters-sheet-head';
+  head.innerHTML = '<span class="filters-sheet-title">Filtri</span>' +
+    '<button type="button" class="filters-sheet-close" aria-label="Chiudi filtri">&times;</button>';
+  form.insertBefore(head, form.firstChild);
+
+  // Scrim cliccabile
+  var scrim = document.createElement('div');
+  scrim.className = 'filters-scrim';
+  details.appendChild(scrim);
+
+  // Badge con il numero di filtri attivi
+  var active = 0;
+  form.querySelectorAll('select').forEach(function (sel) { if (sel.value !== '') active++; });
+  var label = document.createElement('span');
+  label.appendChild(document.createTextNode('Filtri'));
+  if (active > 0) {
+    var badge = document.createElement('span');
+    badge.className = 'filters-count';
+    badge.textContent = String(active);
+    label.appendChild(badge);
+  }
+  summary.textContent = '';
+  summary.appendChild(label);
+
+  function isDesktop() { return mq.matches; }
+
+  function syncMode() {
+    closing = false;
+    details.classList.remove('is-closing');
+    root.classList.remove('filters-locked');
+    details.open = isDesktop();   // desktop: sempre aperto; mobile: chiuso
+  }
+
+  function closeSheet() {
+    if (isDesktop() || !details.open || closing) return;
+    closing = true;
+    details.classList.add('is-closing');
+    setTimeout(function () {
+      details.open = false;
+      details.classList.remove('is-closing');
+      closing = false;
+    }, 190);
+  }
+
+  summary.addEventListener('click', function (e) { if (isDesktop()) e.preventDefault(); });
+  head.querySelector('.filters-sheet-close').addEventListener('click', closeSheet);
+  scrim.addEventListener('click', closeSheet);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+
+  details.addEventListener('toggle', function () {
+    if (isDesktop()) { root.classList.remove('filters-locked'); return; }
+    root.classList.toggle('filters-locked', details.open);
+    if (details.open) head.querySelector('.filters-sheet-close').focus({ preventScroll: true });
+  });
+
+  if (mq.addEventListener) mq.addEventListener('change', syncMode);
+  else if (mq.addListener) mq.addListener(syncMode);
+
+  syncMode();
+})();
