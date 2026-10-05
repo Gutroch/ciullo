@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   '/js/ui-effects.js',
   '/js/calc-input.js',
   '/js/avatar-controller.js',
+  '/js/report-print.js',
   '/js/jonny-chat.js',
   '/manifest.json',
   '/icons/favicon-v3.svg',

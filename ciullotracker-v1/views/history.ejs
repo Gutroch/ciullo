@@ -86,7 +86,7 @@
         <a class="btn btn-secondary" href="/export/json?mese=<%= filtri.mese %>&anno=<%= filtri.anno %>&categoria=<%= filtri.categoria %>&sottocategoria=<%= filtri.sottocategoria %>&tipo=<%= filtri.tipo %>">
           JSON
         </a>
-        <span class="saldo-globale-badge-2" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
+        <span class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
           Saldo totale:
           <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
         </span>
