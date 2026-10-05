@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var AVATAR_WEB_CDN_URL = 'https://esm.sh/@bible-strong/avatar-web@0.1.0';
+  var AVATAR_WEB_CDN_URL = '/js/vendor/avatar/avatar-web.bundle.js';
   var DEFINITION_URL = '/js/vendor/avatar/jonny.avatar.json';
   var IDLE_AFTER_MS = 45000;
   var REACTION_EXPRESSION_HOLD_MS = 1800;
