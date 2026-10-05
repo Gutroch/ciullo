@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ciullotracker-v13.83';
-const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v2';
+const CACHE_NAME = 'ciullotracker-v13.9';
+const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v3';
 
 const STATIC_ASSETS = [
   '/css/style.css',
@@ -81,22 +81,25 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
   // Modulo avatar da CDN: cache-first con aggiornamento in background
   if (url.hostname === 'esm.sh') {
     event.respondWith(
       caches.open(AVATAR_CDN_CACHE).then((cache) =>
         cache.match(req).then((cached) => {
           const network = fetch(req)
-            .then((response) => { cache.put(req, response.clone()); return response; })
-            .catch(() => cached);
+            .then((response) => {
+              // metti in cache solo risposte valide, mai errori
+              if (response && response.ok) cache.put(req, response.clone());
+              return response;
+            })
+            .catch(() => cached || Response.error());
           return cached || network;
         })
       )
     );
     return;
   }
-
+  
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(req).then((cached) => {
