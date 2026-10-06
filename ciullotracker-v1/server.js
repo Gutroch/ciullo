@@ -86,12 +86,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      cookie: {
-        maxAge: 1000 * 60 * 60 * 8,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-      },
+      maxAge: 1000 * 60 * 60 * 8,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
     },
   })
 );
