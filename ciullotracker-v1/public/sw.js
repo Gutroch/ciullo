@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ciullotracker-v13.91';
-const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v4';
+const CACHE_NAME = 'ciullotracker-v13.92';
+const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v_4.5';
 
 const STATIC_ASSETS = [
   '/css/style.css',
