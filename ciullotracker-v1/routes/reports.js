@@ -3,6 +3,7 @@ const Expenses = require('../models/expenses');
 const { requireAuth } = require('../middleware/auth');
 const { analyze, aiPayload, fmt } = require('../services/reportAnalytics');
 const charts = require('../services/reportCharts');
+const { colorFor } = require('../utils/categoryColors');
 const { chatCompletion } = require('../services/groqClient');
 
 const router = express.Router();
@@ -60,6 +61,8 @@ router.get('/', requireAuth, async (req, res) => {
     const categories = [...new Set(allExpenses.map((e) => e.categoria).filter(Boolean))].sort();
 
     const legend = charts.legendItems(data.categories);
+    // Stessi colori categoria di dashboard e storico (anche nella ciambella)
+    if (params.group === 'categoria') legend.forEach((it) => { it.color = colorFor(it.label); });
     const visuals = {
       bars: charts.barsChart(data.series.buckets),
       balance: charts.balanceChart(data.series.buckets),

@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
   <%- include('partials/head', { title: 'Storico · CiulloTracker' }) %>
+  <link rel="stylesheet" href="/css/dashboard-home.css">
 </head>
 <body>
   <%- include('partials/splash') %>
@@ -116,7 +117,7 @@
               <tr>
                 <td colspan="9" class="empty-state">
                   <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                    <span style="font-size: 2rem;">📭</span>
+                    <div class="avatar-feature" data-avatar-mount data-avatar-size="100%" aria-hidden="true" style="width: 88px; height: 88px;"></div>
                     <span>Nessuna spesa trovata con i filtri selezionati.</span>
                     <a href="/expenses/new" class="btn btn-primary" style="display: inline-block;">Aggiungi una spesa</a>
                   </div>
@@ -140,7 +141,7 @@
                       <button class="qty-btn inc" data-id="<%= e.id %>" title="Incrementa">+</button>
                     </div>
                   </td>
-                  <td data-sort-category="<%= e.categoria || '' %>"><%= e.categoria || '—' %></td>
+                  <td data-sort-category="<%= e.categoria || '' %>"><% if (e.categoria) { %><span class="cat-dot" style="background: <%= (categoryColors && categoryColors[e.categoria]) || 'var(--text-faint)' %>"></span><% } %><%= e.categoria || '—' %></td>
                   <td data-sort-subcategory="<%= e.sottocategoria || '' %>"><%= e.sottocategoria || '—' %></td>
                   <td data-sort-created-by="<%= e.inserito_da || '' %>"><%= e.inserito_da || '—' %></td>
                   <td data-sort-for-person="<%= e.per_conto_di || '' %>"><%= e.per_conto_di || '—' %></td>

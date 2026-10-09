@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ciullotracker-v13.95';
+const CACHE_NAME = 'ciullotracker-v14';
 const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v_4.52';
 
 const STATIC_ASSETS = [
@@ -7,6 +7,8 @@ const STATIC_ASSETS = [
   '/css/jonny.css',
   '/js/history-buttons.js',
   '/js/dashboard-charts.js',
+  '/css/dashboard-home.css',
+  '/js/dashboard-home.js', 
   '/js/pwa.js',
   '/js/ui-effects.js',
   '/js/calc-input.js',

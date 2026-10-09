@@ -2,20 +2,24 @@
 <html lang="it">
 <head>
   <%- include('partials/head', { title: 'Dashboard · CiulloTracker' }) %>
+  <link rel="stylesheet" href="/css/dashboard-home.css">
+  <script src="/js/dashboard-home.js" defer></script>
 </head>
 <body>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'dashboard' }) %>
 
-    <main class="main-content">
+    <main class="main-content is-loading">
       <div class="page-title">Dashboard</div>
       <div class="page-subtitle" style="text-transform:capitalize;"><%= meseLabel %></div>
       <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
       <div class="chart-period-hint">Per cambiare periodo, allarga un grafico e scegli mese e anno.</div>
-      <div class="saldo-globale-badge" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
-        Saldo totale (tutti i periodi):
-        <strong class="<%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>">€ <%= saldoGlobale %></strong>
+      <div class="saldo-hero card" title="Somma di tutti gli ingressi meno tutte le uscite, di ogni mese e anno">
+        <div class="saldo-hero-main">
+          <div class="kpi-label">Saldo totale (tutti i periodi)</div>
+          <div class="saldo-hero-value home-num <%= parseFloat(saldoGlobale) < 0 ? 'negative' : 'positive' %>" data-count="<%= saldoGlobale %>" data-prefix="€ ">€ <%= saldoGlobale %></div>
+        </div>
       </div>
 
       <!-- Avatar reattivo: versione grande dedicata alla dashboard -->
@@ -37,15 +41,18 @@
       <div class="grid grid-4">
         <div class="card kpi-card">
           <div class="kpi-label">Totale Uscite</div>
-          <div class="kpi-value negative">€ <%= totale %></div>
+          <div class="kpi-value negative" data-count="<%= totale %>" data-prefix="€ ">€ <%= totale %></div>
+          <svg class="kpi-spark" viewBox="0 0 100 32" data-spark="uscite" aria-hidden="true"></svg>
         </div>
         <div class="card kpi-card">
           <div class="kpi-label">Totale Entrate</div>
-          <div class="kpi-value positive">€ <%= totaleIngressi %></div>
+          <div class="kpi-value positive" data-count="<%= totaleIngressi %>" data-prefix="€ ">€ <%= totaleIngressi %></div>
+          <svg class="kpi-spark" viewBox="0 0 100 32" data-spark="ingressi" aria-hidden="true"></svg>
         </div>
         <div class="card kpi-card">
           <div class="kpi-label">Saldo</div>
-          <div class="kpi-value <%= parseFloat(saldo) < 0 ? 'negative' : 'positive' %>">€ <%= saldo %></div>
+          <div class="kpi-value <%= parseFloat(saldo) < 0 ? 'negative' : 'positive' %>" data-count="<%= saldo %>" data-prefix="€ ">€ <%= saldo %></div>
+          <svg class="kpi-spark" viewBox="0 0 100 32" data-spark="saldo" aria-hidden="true"></svg>
         </div>
         <div class="card kpi-card">
           <div class="kpi-label">Categoria Top</div>
@@ -53,9 +60,27 @@
         </div>
         <div class="card kpi-card">
           <div class="kpi-label">Totale Movimenti</div>
-          <div class="kpi-value neutral"><%= typeof numeroMovimenti !== 'undefined' ? numeroMovimenti : 0 %></div>
+          <div class="kpi-value neutral" data-count="<%= typeof numeroMovimenti !== 'undefined' ? numeroMovimenti : 0 %>" data-decimals="0"><%= typeof numeroMovimenti !== 'undefined' ? numeroMovimenti : 0 %></div>
         </div>
       </div>
+
+      <% if (typeof budgetStato !== 'undefined' && budgetStato && budgetStato.length > 0) { %>
+        <div class="section-kicker">Budget del mese</div>
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="budget-rings">
+            <% budgetStato.forEach(function(b) { var pct = b.limite > 0 ? (b.speso / b.limite) * 100 : 0; %>
+              <div class="budget-ring-card">
+                <div class="budget-ring" data-pct="<%= pct.toFixed(1) %>" role="img" aria-label="<%= b.categoria %>: <%= Math.round(pct) %>% del budget">
+                  <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="track" cx="32" cy="32" r="26"/><circle class="bar" cx="32" cy="32" r="26"/></svg>
+                  <span class="budget-ring-pct"><%= Math.round(pct) %>%</span>
+                </div>
+                <strong><%= b.categoria %></strong>
+                <span class="expense-sub">€ <%= Number(b.speso).toFixed(0) %> di € <%= Number(b.limite).toFixed(0) %></span>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
 
       <div class="section-kicker">Dove va il mese</div>
       <div class="grid grid-2">
@@ -109,6 +134,12 @@
         <canvas id="chartTrend"></canvas>
       </div>
 
+      <div class="section-kicker">Calendario delle spese</div>
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="chart-title"><span>Spese giorno per giorno</span></div>
+        <div id="spendHeatmap" class="heatmap" data-year="<%= selectedYear %>" data-month="<%= selectedMonth %>"></div>
+      </div>
+
       <div class="section-kicker">Da ricordare</div>
       <% if (prossimeScadenze && prossimeScadenze.length > 0) { %>
         <div class="card" style="margin-bottom: 24px;">
@@ -116,12 +147,15 @@
             <span>Prossime Scadenze Ricorrenti</span>
             <a href="/recurring" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Gestisci</a>
           </div>
-          <% prossimeScadenze.forEach(function(r) { %>
+          <% prossimeScadenze.forEach(function(r) {
+               var d = new Date(r.prossimaData);
+               var giorni = Math.max(0, Math.ceil((d - new Date()) / 86400000)); %>
             <div class="expense-item">
+              <div class="due-date"><b><%= d.getDate() %></b><span><%= d.toLocaleDateString('it-IT', { month: 'short' }) %></span></div>
               <div class="expense-meta">
                 <span class="expense-cat"><%= r.categoria %><%= r.sottocategoria ? ' → ' + r.sottocategoria : '' %></span>
                 <span class="expense-name"><%= r.descrizione %></span>
-                <span class="expense-sub">Scade il <%= new Date(r.prossimaData).toLocaleDateString('it-IT') %></span>
+                <span class="expense-sub"><span class="due-chip <%= giorni <= 7 ? 'is-soon' : '' %>"><%= giorni === 0 ? 'oggi' : 'tra ' + giorni + (giorni === 1 ? ' giorno' : ' giorni') %></span></span>
               </div>
               <div class="expense-amount" style="color: <%= r.tipo === 'ingresso' ? 'var(--positive)' : 'var(--negative)' %>;">
                 <%= r.tipo === 'ingresso' ? '+' : '−' %> € <%= r.importo.toFixed(2) %>
@@ -138,9 +172,11 @@
           <a href="/history" style="font-weight:400; font-size:0.85rem; text-decoration:underline; color: var(--accent);">Vedi tutti</a>
         </div>
         <% if (ultimeSpese.length === 0) { %>
-          <div class="empty-state">
-            Nessun movimento registrato questo mese. 
-            <a href="/expenses/new">Aggiungine uno</a>.
+          <div class="empty-jonny">
+            <div class="avatar-feature" data-avatar-mount data-avatar-size="100%" aria-hidden="true"></div>
+            <div class="empty-jonny-title">Questo mese è ancora tutto da scrivere</div>
+            <p>Jonny non ha visto nessun movimento. Aggiungi il primo e qui compariranno contatori, budget e calendario.</p>
+            <a class="btn btn-primary" href="/expenses/new">Aggiungi un movimento</a>
           </div>
         <% } else { %>
           <% ultimeSpese.forEach(function(e) { %>
@@ -209,6 +245,8 @@
       s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';
       document.head.appendChild(s);
     }
+
+    window.CiulloCategoryMap = <%- JSON.stringify(typeof categoryColors !== 'undefined' ? categoryColors : {}) %>;
 
     var dashboardChartData = {
       categorie: <%- JSON.stringify(chartCategorie) %>,
@@ -392,7 +430,9 @@
           chartInstance = null;
         }
 
-        var bgColors = getPalette(labels.length);
+        var bgColors = (typeof window.CiulloCategoryColor === 'function')
+          ? labels.map(function (l) { return window.CiulloCategoryColor(l); })
+          : getPalette(labels.length);
 
         if (currentView === 'macro') {
           chartInstance = new Chart(ctxCategorie, {

@@ -3,6 +3,8 @@ const router = express.Router();
 const Expenses = require('../models/expenses');
 const Users = require('../models/users');
 const Recurring = require('../models/recurring');
+const Budget = require('../models/budget');
+const { colorMap } = require('../utils/categoryColors');
 const { requireAuth } = require('../middleware/auth');
 
 function operationLabel(tipo) {
@@ -231,6 +233,16 @@ const chartTrend = {
     // Prossime scadenze (7 giorni)
     const prossimeScadenze = await Recurring.getUpcoming(7);
 
+    // Budget del mese (il modello salva un solo importo previsto per mese)
+    const budgetStato = [];
+    try {
+      const budgetAnno = await Budget.getBudget(year);
+      const limite = Number(budgetAnno && budgetAnno[month - 1]) || 0;
+      if (limite > 0) budgetStato.push({ categoria: 'Budget del mese', speso: totale, limite });
+    } catch (budgetError) {
+      console.error(' Budget non disponibile per la dashboard:', budgetError.message);
+    }
+
     // Mese label formattata
     const meseLabel = now.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
 
@@ -246,6 +258,8 @@ const chartTrend = {
       // Liste
       ultimeSpese,
       prossimeScadenze,
+      budgetStato,
+      categoryColors: colorMap(),
       // Grafici
       chartCategorie,
       chartSottocategorie,
@@ -486,6 +500,7 @@ router.get('/history', requireAuth, async (req, res) => {
     }, 0);
 
     res.render('history', {
+      categoryColors: colorMap(),
       user: req.session.user,
       expenses: filtered,
       categorie: Object.keys(Expenses.CATEGORIE_SPESE), // 👈 MODIFICA QUESTA RIGA

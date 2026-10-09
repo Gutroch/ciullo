@@ -1,0 +1,77 @@
+/* dashboard-home.css — nuova Home: contatori, anelli budget, sparkline, heatmap, vuoti, scheletri.
+   Usa solo i token di style.css. Caricalo DOPO style.css e avatar.css. */
+:root {
+  --ring-ok: #1f9d63; --ring-warn: #d9901a; --ring-bad: var(--danger);
+  --cat-1: #3b6fd4; --cat-2: #1f9d63; --cat-3: #e08a1e; --cat-4: #8b5cf6;
+  --cat-5: #d6336c; --cat-6: #0ea5b7; --cat-7: #8a6d3b; --cat-8: #6b7280;
+}
+.kpi-value, .home-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* Sparkline dentro i KPI */
+.kpi-spark { display: block; width: 100%; max-width: 120px; height: 34px; margin-top: var(--space-2); }
+.kpi-spark path.line { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.kpi-spark path.area { fill: var(--accent-soft); stroke: none; }
+
+/* Saldo totale (sostituisce il badge) */
+.saldo-hero { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: center; margin-bottom: var(--space-6); }
+.saldo-hero-main { flex: 1 1 260px; min-width: 0; }
+.saldo-hero-value { font-size: clamp(2rem, 7vw, 2.75rem); font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
+.saldo-hero-chart { flex: 2 1 340px; min-width: 0; }
+
+/* Anelli budget */
+.budget-rings { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.budget-ring-card { flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--surface-alt); border-radius: var(--radius-md); text-align: center; }
+.budget-ring { position: relative; width: 92px; height: 92px; }
+.budget-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.budget-ring circle { fill: none; stroke-width: 7; }
+.budget-ring .track { stroke: var(--border); }
+.budget-ring .bar { stroke: var(--ring-ok); stroke-linecap: round; transition: stroke-dashoffset .9s var(--ease-standard, ease); }
+.budget-ring.is-warn .bar { stroke: var(--ring-warn); }
+.budget-ring.is-bad .bar { stroke: var(--ring-bad); }
+.budget-ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+/* Heatmap calendario */
+.heatmap { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; max-width: 560px; }
+.heatmap-dow { text-align: center; font-size: .68rem; font-weight: 700; color: var(--text-faint); text-transform: uppercase; }
+.heatmap-cell { aspect-ratio: 1; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 600; background: var(--surface-alt); color: var(--text-soft); }
+.heatmap-cell[data-l="1"] { background: rgb(var(--ink) / .16); color: var(--text); }
+.heatmap-cell[data-l="2"] { background: rgb(var(--ink) / .38); color: var(--text); }
+.heatmap-cell[data-l="3"] { background: rgb(var(--ink) / .68); color: var(--on-accent, #fff); }
+.heatmap-cell[data-l="4"] { background: rgb(var(--ink) / .92); color: var(--on-accent, #fff); }
+.heatmap-cell.is-pad { background: none; }
+
+/* Scadenze ricorrenti: data a sinistra */
+.due-date { flex: none; width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--surface-alt); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.due-date b { font-size: 1rem; } .due-date span { font-size: .6rem; font-weight: 700; text-transform: uppercase; color: var(--text-soft); }
+.due-chip { font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface-strong); color: var(--text-soft); }
+.due-chip.is-soon { background: rgb(217 144 26 / .16); color: #8a5a0b; }
+
+.cat-dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 3px; margin-right: .45rem; vertical-align: baseline; }
+
+/* Stati vuoti con Jonny */
+.empty-jonny { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; padding: var(--space-8, 2rem) var(--space-4); }
+.empty-jonny .avatar-feature { width: 96px; height: 96px; }
+.empty-jonny-title { font-weight: 700; font-size: var(--text-lg); }
+.empty-jonny p { margin: 0; max-width: 38ch; color: var(--text-soft); font-size: .9rem; }
+
+/* Scheletri (dalla seconda visita, al posto dello splash) */
+@keyframes home-shimmer { to { background-position: -200% 0; } }
+.is-loading .kpi-value, .is-loading .budget-ring-card, .is-loading .heatmap, .is-loading .saldo-hero-value {
+  color: transparent !important; border-radius: var(--radius-sm); pointer-events: none;
+  background: linear-gradient(90deg, var(--surface-alt) 25%, var(--surface-strong) 50%, var(--surface-alt) 75%) 0 0 / 200% 100%;
+  animation: home-shimmer 1.3s linear infinite;
+}
+.is-loading .kpi-spark, .is-loading .heatmap > * , .is-loading .budget-ring { visibility: hidden; }
+
+/* Mobile */
+@media (max-width: 899px) {
+  .saldo-hero { gap: var(--space-3); }
+  .saldo-hero-chart { flex-basis: 100%; }
+  .budget-ring-card { flex-basis: calc(50% - var(--space-3)); }
+  .budget-ring-card:last-child:nth-child(odd) { flex-basis: 100%; }
+  .heatmap { max-width: none; gap: 4px; }
+  .kpi-spark { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .budget-ring .bar { transition: none; } .is-loading * { animation: none !important; }
+}
