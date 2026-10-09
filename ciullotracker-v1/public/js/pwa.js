@@ -1,11 +1,3 @@
-/* ============================================================
-   PWA — registrazione e aggiornamenti
-   Un aggiornamento va notificato in tre momenti diversi, perché
-   può arrivare in tre momenti diversi:
-     1. c'è già una versione in attesa quando la pagina si apre
-     2. ne viene trovata una mentre la pagina è aperta
-     3. ne viene trovata una al ritorno sull'app
-   ============================================================ */
 (function () {
   'use strict';
 
@@ -18,9 +10,6 @@
 
   var reloading = false;
   var hadController = !!navigator.serviceWorker.controller;
-
-  // Il reload avviene quando il nuovo worker prende davvero il controllo,
-  // non dopo un timeout a occhio.
   navigator.serviceWorker.addEventListener('controllerchange', function () {
     if (!hadController || reloading) return;
     reloading = true;
@@ -31,15 +20,10 @@
     navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
       .then(function (reg) {
 
-        // 1. Versione già pronta e in attesa da una sessione precedente
         if (reg.waiting && navigator.serviceWorker.controller) {
           mostraAvviso(reg.waiting);
         }
 
-        // 2. Versione trovata mentre l'app è aperta.
-        //    Va agganciato anche l'eventuale worker già in installazione:
-        //    se "updatefound" è scattato prima che register() risolvesse,
-        //    l'evento sarebbe andato perso.
         if (reg.installing) osserva(reg.installing);
         reg.addEventListener('updatefound', function () {
           osserva(reg.installing);
@@ -63,7 +47,7 @@
         window.addEventListener('online', controlla);
       })
       .catch(function (err) {
-        console.error('Registrazione del service worker non riuscita:', err);
+         //marameo
       });
   });
 
@@ -78,9 +62,9 @@
     overlay.innerHTML =
       '<div class="update-box">' +
         '<span class="update-mark" aria-hidden="true"></span>' +
-        '<h2 id="update-title">Nuova versione disponibile</h2>' +
-        '<p>Aggiorna per continuare con l\'ultima versione di CiulloTracker.</p>' +
-        '<button type="button" id="update-now">Aggiorna ora</button>' +
+        '<h2 id="update-title">Aooo ci sta da aggiornà</h2>' +
+        '<p>Totti va ad un negozio di elettrodomestici per comprarsi uno stereo. Il commesso gli fa: "salve cosa desidera" e Totti: "damme \'no stereo" ed il commesso: "Sony?" e Totti: "no, nun so sonà". </p>' +
+        '<button type="button" id="update-now">Schiacciame\'</button>' +
       '</div>';
     document.body.appendChild(overlay);
 
