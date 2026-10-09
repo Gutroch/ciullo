@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ciullotracker-v13.93';
-const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v_4.51';
+const CACHE_NAME = 'ciullotracker-v13.95';
+const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v_4.52';
 
 const STATIC_ASSETS = [
   '/css/style.css',
@@ -19,7 +19,9 @@ const STATIC_ASSETS = [
   '/icons/icon-192-v3.svg',
   '/icons/icon-512-v3.svg',
   '/js/vendor/avatar/avatar-web.bundle.js',
-  '/js/vendor/avatar/jonny.avatar.json'
+  '/js/vendor/avatar/jonny.avatar.json',
+  '/css/report.css',   
+  '/fonts/figtree-latin-wght-normal.woff2'
 ];
 
 async function precache(cache) {
