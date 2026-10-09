@@ -107,6 +107,7 @@ app.use('/budget', budgetRoutes);
 app.use('/promemoria', promemoriaRoutes);
 app.use('/jonny', jonnyRoutes);
 app.use('/reports', reportsRoutes);
+app.use('/receipt', require('./routes/receipt'));
 
 app.use((req, res) => {
   res.status(404).render('error', {

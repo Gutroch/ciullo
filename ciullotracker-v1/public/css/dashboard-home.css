@@ -75,3 +75,15 @@
 @media (prefers-reduced-motion: reduce) {
   .budget-ring .bar { transition: none; } .is-loading * { animation: none !important; }
 }
+
+/* Scansione scontrino */
+.quick-scan { display: inline-flex; align-items: center; gap: .5rem; margin: 0 0 var(--space-4); min-height: 44px; }
+.receipt-card { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4); margin-bottom: var(--space-5); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); background: var(--surface-alt); }
+.receipt-card-text { flex: 1 1 200px; display: flex; flex-direction: column; gap: 2px; font-size: .85rem; color: var(--text-soft); }
+.receipt-card-text strong { color: var(--text); font-size: .95rem; }
+.receipt-card .btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; }
+.receipt-status { flex: 1 1 100%; font-size: .85rem; color: var(--text-soft); }
+.receipt-status:empty { display: none; }
+.receipt-status.is-error { color: var(--danger); }
+.receipt-status.is-ok { color: var(--text); font-weight: 600; }
+.is-ai-filled { outline: 2px solid var(--ring-warn, #d9901a); outline-offset: 1px; }

@@ -13,7 +13,7 @@ const DEFAULT_MODEL = 'openai/gpt-oss-20b';
  * @param {number} [params.temperature]
  * @returns {Promise<Object>} il messaggio dell'assistente (choices[0].message)
  */
-async function chatCompletion({ messages, tools, tool_choice, temperature = 0.3 }) {
+async function chatCompletion({ messages, tools, tool_choice, temperature = 0.3, model, response_format, max_tokens }) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     const err = new Error('GROQ_API_KEY non configurata');
@@ -22,10 +22,12 @@ async function chatCompletion({ messages, tools, tool_choice, temperature = 0.3 
   }
 
   const body = {
-    model: process.env.GROQ_MODEL || DEFAULT_MODEL,
+    model: model || process.env.GROQ_MODEL || DEFAULT_MODEL,
     messages,
     temperature,
   };
+  if (response_format) body.response_format = response_format;
+  if (max_tokens) body.max_tokens = max_tokens;
 
   if (tools && tools.length > 0) {
     body.tools = tools;

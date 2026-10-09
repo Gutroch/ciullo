@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ciullotracker-v14';
+const CACHE_NAME = 'ciullotracker-v14.1';
 const AVATAR_CDN_CACHE = 'ciullotracker-avatar-cdn-v_4.52';
 
 const STATIC_ASSETS = [
