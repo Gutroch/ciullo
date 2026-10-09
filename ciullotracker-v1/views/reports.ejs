@@ -2,16 +2,33 @@
 <html lang="it">
 <head>
   <%- include('partials/head', { title: 'Report · CiulloTracker' }) %>
+  <link rel="stylesheet" href="/css/report.css">
 </head>
+<%
+  var d = report.data;
+  var v = report.visuals;
+  var sel = function (key) { return report.selected.indexOf(key) !== -1; };
+  var hid = function (key) { return sel(key) ? '' : 'hidden'; };
+  var logoSvg = '<svg viewBox="0 0 192 192" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="96" cy="96" r="52" stroke-width="8" stroke-dasharray="107.09 219.63" transform="rotate(-88 96 96)"/><circle cx="96" cy="96" r="52" stroke-width="22" stroke-dasharray="123.43 203.30" transform="rotate(36 96 96)"/></g></svg>';
+  var chip = function (delta, goodWhenUp) {
+    if (delta === null || delta === undefined) return '';
+    var up = delta >= 0;
+    var good = goodWhenUp ? up : !up;
+    if (Math.abs(delta) < 0.005) return '<span class="rp-chip-delta is-flat">= stabile</span>';
+    return '<span class="rp-chip-delta ' + (good ? 'is-good' : 'is-bad') + '">' + (up ? '▲ ' : '▼ ') + fmt.pct(Math.abs(delta)) + ' vs periodo prec.</span>';
+  };
+  var netClass = function (n) { return n > 0.005 ? 'is-pos' : n < -0.005 ? 'is-neg' : ''; };
+  var groupLabel = report.group === 'mese' ? 'mese' : report.group === 'beneficiario' ? 'beneficiario' : 'categoria';
+%>
 <body>
   <%- include('partials/splash') %>
   <div class="app-shell">
     <%- include('partials/nav', { user: user, active: 'reports' }) %>
     <main class="main-content report-page">
       <div class="page-title">Report personalizzati</div>
-      <div class="page-subtitle">Componi un documento pronto da stampare o salvare in PDF</div>
+      <div class="page-subtitle">Scegli periodo e sezioni, poi stampa o salva in PDF</div>
 
-      <form method="GET" action="/reports" class="card squircle report-controls">
+      <form method="GET" action="/reports" class="card squircle report-controls" id="reportForm">
         <div class="field">
           <label for="dal">Dal</label>
           <input class="input" type="date" name="dal" id="dal" value="<%= report.from %>">
@@ -53,82 +70,244 @@
           <label for="titolo">Titolo del documento</label>
           <input class="input" type="text" name="titolo" id="titolo" maxlength="100" value="<%= report.title %>">
         </div>
+
+        <fieldset class="rp-sections">
+          <legend>Sezioni da includere</legend>
+          <input type="hidden" name="sez_set" value="1">
+          <% report.sections.forEach(function (s) { %>
+            <label class="rp-toggle">
+              <input type="checkbox" name="sezioni" value="<%= s.key %>" data-toggle-section="<%= s.key %>" <%= sel(s.key) ? 'checked' : '' %>>
+              <span><%= s.label %></span>
+            </label>
+          <% }); %>
+        </fieldset>
+
         <button type="submit" class="btn btn-primary">Aggiorna report</button>
       </form>
 
       <div class="report-actions">
-        <span><strong><%= report.expenses.length %></strong> movimenti nel periodo</span>
-        <button type="button" class="btn btn-secondary" id="reportPrintButton" aria-label="Stampa o salva come PDF">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-          Stampa / PDF
-        </button>
+        <span><strong><%= d.expenses.length %></strong> movimenti nel periodo</span>
+        <div class="rp-action-buttons">
+          <button type="button" class="btn btn-secondary" id="reportAiButton" <%= d.totals.count ? '' : 'disabled' %>>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+            <span id="reportAiLabel">Analisi AI</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="reportPrintButton" aria-label="Stampa o salva come PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Stampa / PDF
+          </button>
+        </div>
       </div>
 
-      <article class="report-document">
-        <header class="report-document-header">
-          <span class="report-logo" aria-hidden="true"><span class="brand-logo"></span></span>
-          <div class="report-heading"><%= report.heading %></div>
-          <h1><%= report.title %></h1>
-          <p class="report-period">
-            <% if (report.validRange) { %>
-              Dal <%= new Date(report.from + 'T00:00:00').toLocaleDateString('it-IT') %> al <%= new Date(report.to + 'T00:00:00').toLocaleDateString('it-IT') %>
-            <% } else { %>
-              Intervallo date non valido: la data iniziale è successiva a quella finale
+      <article class="report-document" id="reportDocument"
+               data-query="dal=<%= report.from %>&al=<%= report.to %>&categoria=<%= encodeURIComponent(report.category) %>&tipo=<%= report.type %>">
+        <table class="rp-frame" role="presentation">
+          <tbody><tr><td>
+
+            <header class="rp-header">
+              <div class="rp-brand">
+                <span class="rp-logo"><%- logoSvg %></span>
+                <div>
+                  <div class="rp-kicker">Report finanziario</div>
+                  <div class="rp-heading"><%= report.heading %></div>
+                </div>
+              </div>
+              <div class="rp-meta">
+                <div class="rp-period">
+                  <% if (report.validRange) { %>
+                    <%= fmt.date(report.from) %> – <%= fmt.date(report.to) %> · <%= d.days %> giorni
+                  <% } else { %>
+                    Intervallo non valido: la data iniziale è successiva a quella finale
+                  <% } %>
+                </div>
+                <div class="rp-generated">Generato il <%= report.generatedAt.toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'long', timeStyle: 'short' }) %></div>
+              </div>
+            </header>
+            <h1 class="rp-title"><%= report.title %></h1>
+
+            <% if (!d.totals.count) { %>
+              <p class="rp-empty">Nessun movimento nel periodo selezionato.</p>
             <% } %>
-          </p>
-          <p class="report-generated">Generato il <%= report.generatedAt.toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'long', timeStyle: 'short' }) %></p>
-        </header>
 
-        <section class="report-metrics" aria-label="Riepilogo importi">
-          <div><span>Entrate</span><strong>€ <%= report.totals.income.toFixed(2) %></strong></div>
-          <div><span>Uscite</span><strong>€ <%= report.totals.expenses.toFixed(2) %></strong></div>
-          <div><span>Saldo</span><strong>€ <%= report.totals.net.toFixed(2) %></strong></div>
-          <div><span>Movimenti</span><strong><%= report.expenses.length %></strong></div>
-        </section>
+            <section class="rp-section" data-section="kpi" <%= hid('kpi') %>>
+              <div class="rp-kpis">
+                <div class="rp-kpi">
+                  <span class="rp-kpi-label">Entrate</span>
+                  <strong class="rp-kpi-value"><%= fmt.eur(d.totals.income) %></strong>
+                  <%- chip(d.kpis.deltaIncome, true) %>
+                </div>
+                <div class="rp-kpi">
+                  <span class="rp-kpi-label">Uscite</span>
+                  <strong class="rp-kpi-value"><%= fmt.eur(d.totals.expenses) %></strong>
+                  <%- chip(d.kpis.deltaExpenses, false) %>
+                </div>
+                <div class="rp-kpi">
+                  <span class="rp-kpi-label">Saldo</span>
+                  <strong class="rp-kpi-value <%= netClass(d.totals.net) %>"><%= fmt.eur(d.totals.net) %></strong>
+                  <span class="rp-kpi-sub"><%= d.totals.count %> movimenti</span>
+                </div>
+                <div class="rp-kpi">
+                  <span class="rp-kpi-label">Tasso di risparmio</span>
+                  <strong class="rp-kpi-value <%= d.kpis.savingsRate === null ? '' : netClass(d.kpis.savingsRate) %>"><%= d.kpis.savingsRate === null ? '—' : fmt.pct(d.kpis.savingsRate, 1) %></strong>
+                  <span class="rp-kpi-sub">del totale entrate</span>
+                </div>
+                <div class="rp-kpi">
+                  <span class="rp-kpi-label">Uscite al giorno</span>
+                  <strong class="rp-kpi-value"><%= fmt.eur(d.kpis.avgDaily) %></strong>
+                  <span class="rp-kpi-sub">media per movimento <%= fmt.eur(d.kpis.avgTicket) %></span>
+                </div>
+              </div>
+              <% if (d.prev.hasData) { %>
+                <p class="rp-note">Confronto con il periodo precedente di pari durata (<%= fmt.date(d.prev.from) %> – <%= fmt.date(d.prev.to) %>).</p>
+              <% } %>
+            </section>
 
-        <section class="report-section">
-          <h2>Riepilogo per <%= report.group === 'mese' ? 'mese' : report.group === 'beneficiario' ? 'beneficiario' : 'categoria' %></h2>
-          <div class="table-wrap report-table-wrap">
-            <table class="data-table report-table">
-              <thead><tr><th>Voce</th><th>Entrate</th><th>Uscite</th><th>Saldo</th><th>Movimenti</th></tr></thead>
-              <tbody>
-                <% if (!report.summary.length) { %>
-                  <tr><td colspan="5" class="empty-state">Nessun movimento nel periodo selezionato.</td></tr>
-                <% } else { %>
-                  <% report.summary.forEach(function(item) { %>
-                    <tr><td><%= item.label %></td><td>€ <%= item.income.toFixed(2) %></td><td>€ <%= item.expenses.toFixed(2) %></td><td>€ <%= item.net.toFixed(2) %></td><td><%= item.count %></td></tr>
-                  <% }); %>
+            <section class="rp-section" data-section="andamento" <%= hid('andamento') %>>
+              <h2>Andamento <%= d.series.granularity === 'giorno' ? 'giornaliero' : 'mensile' %></h2>
+              <% if (v.bars) { %>
+                <div class="rp-legend-inline"><span><i class="dot dot-income"></i>Entrate</span><span><i class="dot dot-expense"></i>Uscite</span></div>
+                <%- v.bars %>
+                <% if (v.balance) { %>
+                  <h3>Saldo cumulato</h3>
+                  <%- v.balance %>
                 <% } %>
-              </tbody>
-            </table>
-          </div>
-        </section>
+              <% } else { %>
+                <p class="rp-empty">Dati insufficienti per il grafico.</p>
+              <% } %>
+            </section>
 
-        <section class="report-section">
-          <h2>Dettaglio movimenti</h2>
-          <div class="table-wrap report-table-wrap">
-            <table class="data-table report-table">
-              <thead><tr><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Categoria</th><th>Per conto di</th><th>Importo</th></tr></thead>
-              <tbody>
-                <% if (!report.expenses.length) { %>
-                  <tr><td colspan="6" class="empty-state">Nessun movimento da mostrare.</td></tr>
-                <% } else { %>
-                  <% report.expenses.forEach(function(item) { %>
-                    <tr>
-                      <td><%= new Date(item.data_spesa + 'T00:00:00').toLocaleDateString('it-IT') %></td>
-                      <td><%= item.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %></td>
-                      <td><%= item.note || item.sottocategoria || '—' %></td>
-                      <td><%= item.categoria || '—' %></td>
-                      <td><%= item.per_conto_di || '—' %></td>
-                      <td>€ <%= (Number(item.importo) || 0).toFixed(2) %></td>
-                    </tr>
+            <section class="rp-section" data-section="categorie" <%= hid('categorie') %>>
+              <h2>Dove vanno i soldi</h2>
+              <% if (v.legend.length) { %>
+                <div class="rp-split">
+                  <div class="rp-donut-wrap"><%- v.donut %></div>
+                  <ul class="rp-legend">
+                    <% v.legend.forEach(function (it) { %>
+                      <li>
+                        <i class="dot" style="background: <%= it.color %>"></i>
+                        <span class="rp-legend-name"><%= it.label %></span>
+                        <span class="rp-legend-pct"><%= fmt.pct(it.share, 1) %></span>
+                        <span class="rp-legend-amt"><%= fmt.eur(it.amount) %></span>
+                      </li>
+                    <% }); %>
+                  </ul>
+                </div>
+              <% } else { %>
+                <p class="rp-empty">Nessuna uscita nel periodo.</p>
+              <% } %>
+              <% if (d.incomeSources.length) { %>
+                <h3>Fonti di entrata</h3>
+                <ul class="rp-bars">
+                  <% d.incomeSources.slice(0, 5).forEach(function (it) { %>
+                    <li><span class="rp-bars-name"><%= it.label %></span><span class="rp-bars-track"><span class="rp-bars-fill is-income" style="width: <%= Math.max(2, Math.round(it.share * 100)) %>%"></span></span><span class="rp-bars-val"><%= fmt.eur(it.amount) %></span></li>
                   <% }); %>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <footer class="report-document-footer"><%= report.heading %> · Documento generato il <%= report.generatedAt.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) %></footer>
+                </ul>
+              <% } %>
+            </section>
+
+            <section class="rp-section" data-section="consigli" <%= hid('consigli') %>>
+              <h2>Osservazioni e consigli</h2>
+              <% if (d.insights.length) { %>
+                <div class="rp-insights">
+                  <% d.insights.forEach(function (it) { %>
+                    <div class="rp-insight is-<%= it.tone %>">
+                      <strong><%= it.title %></strong>
+                      <p><%= it.text %></p>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } else { %>
+                <p class="rp-empty">Servono più movimenti per formulare osservazioni.</p>
+              <% } %>
+            </section>
+
+            <section class="rp-section" data-section="ai" id="rpAiSection" <%= hid('ai') %>>
+              <h2>Analisi AI <span class="rp-badge">Jonny</span></h2>
+              <div id="rpAiBody" class="rp-ai-body">
+                <p class="rp-muted rp-no-print">Premi “Analisi AI” in alto per generare una lettura ragionata del periodo. Verranno inviati solo dati aggregati.</p>
+              </div>
+            </section>
+
+            <section class="rp-section" data-section="riepilogo" <%= hid('riepilogo') %>>
+              <h2>Riepilogo per <%= groupLabel %></h2>
+              <div class="table-wrap report-table-wrap">
+                <table class="data-table report-table">
+                  <thead><tr><th>Voce</th><th class="rp-num">Entrate</th><th class="rp-num">Uscite</th><th class="rp-num">Saldo</th><th class="rp-num">Mov.</th></tr></thead>
+                  <tbody>
+                    <% if (!d.summary.length) { %>
+                      <tr><td colspan="5" class="empty-state">Nessun movimento nel periodo selezionato.</td></tr>
+                    <% } else { %>
+                      <% d.summary.forEach(function (item) { %>
+                        <tr><td><%= item.label %></td><td class="rp-num"><%= fmt.eur(item.income) %></td><td class="rp-num"><%= fmt.eur(item.expenses) %></td><td class="rp-num <%= netClass(item.net) %>"><%= fmt.eur(item.net) %></td><td class="rp-num"><%= item.count %></td></tr>
+                      <% }); %>
+                      <tr class="rp-total"><td>Totale</td><td class="rp-num"><%= fmt.eur(d.totals.income) %></td><td class="rp-num"><%= fmt.eur(d.totals.expenses) %></td><td class="rp-num <%= netClass(d.totals.net) %>"><%= fmt.eur(d.totals.net) %></td><td class="rp-num"><%= d.totals.count %></td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="rp-section" data-section="top" <%= hid('top') %>>
+              <h2>Le spese più alte</h2>
+              <% if (d.top.length) { %>
+                <div class="table-wrap report-table-wrap">
+                  <table class="data-table report-table">
+                    <thead><tr><th>Data</th><th>Descrizione</th><th>Categoria</th><th class="rp-num">Importo</th></tr></thead>
+                    <tbody>
+                      <% d.top.forEach(function (t) { %>
+                        <tr><td><%= fmt.date(t.data) %></td><td><%= t.descrizione %></td><td><%= t.categoria %></td><td class="rp-num"><%= fmt.eur(t.importo) %></td></tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } else { %>
+                <p class="rp-empty">Nessuna uscita nel periodo.</p>
+              <% } %>
+              <% if (d.beneficiaries.length > 1) { %>
+                <h3>Uscite per beneficiario</h3>
+                <ul class="rp-bars">
+                  <% d.beneficiaries.slice(0, 6).forEach(function (it) { %>
+                    <li><span class="rp-bars-name"><%= it.label %></span><span class="rp-bars-track"><span class="rp-bars-fill" style="width: <%= Math.max(2, Math.round(it.share * 100)) %>%"></span></span><span class="rp-bars-val"><%= fmt.eur(it.amount) %></span></li>
+                  <% }); %>
+                </ul>
+              <% } %>
+            </section>
+
+            <section class="rp-section" data-section="dettaglio" <%= hid('dettaglio') %>>
+              <h2>Dettaglio movimenti</h2>
+              <div class="table-wrap report-table-wrap">
+                <table class="data-table report-table">
+                  <thead><tr><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Categoria</th><th>Per conto di</th><th class="rp-num">Importo</th></tr></thead>
+                  <tbody>
+                    <% if (!d.expenses.length) { %>
+                      <tr><td colspan="6" class="empty-state">Nessun movimento da mostrare.</td></tr>
+                    <% } else { %>
+                      <% d.expenses.forEach(function (item) { %>
+                        <tr>
+                          <td><%= fmt.date(item.data_spesa) %></td>
+                          <td><%= item.tipo === 'ingresso' ? 'Entrata' : 'Uscita' %></td>
+                          <td><%= item.note || item.sottocategoria || '—' %></td>
+                          <td><%= item.categoria || '—' %></td>
+                          <td><%= item.per_conto_di || '—' %></td>
+                          <td class="rp-num <%= item.tipo === 'ingresso' ? 'is-pos' : '' %>"><%= item.tipo === 'ingresso' ? '+' : '−' %> <%= fmt.eur(Number(item.importo) || 0) %></td>
+                        </tr>
+                      <% }); %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+          </td></tr></tbody>
+          <tfoot>
+            <tr><td>
+              <footer class="rp-footer">
+                <span class="rp-footer-brand"><span class="rp-logo rp-logo-sm"><%- logoSvg %></span><%= report.heading %></span>
+                <span><%= report.title %> · generato il <%= report.generatedAt.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) %></span>
+              </footer>
+            </td></tr>
+          </tfoot>
+        </table>
       </article>
     </main>
   </div>

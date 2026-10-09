@@ -1,0 +1,180 @@
+/* ============================================================
+   REPORT — documento "carta" sempre chiaro (schermo e stampa)
+   ============================================================ */
+.report-document {
+  --rp-ink: #14171c;
+  --rp-soft: #5b6470;
+  --rp-faint: #8b93a0;
+  --rp-line: #e3e6ea;
+  --rp-bg: #ffffff;
+  --rp-tint: #f5f6f8;
+  --rp-income: #1f9d63;
+  --rp-expense: #e5484d;
+  --rp-warn: #b7791f;
+  --rp-info: #2f6fed;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(1.1rem, 4vw, 2.75rem);
+  background: var(--rp-bg);
+  color: var(--rp-ink);
+  border: 1px solid var(--rp-line);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / .08);
+  font-variant-numeric: tabular-nums;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.report-document * { box-sizing: border-box; }
+
+/* Cornice a tabella: serve solo a ripetere il pedice su ogni pagina stampata */
+.rp-frame { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.rp-frame > tbody > tr > td, .rp-frame > tfoot > tr > td { padding: 0; }
+.rp-frame > tfoot { display: table-footer-group; }
+
+/* ---- Intestazione ---- */
+.rp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; padding-bottom: 1.1rem; border-bottom: 2px solid var(--rp-ink); }
+.rp-brand { display: flex; align-items: center; gap: .8rem; }
+.rp-logo { display: inline-flex; width: 2.6rem; height: 2.6rem; color: var(--rp-ink); flex: none; }
+.rp-logo svg { width: 100%; height: 100%; display: block; }
+.rp-logo-sm { width: 1.1rem; height: 1.1rem; }
+.rp-kicker { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--rp-faint); font-weight: 700; }
+.rp-heading { font-size: 1.15rem; font-weight: 750; letter-spacing: -.01em; }
+.rp-meta { text-align: right; font-size: .82rem; color: var(--rp-soft); line-height: 1.5; }
+.rp-period { color: var(--rp-ink); font-weight: 650; }
+.rp-title { margin: 1.1rem 0 .2rem; font-size: clamp(1.4rem, 3.4vw, 1.9rem); letter-spacing: -.02em; line-height: 1.2; color: var(--rp-ink); }
+
+/* ---- Sezioni ---- */
+.rp-section { margin-top: 1.6rem; }
+.rp-section[hidden] { display: none !important; }
+.rp-section h2 { margin: 0 0 .7rem; padding-bottom: .4rem; font-size: 1.02rem; font-weight: 750; letter-spacing: -.005em; color: var(--rp-ink); border-bottom: 1px solid var(--rp-line); display: flex; align-items: center; gap: .5rem; }
+.rp-section h3 { margin: 1.1rem 0 .5rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--rp-soft); font-weight: 700; }
+.rp-empty, .rp-muted, .rp-note { color: var(--rp-soft); font-size: .85rem; margin: .4rem 0; }
+.rp-note { font-size: .76rem; color: var(--rp-faint); margin-top: .7rem; }
+.rp-badge { font-size: .62rem; text-transform: uppercase; letter-spacing: .1em; padding: .15rem .5rem; border-radius: 99px; background: var(--rp-ink); color: #fff; font-weight: 700; }
+
+/* ---- KPI ---- */
+.rp-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .65rem; }
+.rp-kpi { display: flex; flex-direction: column; gap: .2rem; padding: .8rem .85rem; background: var(--rp-tint); border-radius: 10px; min-width: 0; break-inside: avoid; }
+.rp-kpi-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--rp-soft); font-weight: 700; }
+.rp-kpi-value { font-size: 1.15rem; font-weight: 780; letter-spacing: -.02em; white-space: nowrap; }
+.rp-kpi-sub { font-size: .72rem; color: var(--rp-faint); }
+.report-document .is-pos { color: var(--rp-income); }
+.report-document .is-neg { color: var(--rp-expense); }
+.rp-chip-delta { align-self: flex-start; font-size: .68rem; font-weight: 700; padding: .12rem .45rem; border-radius: 99px; }
+.rp-chip-delta.is-good { background: rgb(31 157 99 / .12); color: #167a4c; }
+.rp-chip-delta.is-bad { background: rgb(229 72 77 / .12); color: #c2343a; }
+.rp-chip-delta.is-flat { background: var(--rp-line); color: var(--rp-soft); }
+
+/* ---- Grafici ---- */
+.rp-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.rp-grid { stroke: var(--rp-line); stroke-width: 1; }
+.rp-zero { stroke: var(--rp-faint); stroke-width: 1; stroke-dasharray: 4 3; }
+.rp-axis { fill: var(--rp-faint); font-size: 11px; font-family: inherit; }
+.rp-bar-income { fill: var(--rp-income); }
+.rp-bar-expense { fill: var(--rp-expense); }
+.rp-line { stroke: var(--rp-ink); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.rp-area { fill: rgb(20 23 28 / .07); }
+.rp-dot { fill: var(--rp-ink); }
+.rp-legend-inline { display: flex; gap: 1rem; font-size: .75rem; color: var(--rp-soft); margin-bottom: .3rem; }
+.rp-legend-inline span { display: inline-flex; align-items: center; gap: .35rem; }
+.dot { display: inline-block; width: .65rem; height: .65rem; border-radius: 3px; flex: none; }
+.dot-income { background: var(--rp-income); }
+.dot-expense { background: var(--rp-expense); }
+
+.rp-split { display: grid; grid-template-columns: 210px 1fr; gap: 1.5rem; align-items: center; }
+.rp-donut { width: 100%; max-width: 210px; height: auto; display: block; }
+.rp-donut-track { stroke: var(--rp-tint); }
+.rp-donut-label { fill: var(--rp-faint); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-family: inherit; }
+.rp-donut-value { fill: var(--rp-ink); font-size: 15px; font-weight: 750; font-family: inherit; }
+.rp-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: .1rem; }
+.rp-legend li { display: grid; grid-template-columns: auto 1fr auto auto; gap: .6rem; align-items: center; padding: .38rem 0; border-bottom: 1px solid var(--rp-line); font-size: .84rem; }
+.rp-legend li:last-child { border-bottom: 0; }
+.rp-legend-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-legend-pct { color: var(--rp-soft); font-size: .78rem; min-width: 3.2rem; text-align: right; }
+.rp-legend-amt { font-weight: 700; min-width: 5.6rem; text-align: right; }
+
+.rp-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.rp-bars li { display: grid; grid-template-columns: minmax(7rem, 14rem) 1fr auto; gap: .7rem; align-items: center; font-size: .84rem; }
+.rp-bars-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-bars-track { height: .55rem; background: var(--rp-tint); border-radius: 99px; overflow: hidden; }
+.rp-bars-fill { display: block; height: 100%; background: var(--rp-ink); border-radius: 99px; }
+.rp-bars-fill.is-income { background: var(--rp-income); }
+.rp-bars-val { font-weight: 700; min-width: 5.6rem; text-align: right; }
+
+/* ---- Consigli / AI ---- */
+.rp-insights { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.rp-insight { padding: .8rem .95rem; border-radius: 10px; border-left: 4px solid var(--rp-info); background: var(--rp-tint); break-inside: avoid; }
+.rp-insight strong { display: block; font-size: .88rem; margin-bottom: .2rem; }
+.rp-insight p { margin: 0; font-size: .8rem; line-height: 1.5; color: var(--rp-soft); }
+.rp-insight.is-ok { border-left-color: var(--rp-income); }
+.rp-insight.is-warn { border-left-color: var(--rp-warn); }
+.rp-ai-body { display: grid; gap: .75rem; }
+.rp-ai-summary { margin: 0; font-size: .92rem; line-height: 1.6; }
+.rp-ai-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.rp-ai-box { padding: .8rem .95rem; border-radius: 10px; background: var(--rp-tint); break-inside: avoid; }
+.rp-ai-box h4 { margin: 0 0 .35rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--rp-soft); }
+.rp-ai-box ul { margin: 0; padding-left: 1.1rem; list-style: disc; font-size: .82rem; line-height: 1.55; }
+.rp-ai-goal { padding: .7rem .95rem; border-radius: 10px; background: var(--rp-ink); color: #fff; font-size: .85rem; break-inside: avoid; }
+.rp-ai-note { font-size: .7rem; color: var(--rp-faint); margin: 0; }
+.rp-ai-loading { display: flex; align-items: center; gap: .6rem; color: var(--rp-soft); font-size: .85rem; }
+.rp-ai-loading::before { content: ''; width: .9rem; height: .9rem; border: 2px solid var(--rp-line); border-top-color: var(--rp-ink); border-radius: 50%; animation: rp-spin .8s linear infinite; }
+.rp-ai-error { color: #c2343a; font-size: .85rem; }
+@keyframes rp-spin { to { transform: rotate(360deg); } }
+
+/* ---- Tabelle ---- */
+.report-document .report-table-wrap { overflow-x: auto; border: 0; background: transparent; }
+.report-document .report-table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: .82rem; }
+.report-document .report-table th { text-align: left; padding: .5rem .55rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--rp-soft); background: var(--rp-tint); border-bottom: 1px solid var(--rp-line); font-weight: 700; }
+.report-document .report-table td { padding: .5rem .55rem; border-bottom: 1px solid var(--rp-line); color: var(--rp-ink); background: transparent; }
+.report-document .report-table .rp-num { text-align: right; white-space: nowrap; }
+.report-document .report-table tr.rp-total td { font-weight: 750; border-top: 2px solid var(--rp-ink); background: var(--rp-tint); }
+.report-document .report-table tr { break-inside: avoid; }
+.report-document .report-table thead { display: table-header-group; }
+
+/* ---- Pedice ---- */
+.rp-footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 2rem; padding-top: .7rem; border-top: 1px solid var(--rp-line); font-size: .72rem; color: var(--rp-faint); }
+.rp-footer-brand { display: inline-flex; align-items: center; gap: .45rem; font-weight: 700; color: var(--rp-soft); }
+
+/* ---- Menu in alto ---- */
+.rp-sections { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin: 0; padding: .6rem 0 0; border: 0; border-top: 1px solid var(--border); }
+.rp-sections legend { padding: 0 .5rem 0 0; font-size: .75rem; color: var(--text-soft); font-weight: 600; float: left; margin-right: .3rem; }
+.rp-toggle { position: relative; cursor: pointer; }
+.rp-toggle input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.rp-toggle span { display: inline-block; padding: .38rem .8rem; border: 1px solid var(--border-strong); border-radius: 99px; font-size: .8rem; font-weight: 600; color: var(--text-soft); transition: background var(--motion-fast, .11s), color var(--motion-fast, .11s); }
+.rp-toggle input:checked + span { background: var(--text); color: var(--on-accent, #fff); border-color: var(--text); }
+.rp-toggle input:focus-visible + span { outline: 2px solid var(--text); outline-offset: 2px; }
+.rp-action-buttons { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) { .rp-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .rp-header { flex-direction: column; gap: .8rem; }
+  .rp-meta { text-align: left; }
+  .rp-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rp-split { grid-template-columns: 1fr; justify-items: center; }
+  .rp-split .rp-legend { width: 100%; }
+  .rp-insights, .rp-ai-cols { grid-template-columns: 1fr; }
+  .rp-bars li { grid-template-columns: minmax(5rem, 9rem) 1fr auto; }
+  .rp-footer { flex-direction: column; align-items: flex-start; gap: .3rem; }
+  .rp-axis { font-size: 19px; }
+}
+
+/* ---- Stampa / PDF ---- */
+@page { size: A4; margin: 12mm 13mm 14mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .report-page { padding: 0 !important; margin: 0 !important; }
+  .report-document { max-width: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+  .rp-no-print, .report-controls, .report-actions, .page-title, .page-subtitle { display: none !important; }
+  .rp-section[hidden] { display: none !important; }
+  .rp-section { break-inside: auto; }
+  .rp-section h2, .rp-section h3 { break-after: avoid; }
+  .rp-svg, .rp-split, .rp-kpis { break-inside: avoid; }
+  .rp-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .4rem; }
+  .rp-kpi { padding: .55rem .6rem; }
+  .rp-kpi-value { font-size: .98rem; }
+  .rp-insights, .rp-ai-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-document .report-table-wrap { overflow: visible; }
+  .report-document .report-table { min-width: 0; font-size: 8.5pt; }
+  .rp-footer { margin-top: 0; font-size: 7.5pt; }
+}
